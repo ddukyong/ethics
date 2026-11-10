@@ -1,7 +1,7 @@
 /**
  * Q-메이커스 서버 (Google Apps Script) — 1~6차시 통합 워크북
  * - 학번·이름으로 들어가면 모둠 활동과 개인 활동이 계속 이어짐
- * - 선생님 화면 연동, 집중 모드(전체 화면)와 화면 이탈 기록
+ * - 선생님 화면 연동, 집중 모드(화면 이탈 시간 기록), 모둠 사이 발표 댓글, 5·6차시 자기주도 탐구 열기
  * - 이 파일 전체를 Apps Script의 Code.gs에 붙여 넣고, [배포 관리]에서 새 버전으로 배포하기
  */
 
@@ -13,10 +13,11 @@ const MOUMS = 8;                              // 모둠 수 (index.html의 MOUMS
 const SHEET_ID = "";                          // 스프레드시트에 붙은 스크립트면 비워 둠
 /* ============================ */
 
-const STEP_IDS = ["1-1", "1-2", "1-3", "2-1", "2-2", "2-3", "3-1", "3-2", "3-3", "4-1", "4-2", "4-3", "5-1", "5-2", "5-3", "6-1"];
+const STEP_IDS = ["1-1", "1-2", "1-3", "2-1", "2-2", "2-3", "3-1", "3-2", "3-3", "4-1", "4-2", "4-3", "5-1", "5-2", "5-3", "6-1", "6-2"];
+const DEADLINE = new Date("2026-12-20T23:59:59+09:00"); // 자기주도 탐구(5·6차시) 마감
 const STEP_NAME = { "1-1":"질문 쏟아내기", "1-2":"비슷한 것끼리 묶기", "1-3":"후보 탐구 질문 추리기", "2-1":"후보 질문 정교화하기", "2-2":"최종 탐구 질문 정하기",
   "2-3":"하위 질문·조사 계획", "3-1":"하위 질문 자료 조사", "3-2":"조사 내용 공유·보완", "3-3":"답변 작성", "4-1":"발표 준비", "4-2":"발표와 댓글",
-  "4-3":"배움 정리", "5-1":"채점 기준·자료 (3) 확인", "5-2":"진로 분야 새 사례 찾기", "5-3":"평가 준비지 작성·제출", "6-1":"제안서 작성(수행평가)" };
+  "4-3":"배움 정리", "5-1":"새 사례 찾고 질문 쏟아내기", "5-2":"나의 탐구 질문 정하기", "5-3":"하위 질문·탐구 계획", "6-1":"자료 조사 기록", "6-2":"정책 제안서" };
 const CACHE_SEC = 21600; // 6시간
 const OWNED = ["addCard", "delCard", "addLad", "editLad", "delLad", "addFb", "delFb"];
 
@@ -90,14 +91,12 @@ function handle_(p){
       let pp, submitted = false;
       try{
         pp = loadP_(code, uid);
-        if(f.indexOf("s6") === 0 && pp.f.s6sub) throw new Error("제출한 제안서는 고칠 수 없어요.");
+        if(/^s[56]/.test(f) && new Date() > DEADLINE) throw new Error("마감(12. 20.)이 지나 더 고칠 수 없어요.");
         if(/sub$/.test(f)){
           const on = !!p.val;
-          if(f === "s6sub" && !on) throw new Error("제출한 제안서는 고칠 수 없어요.");
           pp.f[f] = on ? Utilities.formatDate(new Date(), "Asia/Seoul", "M월 d일 HH:mm") : "";
           submitted = on;
         } else {
-          if((f.indexOf("s4") === 0 && pp.f.s4sub) || (f.indexOf("s5") === 0 && pp.f.s5sub)) throw new Error("제출한 뒤에는 고칠 수 없어요. 제출을 취소한 뒤 고쳐 주세요.");
           pp.f[f] = String(p.val == null ? "" : p.val).slice(0, 3000);
         }
         pp.v++; saveP_(code, uid, pp);
@@ -120,19 +119,50 @@ function handle_(p){
     case "leave": {
       if(teacher) return { ok:true };
       const sec = Math.max(0, Math.round(+p.sec || 0));
-      const st = String(p.step || "");
-      sheet_("화면이탈", ["기록 시각", "반 코드", "반", "모둠", "학번", "이름", "차시·활동", "종류", "벗어난 시각", "돌아온 시각", "이탈 시간(초)", "이탈 시간"])
-        .appendRow([new Date(), code, cls.name, moum, sid, name, st + " " + (STEP_NAME[st] || ""), String(p.type || "").slice(0, 40),
-          String(p.start || "").slice(0, 12), String(p.end || "").slice(0, 12), sec, Math.floor(sec / 60) + "분 " + (sec % 60) + "초"]);
+      sheet_("화면이탈기록", ["기록 시각", "반 코드", "반", "모둠", "학번", "이름", "벗어난 시각", "돌아온 시각", "이탈 시간(초)", "이탈 시간"])
+        .appendRow([new Date(), code, cls.name, moum, sid, name, String(p.start || "").slice(0, 12), String(p.end || "").slice(0, 20), sec, Math.floor(sec / 60) + "분 " + (sec % 60) + "초"]);
       return { ok:true };
     }
     case "leaves": {
       checkTeacher_(p.key);
-      const sh = book_().getSheetByName("화면이탈");
-      const rows = !sh || sh.getLastRow() < 2 ? [] : sh.getRange(2, 1, sh.getLastRow() - 1, 12).getValues()
+      const sh = book_().getSheetByName("화면이탈기록");
+      const rows = !sh || sh.getLastRow() < 2 ? [] : sh.getRange(2, 1, sh.getLastRow() - 1, 10).getValues()
         .filter(r => String(r[1]) === code).slice(-200).reverse()
-        .map(r => [r[3] + "모둠", r[4], r[5], r[6], r[7], r[8], r[9], r[11]].map(String));
+        .map(r => [r[3] + "모둠", r[4], r[5], r[6], r[7], r[9]].map(String));
       return { ok:true, rows };
+    }
+    case "board": {
+      const board = [];
+      for(let m = 1; m <= MOUMS; m++){
+        const st = load_(code, String(m));
+        board.push({ moum:m, q:st.fin.text, answer:st.concl.answer, evidence:st.concl.evidence, cmts:st.cmts });
+      }
+      return { ok:true, board };
+    }
+    case "cmt":
+    case "uncmt": {
+      const to = String(p.to || "");
+      if(!moumOk(to)) throw new Error("발표 모둠을 골라 주세요.");
+      if(!teacher && to === moum) throw new Error("우리 모둠에는 댓글을 남길 수 없어요.");
+      const kind = String(p.kind || "");
+      if(p.action === "cmt" && ["like", "fix", "ask", "link"].indexOf(kind) < 0) throw new Error("댓글 종류를 골라 주세요.");
+      const lock = LockService.getScriptLock();
+      lock.waitLock(20000);
+      let st;
+      try{
+        st = load_(code, to);
+        const op = p.action === "cmt" ? { t:"addCmt", id:String(p.id || ""), name:uid, from:teacher ? "교사" : moum, kind, text:String(p.text || "") }
+                                      : { t:"delCmt", id:String(p.id || ""), name:uid };
+        const before = JSON.stringify(st);
+        applyOp(st, op);
+        if(JSON.stringify(st) !== before){ st.v = (st.v || 0) + 1; save_(code, to, st); }
+      } finally { lock.releaseLock(); }
+      if(p.action === "cmt"){
+        const KN = { like:"좋아요", fix:"보완이 필요한 점", ask:"궁금한 점", link:"연결되는 점" };
+        try{ sheet_("4차시댓글", ["시각", "반", "발표 모둠", "남긴 모둠", "학번", "이름", "종류", "내용"])
+          .appendRow([new Date(), cls.name, to, teacher ? "교사" : moum, sid, teacher ? "선생님" : name, KN[kind], String(p.text || "").slice(0, 300)]); }catch(err){ console.error(err); }
+      }
+      return { ok:true, cmts:st.cmts };
     }
     case "teacher": {
       checkTeacher_(p.key);
@@ -146,6 +176,7 @@ function handle_(p){
         const c = getCls_(code);
         if(p.live !== undefined) c.live = !!p.live;
         if(p.lock !== undefined) c.lock = !!p.lock;
+        if(p.open56 !== undefined) c.open56 = !!p.open56;
         if(p.step !== undefined && STEP_IDS.indexOf(p.step) >= 0) c.step = p.step;
         c.push = !!p.push;
         c.seq = (c.seq || 0) + 1;
@@ -238,7 +269,7 @@ function getCls_(code){
   if(hit){ try{ return JSON.parse(hit); }catch(e){} }
   let c = null;
   try{ c = JSON.parse(PropertiesService.getScriptProperties().getProperty(k) || "null"); }catch(e){}
-  c = c || { live:false, lock:false, step:"", seq:0, push:false };
+  c = c || { live:false, lock:false, open56:false, step:"", seq:0, push:false };
   cache.put(k, JSON.stringify(c), CACHE_SEC);
   return c;
 }
@@ -269,19 +300,22 @@ function log_(cls, moum, sid, name, op, st){
     const row = [now, cls.name, moum, st.fin.text, st.fin.reason, st.fin.from.map(ladText).filter(String).join(" / ")];
     ["a", "b", "c"].forEach(k => { const s = st.subs[k]; row.push(s.q, s.check, s.src, s.who); });
     row.push(who);
+    if(st.subN === 4){ const s = st.subs.d; row.push(s.q, s.check, s.src, s.who); }
     sheet_("2차시탐구계획", ["시각", "반", "모둠", "최종 탐구 질문", "고른 이유", "바탕이 된 질문",
       "하위①실태 질문", "하위① 확인할 것", "하위① 자료·출처", "하위① 담당",
       "하위②원인 질문", "하위② 확인할 것", "하위② 자료·출처", "하위② 담당",
-      "하위③영향 질문", "하위③ 확인할 것", "하위③ 자료·출처", "하위③ 담당", "확정한 학생"]).appendRow(row);
+      "하위③영향 질문", "하위③ 확인할 것", "하위③ 자료·출처", "하위③ 담당", "확정한 학생",
+      "하위④ 질문", "하위④ 확인할 것", "하위④ 자료·출처", "하위④ 담당"]).appendRow(row);
   }
   if(op.t === "done3" && op.done){
     const row = [now, cls.name, moum, st.fin.text];
     ["a", "b", "c"].forEach(k => { const s = st.subs[k], r = st.res[k];
       row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text).join(" / "), r.fix); });
     row.push(st.concl.answer, st.concl.evidence, st.concl.more, who);
+    if(st.subN === 4){ const s = st.subs.d, r = st.res.d; row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text).join(" / "), r.fix); }
     const h = ["시각", "반", "모둠", "탐구 질문"];
     ["①", "②", "③"].forEach(n => h.push("하위" + n + " 질문", "하위" + n + " 담당", "하위" + n + " 조사 내용", "하위" + n + " 출처", "하위" + n + " 해석", "하위" + n + " 보완 의견", "하위" + n + " 수정"));
-    h.push("답변", "핵심 근거", "더 확인하고 싶은 점", "확정한 학생");
+    h.push("답변", "핵심 근거", "더 확인하고 싶은 점", "확정한 학생", "하위④ 질문", "하위④ 담당", "하위④ 조사 내용", "하위④ 출처", "하위④ 해석", "하위④ 보완 의견", "하위④ 수정");
     sheet_("3차시탐구문서", h).appendRow(row);
   }
 }
@@ -294,14 +328,17 @@ function logSubmit_(cls, moum, sid, name, f, pp){
       .appendRow(base.concat([v("s4first"), v("s4deep"), v("s4new"), v("s4synth"), memo]));
   }
   if(f === "s5sub"){
-    sheet_("5차시평가준비지", ["시각", "반", "모둠", "학번", "이름", "진로 분야", "사례를 고른 이유", "사례 제목", "출처", "핵심 사실", "공간 불평등인 이유",
-      "해결 질문(제도)", "제도적 방안", "제도 필요 이유", "해결 질문(시민)", "시민 실천 방안", "시민 실천 필요 이유", "스스로 점검(체크 수)"])
-      .appendRow(base.concat([v("s5career"), v("s5why"), v("s5title"), v("s5source"), v("s5facts"), v("s5reason"), v("s5q2"), v("s5inst"), v("s5instwhy"),
-        v("s5q3"), v("s5civic"), v("s5civicwhy"), [1, 2, 3, 4].filter(i => v("s5k" + i)).length + "/4"]));
+    sheet_("탐구계획서", ["제출 시각", "반", "모둠", "학번", "이름", "진로 분야", "이유", "사례 제목", "출처", "핵심 사실", "쏟아낸 질문", "출발 질문", "① 개념", "② 범위·대상", "③ 탐구형",
+      "나의 탐구 질문", "공간 불평등인 이유", "하위① 실태", "하위① 찾을 자료", "하위② 원인", "하위② 찾을 자료", "하위③ 영향", "하위③ 찾을 자료", "탐구 일정", "해결 질문(제도)", "제도적 방안", "해결 질문(시민)", "시민 실천 방안"])
+      .appendRow(base.concat([v("s5career"), v("s5why"), v("s5title"), v("s5source"), v("s5facts"), v("s5qs"), v("s5start"), v("s5c1"), v("s5c2"), v("s5c3"),
+        v("s5myq"), v("s5reason"), v("s5h1"), v("s5h1s"), v("s5h2"), v("s5h2s"), v("s5h3"), v("s5h3s"),
+        [1, 2, 3, 4].map(i => v("s5d" + i) || v("s5t" + i) ? v("s5d" + i) + " " + v("s5t" + i) : "").filter(String).join(" / "), v("s5q2"), v("s5inst"), v("s5q3"), v("s5civic")]));
   }
   if(f === "s6sub"){
-    sheet_("6차시제안서", ["제출 시각", "반", "모둠", "학번", "이름", "제안서 제목", "1 현상 및 문제 진단", "2 제도적 방안", "3 시민 실천 방안", "글자 수"])
-      .appendRow(base.concat([v("s6title"), v("s6a1"), v("s6a2"), v("s6a3"), (v("s6a1") + v("s6a2") + v("s6a3")).length]));
+    sheet_("정책제안서", ["제출 시각", "반", "모둠", "학번", "이름", "제안서 제목", "1 현상 및 문제 진단", "2 제도적 방안", "3 시민 실천 방안", "4 진로와의 연결", "글자 수",
+      "하위① 조사 내용", "하위① 출처", "하위① 해석", "하위② 조사 내용", "하위② 출처", "하위② 해석", "하위③ 조사 내용", "하위③ 출처", "하위③ 해석"])
+      .appendRow(base.concat([v("s6title"), v("s6a1"), v("s6a2"), v("s6a3"), v("s6a4"), (v("s6a1") + v("s6a2") + v("s6a3") + v("s6a4")).length,
+        v("s6r1d"), v("s6r1s"), v("s6r1i"), v("s6r2d"), v("s6r2s"), v("s6r2i"), v("s6r3d"), v("s6r3s"), v("s6r3i")]));
   }
 }
 
@@ -317,17 +354,11 @@ function resetPractice(){
       if(String(vals[i][0]) === code){ CacheService.getScriptCache().remove("개인상태:" + code + ":" + vals[i][1]); sh.deleteRow(i + 2); }
     }
   }
-  putCls_(code, { live:false, lock:false, step:"", seq:0, push:false });
+  putCls_(code, { live:false, lock:false, open56:false, step:"", seq:0, push:false });
   CacheService.getScriptCache().remove("classes");
 }
 /** 반목록 시트를 고친 뒤 바로 반영하고 싶을 때 */
 function refreshClasses(){ CacheService.getScriptCache().remove("classes"); }
-/** 학생 한 명의 6차시 제안서 제출을 풀어 줌 (편집기에서 학번·이름을 넣고 실행) */
-function unlockProposal(code, sid, name){
-  const uid = String(sid) + " " + String(name);
-  const pp = loadP_(code, uid);
-  pp.f.s6sub = ""; pp.v++; saveP_(code, uid, pp);
-}
 
 /* ===== 공통 규칙 시작 — Code.gs와 글자 하나까지 같아야 함 ===== */
 function norm(st){
@@ -346,6 +377,10 @@ function norm(st){
   st.concl = st.concl || {}; ["answer", "evidence", "more"].forEach(f => { st.concl[f] = st.concl[f] || ""; });
   st.pres = st.pres || {}; ["p1", "p2", "p3"].forEach(f => { st.pres[f] = st.pres[f] || ""; });
   st.done3 = !!st.done3;
+  st.subN = st.subN === 4 ? 4 : 3;
+  st.subs.d = st.subs.d || {}; ["q", "check", "src", "who"].forEach(f => { st.subs.d[f] = st.subs.d[f] || ""; });
+  const rd = st.res.d = st.res.d || {}; ["data", "src", "interp", "fix"].forEach(f => { rd[f] = rd[f] || ""; }); rd.fb = rd.fb || [];
+  st.cmts = st.cmts || [];
   return st;
 }
 function applyOp(st, op){
@@ -355,7 +390,7 @@ function applyOp(st, op){
   const cand = id => st.cands.find(k => k.id === id);
   const lad = id => st.lads.find(l => l.id === id);
   const prune = () => { st.groups = st.groups.filter(g => st.cards.some(c => c.g === g.id)); };
-  const K3 = ["a", "b", "c"];
+  const K3 = st.subN === 4 ? ["a", "b", "c", "d"] : ["a", "b", "c"];
   switch(op.t){
     case "addCard": if(!card(op.id) && st.cards.length < 400) st.cards.push({ id:op.id, name:op.name, text:cut(op.text, 200), g:"", src:cut(op.src, 20), q:cut(op.q, 80) }); break;
     case "delCard": { const n = st.cards.length; st.cards = st.cards.filter(x => !(x.id === op.id && x.name === op.name));
@@ -393,6 +428,10 @@ function applyOp(st, op){
     case "concl": if(["answer", "evidence", "more"].includes(op.f)) st.concl[op.f] = cut(op.val, 1000); break;
     case "pres": if(["p1", "p2", "p3"].includes(op.f)) st.pres[op.f] = cut(op.val, 300); break;
     case "done3": st.done3 = !!op.done; break;
+    case "subN": st.subN = op.n === 4 ? 4 : 3; break;
+    case "addCmt": if(st.cmts.length < 300 && !st.cmts.find(x => x.id === op.id))
+      st.cmts.push({ id:op.id, name:op.name, from:cut(op.from, 4), kind:cut(op.kind, 8), text:cut(op.text, 300) }); break;
+    case "delCmt": st.cmts = st.cmts.filter(x => !(x.id === op.id && x.name === op.name)); break;
   }
   return st;
 }
