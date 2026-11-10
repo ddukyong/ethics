@@ -823,10 +823,10 @@ VIEWS["1-1"] = () => {
       <ul><li>한 번에 질문 하나씩 올리기</li><li>되도록 많이 쓰기 — 좋은 질문인지는 나중에 따지기</li><li>떠오른 그대로 쓰기 — 답을 달거나 고치지 않기</li><li>생각이 문장으로 떠오르면 물음표로 바꾸어 쓰기 <small>예) 군 지역은 응급실이 멀다 → 군 지역은 왜 응급실이 멀까?</small></li></ul></div>
     <div class="box"><span class="tag">더 나아가기</span>
       <ul><li>두 개 이상의 자료를 연결 지어 질문하기</li><li>숫자 뒤에 숨은 ‘왜’를 묻기</li><li>자료 속 사람의 자리에 서서 묻기</li><li>나와 우리 지역으로 가져와 묻기</li><li>공정한지·옳은지를 묻기</li></ul></div>
-    <label for="qin" style="margin-top:20px">떠오른 질문</label>
+    <div class="srcpick" id="srcPick" style="margin-top:20px"><span>어느 자료를 보고? <small class="hint">(1~2개)</small></span>${SRC1.map(([k, n]) => `<button data-src="${k}" aria-pressed="false">${n}</button>`).join("")}</div>
+    <label for="qin">떠오른 질문</label>
     <div class="quote" id="quoteBox" hidden><span id="quoteText"></span><button data-act="quoteX">빼기 ✕</button></div>
     <textarea id="qin" data-k="qin" maxlength="200" placeholder="자료 (1)에서 눈에 띄거나 의아한 부분을 보며 떠오른 질문" ${me.teacher ? "disabled" : ""}></textarea>
-    <div class="srcpick" id="srcPick"><span>어느 자료를 보고? <small class="hint">(1~2개)</small></span>${SRC1.map(([k, n]) => `<button data-src="${k}" aria-pressed="false">${n}</button>`).join("")}</div>
     <p class="hint" id="qHint" role="status"></p>
     <button class="primary" id="qAdd" disabled>질문 올리기</button>
     <h2>내가 올린 질문 (${mine.length})</h2>
