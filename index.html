@@ -113,6 +113,11 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .rq{font-weight:700;font-size:16px;margin:0 0 4px}
 .rfb{margin:4px 0;padding:6px 10px;border-left:3px solid #FFD02B;background:#FAF9F5;font-size:14px}
 @media print{ .top,.tbar,.leaves,.follow,#lessonArea,#dash,.repbar,#toast,.bar{display:none!important} body{background:#fff} .shell{padding:0} .rep{border:0;max-width:none} }
+.pvbar{margin-top:14px;padding:10px 14px;border-radius:12px;border:2px dashed var(--ink);background:var(--paper);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.pvbar b{margin-right:4px}
+.pvbar.on{border-style:solid;background:var(--soft)}
+.pvbar button{padding:4px 12px;border:1.5px solid var(--field);background:var(--paper);font-size:14px;border-radius:20px}
+.pvbar button.back{background:var(--ink);color:var(--paper);border-color:var(--ink);margin-left:auto}
 .follow{margin-top:12px;padding:8px 14px;border-radius:10px;background:var(--soft);font-size:14px}
 
 /* 차시·활동 탭 */
@@ -366,6 +371,7 @@ details.box summary{cursor:pointer;font-weight:700}
     <section id="dash" hidden></section>
     <section id="report" hidden></section>
     <div id="lessonArea">
+    <div class="pvbar" id="pvBar" hidden></div>
     <nav class="lessons" role="tablist" aria-label="차시" id="lessonNav"></nav>
     <nav class="acts-nav" role="tablist" aria-label="활동" id="stepNav"></nav>
 
@@ -688,8 +694,9 @@ function ask(msg){ return new Promise(r => { $("modalMsg").textContent = msg; $(
   $("modalYes").onclick = () => { $("modal").hidden = true; r(true); }; $("modalNo").onclick = () => { $("modal").hidden = true; r(false); }; }); }
 
 /* ===== 저장 줄 ===== */
-function send(op){ if(!S) return; applyOp(S, op); later(); queue.push({ action:"op", op }); pump(); }
-function psend(f, val){ if(!P) return; P.f[f] = val; later(); queue = queue.filter(q => !(q.action === "pset" && q.f === f)); queue.push({ action:"pset", f, val }); pump(); }
+const PVMSG = "학생 화면 미리 보기에서는 읽기만 할 수 있어요";
+function send(op){ if(!S) return; if(me.preview) return toast(PVMSG); applyOp(S, op); later(); queue.push({ action:"op", op }); pump(); }
+function psend(f, val){ if(!P) return; if(me.preview) return toast(PVMSG); P.f[f] = val; later(); queue = queue.filter(q => !(q.action === "pset" && q.f === f)); queue.push({ action:"pset", f, val }); pump(); }
 function later(){ clearTimeout(later.t); later.t = setTimeout(render, 0); }
 async function pump(){
   if(busy || !queue.length) return;
@@ -720,7 +727,7 @@ function applyCls(c, initial){
   const prev = CLS; CLS = c;
   if(prev && !!prev.open56 !== !!c.open56) later();
   if(!initial && !me.teacher && c.lock && !(prev && prev.lock)) toast("집중 모드가 켜졌어요. 다른 화면으로 가면 벗어난 시간이 기록돼요.", true);
-  if(me.teacher){ drawTeacher(); return; }
+  if(me.teacher || me.preview){ drawTeacher(); return; }
   const go = c.step && STEPS[c.step];
   if(initial){ clsSeen = c.seq; if(go) setStep(c.step); }
   else if(c.seq !== clsSeen){
@@ -753,6 +760,7 @@ $("tPush").onclick = () => { setCls({ step, push:true }); toast(`학생 모두�
 $("tMoum").innerHTML = '<option value="">모둠 활동 보기</option>' + Array.from({length:MOUMS}, (_, i) => `<option value="${i+1}">${i+1}모둠 활동 보기</option>`).join("");
 $("tMoum").onchange = e => { if(e.target.value) openMoum(e.target.value); };
 async function openMoum(m){
+  if(me.preview){ me = me.back; P = { v:0, f:{}, notes:{ marks:[], memos:{} } }; loadNotes(); }
   me.moum = String(m); saveMe(); selected.clear(); $("tMoum").value = me.moum;
   try{ const d = await api({ action:"state", v:-1, pv:-1 }); S = norm(d.state); }catch(err){ toast(err.message); }
   setTMode("moum"); render();
@@ -760,6 +768,7 @@ async function openMoum(m){
 /* ===== 교사: 현황판과 연수용 결과물 ===== */
 let tmode = "dash", ALL = null, repMoum = "1", hideNames = false;
 function setTMode(m){
+  if(me.preview){ me = me.back; P = { v:0, f:{}, notes:{ marks:[], memos:{} } }; loadNotes(); }
   tmode = m;
   $("dash").hidden = m !== "dash"; $("report").hidden = m !== "report"; $("lessonArea").hidden = m !== "moum";
   $("tDash").style.outline = m === "dash" ? "3px solid #fff" : ""; $("tReport").style.outline = m === "report" ? "3px solid #fff" : "";
@@ -861,6 +870,7 @@ async function enter(){
   S = norm(d.state); P = d.p; show(d.cls);
 }
 $("leave").onclick = async () => {
+  if(me && me.preview){ endPreview(); return; }
   if(!(await ask("이 기기에서 로그아웃할까요? 학번과 이름으로 다시 들어오면 이어서 할 수 있어요."))) return;
   endAway(); try{ localStorage.removeItem(LS); }catch(e){}
   me = null; S = null; P = null; CLS = null; $("app").hidden = true; $("join").hidden = false; $("lockOv").hidden = true; hideMarkBar();
@@ -942,6 +952,33 @@ function render(){
   renderDocs();
   if(keep){ const el = document.querySelector(`[data-k="${keep.k}"]`); if(el && !el.disabled){ el.value = keep.val; el.focus(); try{ el.setSelectionRange(keep.s, keep.e); }catch(_){} } }
   if(step === "1-1"){ drawPend(); qinHint(); }
+  if(me.preview){ document.querySelectorAll("#work input, #work textarea, #work select, #qAdd").forEach(x => x.disabled = true); $("moveBar").hidden = true; }
+  drawPv();
+}
+/* ===== 교사: 학생 화면으로 보기 (읽기 전용, 다시 로그인하지 않음) ===== */
+function drawPv(){
+  const bar = $("pvBar"); if(!bar) return;
+  const real = me.preview ? me.back : me;
+  if(!real || !real.teacher){ bar.hidden = true; return; }
+  bar.hidden = false; bar.classList.toggle("on", !!me.preview);
+  if(me.preview){ bar.innerHTML = `<b>👀 ${esc(me.name)} 학생 화면 미리 보기</b><span class="hint" style="margin:0">학생이 보는 그대로예요. 읽기만 할 수 있어요.</span><button class="back" data-act="pvBack">교사 화면으로 돌아가기</button>`; return; }
+  const mem = [...new Set(S.mem || [])];
+  bar.innerHTML = `<b>학생 화면으로 보기</b>${mem.map(u => `<button data-act="pvAs" data-id="${esc(u)}">${esc(dn(u))}</button>`).join("") || '<span class="hint" style="margin:0">이 모둠에 들어온 학생이 아직 없어요.</span>'}`;
+}
+async function startPreview(u){
+  const m = String(u).match(/^(\d+)\s+(.+)$/); if(!m) return;
+  const back = me;
+  me = { code:back.code, moum:back.moum, sid:m[1], name:m[2], uid:u, preview:true, back };
+  try{ const d = await api({ action:"state", v:-1, pv:-1 }); S = norm(d.state); P = d.p || { v:0, f:{}, notes:{ marks:[], memos:{} } }; }
+  catch(err){ me = back; toast(err.message); return; }
+  $("whoText").textContent = `선생님 · ${me.moum}모둠 ${me.name} 화면 보는 중`;
+  loadNotes(); drawNav(); render(); window.scrollTo({ top:0 });
+}
+async function endPreview(){
+  if(!me.preview) return;
+  me = me.back; P = { v:0, f:{}, notes:{ marks:[], memos:{} } };
+  try{ const d = await api({ action:"state", v:-1, pv:-1 }); S = norm(d.state); }catch(err){ toast(err.message); }
+  $("whoText").textContent = whoText(); loadNotes(); drawNav(); render();
 }
 
 const VIEWS = {};
@@ -1337,7 +1374,7 @@ function renderDocs(){
 let lastLadField = null;
 document.addEventListener("focusin", e => { if(e.target.dataset && e.target.dataset.lf) lastLadField = e.target; });
 document.addEventListener("click", async e => {
-  if(e.target.id === "qAdd"){ addQuestion(); return; }
+  if(e.target.id === "qAdd"){ if(me.preview) return toast(PVMSG); addQuestion(); return; }
   const sb = e.target.closest("#srcPick [data-src]");
   if(sb){ const k = sb.dataset.src;
     if(pendSrc.includes(k)) pendSrc = pendSrc.filter(x => x !== k);
@@ -1346,6 +1383,9 @@ document.addEventListener("click", async e => {
     drawPend(); return; }
   const b = e.target.closest("[data-act]"); if(!b || !S) return;
   const { act, id, g } = b.dataset;
+  if(me.preview && !["showSrcQ","boardSel","boardRefresh","copy","copyText","pvAs","pvBack","tGo","tRep","cmtKind"].includes(act)){ toast(PVMSG); return; }
+  if(act === "pvAs"){ startPreview(id); return; }
+  if(act === "pvBack"){ endPreview(); return; }
   if(act === "tGo"){ openMoum(id); return; }
   if(act === "tRep"){ repMoum = String(id); if(tmode !== "report") setTMode("report"); else drawReport(); return; }
   if(act === "showSrcQ"){ const el = $("srcq-" + id); if(el) el.hidden = !el.hidden; return; }
@@ -1516,7 +1556,7 @@ function loadNotes(){
   document.querySelectorAll("[data-memo]").forEach(t => { if(document.activeElement === t) return; t.value = NOTES.memos[t.dataset.memo] || ""; if(t.value) t.closest("details").open = true; });
 }
 function saveNotes(){
-  if(!me || me.teacher || !P) return;
+  if(!me || me.teacher || me.preview || !P) return;
   P.notes = NOTES; clearTimeout(saveNotes.t);
   saveNotes.t = setTimeout(() => { api({ action:"notes", notes:NOTES }).then(d => { if(d.pv) P.v = d.pv; }).catch(err => toast(err.message)); }, 1200);
 }
@@ -1543,7 +1583,7 @@ document.addEventListener("selectionchange", () => {
   const sel = getSelection();
   if(!sel.rangeCount || sel.isCollapsed){ clearTimeout(hideMarkBar.t); if(!delId) hideMarkBar.t = setTimeout(() => { if(getSelection().isCollapsed && !delId) hideMarkBar(); }, 700); return; }
   const r = sel.getRangeAt(0), b = bodyOf(r.commonAncestorContainer);
-  if(!b || !me || me.teacher) return;
+  if(!b || !me || me.teacher || me.preview) return;
   const s = offsetIn(b, r.startContainer, r.startOffset), e = offsetIn(b, r.endContainer, r.endOffset);
   const text = r.toString().replace(/\s+/g, " ").trim();
   if(e - s < 1 || !text) return;
@@ -1553,7 +1593,7 @@ document.addEventListener("selectionchange", () => {
 });
 document.addEventListener("click", e => {
   const m = e.target.closest("mark[data-mid]");
-  if(m && getSelection().isCollapsed && me && !me.teacher){ delId = m.dataset.mid; selInfo = null; showMarkBar("del"); }
+  if(m && getSelection().isCollapsed && me && !me.teacher && !me.preview){ delId = m.dataset.mid; selInfo = null; showMarkBar("del"); }
 });
 function showMarkBar(mode){
   const bar = $("markBar"); bar.hidden = false;
@@ -1587,7 +1627,7 @@ $("markBar").querySelectorAll("[data-mk]").forEach(btn => {
 
 /* ===== 집중 모드: 다른 화면으로 가면 앱을 가리고, 벗어난 시간을 기록 ===== */
 let away = null;
-const lockOn = () => !!(me && me.uid && !me.teacher && CLS && CLS.lock);
+const lockOn = () => !!(me && me.uid && !me.teacher && !me.preview && CLS && CLS.lock);
 const fmt = d => d.toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false });
 const mmss = sec => `${Math.floor(sec / 60)}분 ${sec % 60}초`;
 function focusCheck(){
