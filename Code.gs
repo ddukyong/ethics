@@ -50,11 +50,13 @@ function handle_(p){
   if(p.action === "login"){
     let moum = String(p.moum || "");
     let pp = teacher ? blankP_() : loadP_(code, uid);
+    let oldMoum = "";
     if(!teacher){
-      if(moumOk(moum) && pp.moum !== moum){ pp.moum = moum; pp.v++; saveP_(code, uid, pp); }
+      if(moumOk(moum) && pp.moum !== moum){ oldMoum = pp.moum; pp.moum = moum; pp.v++; saveP_(code, uid, pp); }
       moum = pp.moum;
     }
     if(!moumOk(moum)) throw new Error(teacher ? "볼 모둠을 골라 주세요." : "처음 들어올 때는 모둠을 골라 주세요.");
+    if(!teacher) joinMoum_(code, moum, oldMoum, uid);
     return { ok:true, uid, moum, state:load_(code, moum), p:pp, cls:getCls_(code) };
   }
 
@@ -189,6 +191,23 @@ function handle_(p){
   throw new Error("알 수 없는 요청입니다.");
 }
 
+/* 로그인한 학생을 그 모둠의 모둠원 목록(st.mem)에 올림. 모둠을 옮기면 예전 모둠에서는 뺌 */
+function joinMoum_(code, moum, oldMoum, uid){
+  const st0 = load_(code, moum);
+  if(st0.mem.indexOf(uid) >= 0 && !moumOk_(oldMoum)) return;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try{
+    const st = load_(code, moum);
+    if(st.mem.indexOf(uid) < 0){ st.mem.push(uid); st.v = (st.v || 0) + 1; save_(code, moum, st); }
+    if(moumOk_(oldMoum) && oldMoum !== moum){
+      const o = load_(code, oldMoum);
+      if(o.mem.indexOf(uid) >= 0){ o.mem = o.mem.filter(x => x !== uid); o.v = (o.v || 0) + 1; save_(code, oldMoum, o); }
+    }
+  } finally { lock.releaseLock(); }
+}
+function moumOk_(m){ return /^\d+$/.test(String(m)) && +m >= 1 && +m <= MOUMS; }
+
 function checkTeacher_(key){
   const real = PropertiesService.getScriptProperties().getProperty("TEACHER_KEY") || TEACHER_KEY;
   if(!key || String(key) !== real) throw new Error("교사 비밀번호가 맞지 않아요.");
@@ -269,7 +288,8 @@ function getCls_(code){
   if(hit){ try{ return JSON.parse(hit); }catch(e){} }
   let c = null;
   try{ c = JSON.parse(PropertiesService.getScriptProperties().getProperty(k) || "null"); }catch(e){}
-  c = c || { live:false, lock:false, open56:false, step:"", seq:0, push:false };
+  c = c || { live:false, lock:true, open56:false, step:"", seq:0, push:false };
+  if(c.lock === undefined) c.lock = true; // 집중 모드는 기본으로 켜 둠
   cache.put(k, JSON.stringify(c), CACHE_SEC);
   return c;
 }
@@ -313,9 +333,11 @@ function log_(cls, moum, sid, name, op, st){
       row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text).join(" / "), r.fix); });
     row.push(st.concl.answer, st.concl.evidence, st.concl.more, who);
     if(st.subN === 4){ const s = st.subs.d, r = st.res.d; row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text).join(" / "), r.fix); }
+    else row.push("", "", "", "", "", "", "");
+    ["a", "b", "c", "d"].forEach(k => row.push(st.res[k].ai));
     const h = ["시각", "반", "모둠", "탐구 질문"];
     ["①", "②", "③"].forEach(n => h.push("하위" + n + " 질문", "하위" + n + " 담당", "하위" + n + " 조사 내용", "하위" + n + " 출처", "하위" + n + " 해석", "하위" + n + " 보완 의견", "하위" + n + " 수정"));
-    h.push("답변", "핵심 근거", "더 확인하고 싶은 점", "확정한 학생", "하위④ 질문", "하위④ 담당", "하위④ 조사 내용", "하위④ 출처", "하위④ 해석", "하위④ 보완 의견", "하위④ 수정");
+    h.push("답변", "핵심 근거", "더 확인하고 싶은 점", "확정한 학생", "하위④ 질문", "하위④ 담당", "하위④ 조사 내용", "하위④ 출처", "하위④ 해석", "하위④ 보완 의견", "하위④ 수정", "하위① AI 활용", "하위② AI 활용", "하위③ AI 활용", "하위④ AI 활용");
     sheet_("3차시탐구문서", h).appendRow(row);
   }
 }
@@ -354,7 +376,7 @@ function resetPractice(){
       if(String(vals[i][0]) === code){ CacheService.getScriptCache().remove("개인상태:" + code + ":" + vals[i][1]); sh.deleteRow(i + 2); }
     }
   }
-  putCls_(code, { live:false, lock:false, open56:false, step:"", seq:0, push:false });
+  putCls_(code, { live:false, lock:true, open56:false, step:"", seq:0, push:false });
   CacheService.getScriptCache().remove("classes");
 }
 /** 반목록 시트를 고친 뒤 바로 반영하고 싶을 때 */
@@ -373,14 +395,15 @@ function norm(st){
   st.subChk = st.subChk || [false, false, false];
   st.done2 = !!st.done2;
   st.res = st.res || {};
-  ["a", "b", "c"].forEach(k => { const r = st.res[k] = st.res[k] || {}; ["data", "src", "interp", "fix"].forEach(f => { r[f] = r[f] || ""; }); r.fb = r.fb || []; });
+  ["a", "b", "c"].forEach(k => { const r = st.res[k] = st.res[k] || {}; ["data", "src", "interp", "fix", "ai"].forEach(f => { r[f] = r[f] || ""; }); r.fb = r.fb || []; });
   st.concl = st.concl || {}; ["answer", "evidence", "more"].forEach(f => { st.concl[f] = st.concl[f] || ""; });
   st.pres = st.pres || {}; ["p1", "p2", "p3"].forEach(f => { st.pres[f] = st.pres[f] || ""; });
   st.done3 = !!st.done3;
   st.subN = st.subN === 4 ? 4 : 3;
   st.subs.d = st.subs.d || {}; ["q", "check", "src", "who"].forEach(f => { st.subs.d[f] = st.subs.d[f] || ""; });
-  const rd = st.res.d = st.res.d || {}; ["data", "src", "interp", "fix"].forEach(f => { rd[f] = rd[f] || ""; }); rd.fb = rd.fb || [];
+  const rd = st.res.d = st.res.d || {}; ["data", "src", "interp", "fix", "ai"].forEach(f => { rd[f] = rd[f] || ""; }); rd.fb = rd.fb || [];
   st.cmts = st.cmts || [];
+  st.mem = st.mem || [];
   return st;
 }
 function applyOp(st, op){
@@ -421,7 +444,7 @@ function applyOp(st, op){
     case "sub": if(K3.includes(op.k) && ["q", "check", "src", "who"].includes(op.f)) st.subs[op.k][op.f] = cut(op.val, 200); break;
     case "subChk": if(op.i >= 0 && op.i < 3) st.subChk[op.i] = !!op.val; break;
     case "done2": st.done2 = !!op.done; break;
-    case "res": if(K3.includes(op.k) && ["data", "src", "interp", "fix"].includes(op.f)) st.res[op.k][op.f] = cut(op.val, 1000); break;
+    case "res": if(K3.includes(op.k) && ["data", "src", "interp", "fix", "ai"].includes(op.f)) st.res[op.k][op.f] = cut(op.val, 1000); break;
     case "addFb": if(K3.includes(op.k) && st.res[op.k].fb.length < 40 && !st.res[op.k].fb.find(x => x.id === op.id))
       st.res[op.k].fb.push({ id:op.id, name:op.name, tag:cut(op.tag, 20), text:cut(op.text, 300) }); break;
     case "delFb": if(K3.includes(op.k)) st.res[op.k].fb = st.res[op.k].fb.filter(x => !(x.id === op.id && x.name === op.name)); break;
