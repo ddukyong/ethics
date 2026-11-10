@@ -1231,7 +1231,7 @@ VIEWS["1-3"] = () => {
     <h2>② 우리 모둠 후보 탐구 질문 (${S.cands.length}/3)</h2>
     ${S.cands.map((k, i) => `<div class="cand"><span class="num">후보 ${NUM[i]}</span>
       <label for="ct-${k.id}">후보 탐구 질문</label>
-      <textarea id="ct-${k.id}" maxlength="200" data-k="ct-${k.id}" data-ctext="${k.id}" data-qc="open" ${S.done ? "disabled" : ""}>${esc(k.text)}</textarea>${qc("ct-" + k.id, k.text, "open")}
+      <textarea id="ct-${k.id}" maxlength="200" data-k="ct-${k.id}" data-ctext="${k.id}" ${S.done ? "disabled" : ""}>${esc(k.text)}</textarea>
       ${k.from.length ? `<p class="from">바탕이 된 질문: ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}
       ${k.from.length >= 2 && !S.done ? '<p class="hint warn">바탕 질문이 2개 이상이에요 — 위 칸에서 한 문장으로 합쳐 쓰기</p>' : ""}
       ${S.done ? "" : `<div class="acts"><button class="ghost" data-act="delCand" data-id="${k.id}">후보에서 빼기</button></div>`}</div>`).join("")
