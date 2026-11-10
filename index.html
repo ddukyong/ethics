@@ -118,7 +118,14 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .pvbar.on{border-style:solid;background:var(--soft)}
 .pvbar button{padding:4px 12px;border:1.5px solid var(--field);background:var(--paper);font-size:14px;border-radius:20px}
 .pvbar button.back{background:var(--ink);color:var(--paper);border-color:var(--ink);margin-left:auto}
-#docSlot{margin-top:14px}
+#docSlot{margin-top:14px;min-width:0;max-width:100%}
+/* 휴대폰(특히 아이폰 사파리)에서 그림·표가 자료 칸을 원래 크기만큼 넓히지 않게 */
+#docPane{min-width:0;max-width:100%}
+.doc{grid-template-columns:minmax(0,1fr)}
+.doc > *, .src, .src-body, .src-body *{min-width:0;max-width:100%}
+.map,.src img{max-width:100%;height:auto}
+.src,.cite,.doc-title{overflow-wrap:anywhere}
+@media (max-width:959px){ .src-body table,.wtable{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch} }
 #docSlot #docPane{border:1.5px solid var(--hair)}
 .zone{margin-top:12px;border:1.5px solid var(--hair);border-radius:12px;background:var(--paper)}
 .zone[open]{border-color:var(--ink)}
