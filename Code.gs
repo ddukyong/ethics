@@ -7,6 +7,7 @@
 
 /* ===== 선생님이 바꾸는 곳 ===== */
 const TEACHER_KEY = "여기에-교사-비밀번호";   // 선생님으로 들어갈 때 쓰는 비밀번호 (꼭 바꾸기)
+                                              // 스크립트 속성 TEACHER_KEY가 있으면 그것을 먼저 씀
 const PRACTICE_CODE = "practice26";           // resetPractice()로 비울 연습용 수업 코드
 const MOUMS = 8;                              // 모둠 수 (index.html의 MOUMS와 같게)
 const SHEET_ID = "";                          // 스프레드시트에 붙은 스크립트면 비워 둠
@@ -79,7 +80,8 @@ function handle_(p){
 }
 
 function checkTeacher_(key){
-  if(!key || String(key) !== TEACHER_KEY) throw new Error("교사 비밀번호가 맞지 않아요.");
+  const real = PropertiesService.getScriptProperties().getProperty("TEACHER_KEY") || TEACHER_KEY;
+  if(!key || String(key) !== real) throw new Error("교사 비밀번호가 맞지 않아요.");
 }
 
 /* ===== 스프레드시트 ===== */
@@ -99,13 +101,16 @@ function findClass_(code){
   try{ list = JSON.parse(cache.get("classes") || "null"); }catch(e){}
   if(!list){
     const sh = book_().getSheetByName("반목록");
-    if(!sh) throw new Error("스프레드시트에 ‘반목록’ 시트가 없어요.");
-    list = sh.getDataRange().getValues().slice(1)
+    list = !sh ? [] : sh.getDataRange().getValues().slice(1)
       .filter(r => String(r[1]).trim())
       .map(r => ({ name:String(r[0]).trim(), code:String(r[1]).trim() }));
     cache.put("classes", JSON.stringify(list), 600);
   }
-  return list.find(c => c.code === code) || null;
+  const hit = list.find(c => c.code === code);
+  if(hit) return hit;
+  // 예전 서버처럼 스크립트 속성 CLASS_CODE로 정한 수업 코드도 받아 줌
+  const old = PropertiesService.getScriptProperties().getProperty("CLASS_CODE");
+  return old && String(old).trim() === code ? { name:"Q-메이커스", code } : null;
 }
 
 /* ===== 모둠 상태: 캐시에서 빠르게 읽고, ‘앱상태’ 시트에 늘 저장 ===== */
