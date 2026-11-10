@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>질문 쏟아내기·묶기·추리기 | Q-메이커스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yellow:#FFD02B; --ink:#000; --paper:#fff; --soft:#FFF6CF; --muted:#555; --line:#000; --warn:#B3261E;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --ink:#F4F4F4; --paper:#141414; --soft:#2A2510; --muted:#B5B5B5; --line:#F4F4F4; --warn:#FF8A80; color-scheme:dark; }
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:17px;line-height:1.6;word-break:keep-all}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px 120px}
+header{background:var(--yellow);color:#000;border-bottom:3px solid #000;overflow:hidden}
+header .wrap{display:flex;align-items:flex-end;gap:14px;padding-top:18px;padding-bottom:0}
+.q{font-family:"Black Han Sans",sans-serif;font-size:116px;line-height:.78;margin-bottom:-12px}
+header p{margin:0 0 4px;font-weight:700;font-size:14px}
+header h1{margin:0 0 16px;font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:28px;line-height:1.2}
+h2{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:22px;margin:30px 0 10px}
+label{display:block;font-weight:700;margin:16px 0 6px}
+input[type=text],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:4px;padding:9px 11px}
+textarea{resize:vertical;min-height:70px}
+button{font:inherit;font-weight:700;cursor:pointer;border-radius:4px;color:var(--ink)}
+.primary{display:block;width:100%;margin-top:16px;padding:13px;border:3px solid #000;background:var(--yellow);color:#000;font-size:18px}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.ghost{padding:4px 10px;border:2px solid var(--line);background:transparent;font-size:14px}
+.ghost:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:14px;color:var(--muted);margin:4px 0 0}
+.lead{margin:22px 0 0;padding:14px 16px;border:2px solid var(--line);border-radius:4px;background:var(--soft)}
+.box{margin-top:16px;padding:10px 16px;border:2px solid var(--line);border-radius:4px;font-size:15px}
+.box.dash{border-style:dashed}
+.box .tag{display:inline-block;margin:2px 0 4px;padding:1px 8px;background:#000;color:var(--yellow);font-size:13px;font-weight:700}
+.box ul{margin:4px 0;padding-left:20px}
+.box li{margin:3px 0}
+.who{display:flex;align-items:center;gap:10px;margin-top:18px;font-size:15px}
+.who span:first-child{flex:1;font-weight:700}
+.sync{font-size:13px;color:var(--muted)}
+
+/* 수업 흐름 탭 */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;border:2px solid var(--line);border-radius:4px;overflow:hidden}
+.steps button{border:0;border-right:2px solid var(--line);border-radius:0;background:var(--paper);padding:8px 4px;font-size:15px;line-height:1.3}
+.steps button:last-child{border-right:0}
+.steps button small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.steps button[aria-selected=true]{background:#000;color:var(--yellow)}
+.steps button[aria-selected=true] small{color:var(--yellow)}
+
+/* 카드 */
+.cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;min-height:10px}
+.card{display:block;text-align:left;max-width:100%;padding:8px 10px;border:2px solid var(--line);border-radius:3px;background:var(--soft);font-weight:500;font-size:15px;line-height:1.45}
+.card small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+.card.sel{outline:4px solid var(--yellow);outline-offset:1px;border-width:3px}
+.card .x{margin-left:8px;border:0;background:none;padding:0 2px;font-size:14px;color:var(--muted)}
+.mine{list-style:none;margin:0;padding:0;display:flex;flex-direction:column-reverse;gap:6px}
+.mine li{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:2px solid var(--line);border-radius:3px;background:var(--soft);font-size:15px}
+.mine li button{border:0;background:none;color:var(--muted);font-size:13px;font-weight:400;padding:0}
+
+/* 묶음 */
+.bucket{margin-top:14px;border:2px solid var(--line);border-radius:4px;padding:10px 12px}
+.bucket.unsorted{border-style:dashed}
+.bucket.aside{border-style:dotted;border-width:3px}
+.bhead{display:flex;align-items:center;gap:8px}
+.bhead input{flex:1;padding:5px 8px;font-weight:700}
+.bhead .title{flex:1;font-weight:700}
+.bhead .n{font-size:13px;color:var(--muted);white-space:nowrap}
+.moveto{padding:4px 10px;border:3px solid #000;background:var(--yellow);color:#000;font-size:14px}
+.movebar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:#000;color:var(--yellow);padding:10px 18px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;font-size:15px}
+.movebar span{flex:1}
+.movebar button{background:var(--yellow);color:#000;border:0;padding:6px 12px}
+
+/* 후보와 AI */
+.cand{margin-top:14px;border:3px solid var(--line);border-radius:4px;padding:6px 14px 14px}
+.cand .num{font-family:"Black Han Sans",sans-serif;font-size:20px}
+.cand label{font-size:15px;margin:10px 0 4px}
+.from{font-size:13px;color:var(--muted);margin:6px 0 0}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ai{margin-top:12px;padding:10px 14px;border:2px dashed var(--line);border-radius:4px;font-size:15px}
+.ai .status{display:inline-block;padding:1px 10px;background:#000;color:var(--yellow);font-weight:700;font-size:14px;margin-right:6px}
+.ai p{margin:6px 0 0}
+.ai .ex{margin-top:8px;padding:8px 10px;border:2px solid var(--line);background:var(--soft)}
+.pickg{margin-top:12px}
+.pickg h3{font-size:15px;margin:0 0 4px}
+.pickq{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:15px}
+.pickq span{flex:1;padding-top:3px}
+.done{margin-top:18px;padding:16px;border:3px solid #000;background:var(--yellow);color:#000;border-radius:4px}
+.done pre{white-space:pre-wrap;font:inherit;font-size:15px;margin:8px 0 0}
+.done button{color:#000;border-color:#000}
+#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);max-width:90%;background:var(--warn);color:#fff;padding:8px 14px;border-radius:4px;font-size:14px;z-index:20}
+.empty{color:var(--muted);font-size:14px;margin:6px 0}
+[hidden]{display:none!important}
+@media (max-width:420px){ .q{font-size:92px} header h1{font-size:23px} .row{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="q" aria-hidden="true">Q</div>
+  <div><p>Q-메이커스 · 질문 생성하기</p><h1>질문 쏟아내기·묶기·추리기</h1></div>
+</div></header>
+
+<div class="wrap">
+<!-- 들어가기 -->
+<section id="join">
+  <p class="lead">자료 (1)을 보며 떠오른 질문을 쏟아내고, 모둠원과 비슷한 질문끼리 묶은 뒤, 가장 답을 찾아보고 싶은 후보 탐구 질문을 2~3개로 추려 보자.</p>
+  <label for="jcode">수업 코드</label><input id="jcode" type="text" autocomplete="off" maxlength="20">
+  <div class="row">
+    <div><label for="jmoum">모둠</label><select id="jmoum"><option value="">고르기</option></select></div>
+    <div><label for="jname">이름</label><input id="jname" type="text" maxlength="10"></div>
+  </div>
+  <button class="primary" id="joinBtn" disabled>들어가기</button>
+  <p class="hint" id="joinMsg" role="status"></p>
+</section>
+
+<!-- 활동 -->
+<section id="app" hidden>
+  <div class="who"><span id="whoText"></span><span class="sync" id="sync"></span><button class="ghost" id="leave">나가기</button></div>
+  <nav class="steps" role="tablist" aria-label="오늘 수업의 흐름">
+    <button role="tab" data-tab="1">1 질문 쏟아내기<small>개인</small></button>
+    <button role="tab" data-tab="2">2 비슷한 것끼리 묶기<small>모둠</small></button>
+    <button role="tab" data-tab="3">3 후보 탐구 질문 추리기<small>모둠</small></button>
+  </nav>
+
+  <!-- 1 쏟아내기 -->
+  <section id="t1" role="tabpanel">
+    <div class="box"><span class="tag">질문 쏟아내기 약속</span>
+      <ul><li>한 번에 질문 하나씩 올리기</li><li>되도록 많이 쓰기 — 좋은 질문인지는 나중에 따지기</li><li>떠오른 그대로 쓰기 — 답을 달거나 고치지 않기</li><li>생각이 문장으로 떠오르면 물음표로 바꾸어 쓰기<br><small>예) 군 지역은 응급실이 멀다 → 군 지역은 왜 응급실이 멀까?</small></li></ul>
+    </div>
+    <div class="box dash"><span class="tag">더 나아가기</span><br>두 개 이상의 자료를 연결 지어 질문해 보기</div>
+    <label for="qin">떠오른 질문</label>
+    <textarea id="qin" maxlength="200" placeholder="자료 (1)에서 눈에 띄거나 의아한 부분을 보며 떠오른 질문"></textarea>
+    <p class="hint" id="qHint" role="status"></p>
+    <button class="primary" id="qAdd" disabled>질문 올리기</button>
+    <h2>내가 올린 질문 <span id="myCount"></span></h2>
+    <p class="hint" id="teamCount"></p>
+    <ul class="mine" id="mine"></ul>
+  </section>
+
+  <!-- 2 묶기 -->
+  <section id="t2" role="tabpanel" hidden>
+    <div class="box"><span class="tag">묶는 방법</span>
+      <ul><li>질문을 눌러 고른 뒤, 옮길 묶음의 [여기로]를 누르기</li><li>비슷한 질문은 한 묶음에 모으고, 묶음마다 이름 붙이기</li><li>어디에도 맞지 않는 질문은 ‘따로 두기’로 — 버리지 않음</li></ul>
+    </div>
+    <div id="buckets"></div>
+    <button class="ghost" id="addGroup" style="margin-top:14px">+ 새 묶음 만들기</button>
+  </section>
+
+  <!-- 3 추리기 -->
+  <section id="t3" role="tabpanel" hidden>
+    <div class="box"><span class="tag">도움말</span>
+      <ul><li>묶음마다 대표가 되는 질문을 고르거나, 비슷한 질문을 한 문장으로 합치기</li><li>단순한 수치 확인보다 ‘왜 그럴까?’, ‘어떤 영향을 미칠까?’처럼 더 알아보고 싶은 질문을 우선 고르기</li><li>[AI 기준 받기]를 누르면 닫힌 질문을 여는 방향을 알려 줌</li></ul>
+    </div>
+    <h2>우리 모둠 후보 탐구 질문 <span id="candCount"></span></h2>
+    <div id="cands"></div>
+    <button class="ghost" id="addCand" style="margin-top:12px">+ 직접 쓰거나 합쳐 쓰기</button>
+    <button class="primary" id="finalize" disabled>후보 탐구 질문 확정하기</button>
+    <p class="hint" id="finalHint"></p>
+    <div id="doneBox"></div>
+    <h2>묶음에서 대표 질문 고르기</h2>
+    <div id="pick"></div>
+  </section>
+</section>
+</div>
+<div class="movebar" id="moveBar" hidden><span>옮길 묶음의 [여기로]를 누르기</span><button id="cancelSel">취소</button></div>
+<div id="toast" hidden></div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzfHP_EYODLuj0xLqBrmL_kVV-Y16oSoOtVF0DpyMKRLJoc4vdjRqpWnx5KLnPnJ1s/exec";
+const MOUMS = 8;
+const LS = "qmakers-step1";
+
+/* ===== 서버와 똑같이 쓰는 상태 변경 규칙 (Code.gs의 applyOp_와 같아야 함) ===== */
+function applyOp(st, op){
+  const card = id => st.cards.find(x => x.id === id);
+  const cand = id => st.cands.find(k => k.id === id);
+  switch(op.t){
+    case "addCard": if(!card(op.id)) st.cards.push({ id:op.id, name:op.name, text:op.text, g:"" }); break;
+    case "delCard": { const n = st.cards.length; st.cards = st.cards.filter(x => !(x.id === op.id && x.name === op.name)); if(st.cards.length === n) break; }
+                    st.cands.forEach(k => k.from = k.from.filter(f => f !== op.id)); break;
+    case "move": { const x = card(op.id); if(x) x.g = op.g; break; }
+    case "addGroup": if(!st.groups.find(g => g.id === op.id)) st.groups.push({ id:op.id, name:op.name }); break;
+    case "renameGroup": { const g = st.groups.find(g => g.id === op.id); if(g) g.name = op.name; break; }
+    case "delGroup": st.groups = st.groups.filter(g => g.id !== op.id);
+                     st.cards.forEach(x => { if(x.g === op.id) x.g = ""; }); break;
+    case "addCand": if(st.cands.length < 3 && !cand(op.id)) st.cands.push({ id:op.id, text:op.text || "", reason:"", from:op.from || [], ai:null, aiEx:"" }); break;
+    case "editCand": { const k = cand(op.id); if(!k) break;
+      if(op.text !== undefined && op.text !== k.text){ k.text = op.text; k.ai = null; k.aiEx = ""; }
+      if(op.reason !== undefined) k.reason = op.reason; break; }
+    case "addFrom": { const k = cand(op.id); if(k && card(op.card) && !k.from.includes(op.card)) k.from.push(op.card); break; }
+    case "delCand": st.cands = st.cands.filter(k => k.id !== op.id); break;
+    case "done": st.done = !!op.done; break;
+  }
+  return st;
+}
+/* ============================================================================ */
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+let me = null, S = null, tab = 1, selected = null, queue = [], busy = false, aiBusy = {}, hintShown = false;
+try{ me = JSON.parse(localStorage.getItem(LS)); }catch(e){}
+
+async function api(payload){
+  const res = await fetch(API_URL, { method:"POST", body: JSON.stringify({ ...payload, classCode:me.code, moum:me.moum, name:me.name }) });
+  if(!res.ok) throw new Error("서버 응답 오류 (" + res.status + ")");
+  const d = await res.json();
+  if(!d.ok) throw new Error(d.error || "알 수 없는 오류");
+  return d;
+}
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3500); }
+
+/* 바꾼 내용은 화면에 먼저 반영하고, 서버에 차례로 보냄 */
+function send(op){ if(!S) return; applyOp(S, op); render(); queue.push(op); pump(); }
+async function pump(){
+  if(busy || !queue.length) return;
+  busy = true; $("sync").textContent = "저장 중…";
+  const op = queue[0];
+  try{
+    const d = await api({ action:"op", op });
+    queue.shift();
+    S = d.state; queue.forEach(o => applyOp(S, o));
+  }catch(err){ queue.shift(); toast(err.message); }
+  busy = false; $("sync").textContent = queue.length ? "저장 중…" : "저장됨";
+  render(); pump();
+}
+async function poll(){
+  if(!me || busy || queue.length || document.hidden) return;
+  try{
+    const d = await api({ action:"state", v: S ? S.v : -1 });
+    if(d.state && !busy && !queue.length){ S = d.state; render(); }
+    $("sync").textContent = "연결됨";
+  }catch(err){ $("sync").textContent = "연결 끊김"; }
+}
+
+/* 들어가기 */
+$("jmoum").innerHTML += Array.from({length:MOUMS}, (_, i) => `<option value="${i+1}">${i+1}모둠</option>`).join("");
+function joinValid(){ $("joinBtn").disabled = !($("jcode").value.trim() && $("jmoum").value && $("jname").value.trim()); }
+["jcode","jname"].forEach(id => $(id).addEventListener("input", joinValid)); $("jmoum").addEventListener("change", joinValid);
+$("joinBtn").onclick = async () => {
+  me = { code:$("jcode").value.trim(), moum:$("jmoum").value, name:$("jname").value.trim() };
+  $("joinBtn").disabled = true; $("joinMsg").textContent = "들어가는 중…";
+  try{
+    const d = await api({ action:"state", v:-1 });
+    S = d.state; localStorage.setItem(LS, JSON.stringify(me)); $("joinMsg").textContent = ""; show();
+  }catch(err){ $("joinMsg").textContent = err.message; me = null; joinValid(); }
+};
+$("leave").onclick = () => { localStorage.removeItem(LS); me = null; S = null; $("app").hidden = true; $("join").hidden = false; };
+function show(){ $("join").hidden = true; $("app").hidden = false; $("whoText").textContent = `${me.moum}모둠 ${me.name}`; setTab(tab); render(); }
+
+/* 탭 */
+document.querySelectorAll(".steps button").forEach(b => b.onclick = () => setTab(+b.dataset.tab));
+function setTab(n){
+  tab = n; selected = null;
+  document.querySelectorAll(".steps button").forEach(b => b.setAttribute("aria-selected", +b.dataset.tab === n));
+  [1,2,3].forEach(i => $("t"+i).hidden = i !== n);
+  render();
+}
+
+/* 1 쏟아내기 */
+$("qin").addEventListener("input", () => { hintShown = false; $("qHint").textContent = ""; $("qAdd").disabled = $("qin").value.trim().length < 3; });
+$("qAdd").onclick = () => {
+  const text = $("qin").value.trim();
+  if(!/[?？]$/.test(text) && !hintShown){
+    hintShown = true;
+    $("qHint").textContent = "물음표로 바꾸어 써 볼까? 이대로 올리려면 한 번 더 누르기";
+    return;
+  }
+  send({ t:"addCard", id:uid(), name:me.name, text });
+  $("qin").value = ""; $("qHint").textContent = ""; hintShown = false; $("qAdd").disabled = true; $("qin").focus();
+};
+$("qin").addEventListener("keydown", e => { if(e.key === "Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); if(!$("qAdd").disabled) $("qAdd").click(); } });
+
+/* 2 묶기 */
+$("addGroup").onclick = () => send({ t:"addGroup", id:uid(), name:"" });
+$("cancelSel").onclick = () => { selected = null; render(); };
+
+/* 3 추리기 */
+$("addCand").onclick = () => { if(S.cands.length < 3) send({ t:"addCand", id:uid(), text:"", from:[] }); };
+$("finalize").onclick = () => send({ t:"done", done:true });
+
+/* 공통 클릭 처리 */
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if(!b || !S) return;
+  const { act, id, g } = b.dataset;
+  if(act === "delMine"){ if(confirm("이 질문을 지울까?")) send({ t:"delCard", id, name:me.name }); }
+  if(act === "sel"){ selected = selected === id ? null : id; render(); }
+  if(act === "moveTo"){ if(selected){ send({ t:"move", id:selected, g }); selected = null; render(); } }
+  if(act === "delGroup"){ send({ t:"delGroup", id }); }
+  if(act === "toCand"){
+    if(S.cands.length >= 3) return toast("후보는 3개까지만 올릴 수 있음");
+    const c = S.cards.find(x => x.id === id); send({ t:"addCand", id:uid(), text:c.text, from:[id] });
+  }
+  if(act === "addFrom"){ // 이미 있는 후보에 바탕 질문 더하기(합치기)
+    send({ t:"addFrom", id:g, card:id });
+  }
+  if(act === "delCand"){ if(confirm("이 후보를 뺄까?")) send({ t:"delCand", id }); }
+  if(act === "ai" || act === "aiEx"){
+    if(queue.length){ await new Promise(r => setTimeout(r, 800)); }
+    aiBusy[id] = act; render();
+    try{ const d = await api({ action:"ai", candId:id, withExample: act === "aiEx" }); S = d.state; }
+    catch(err){ toast(err.message); }
+    delete aiBusy[id]; render();
+  }
+  if(act === "reopen"){ send({ t:"done", done:false }); }
+  if(act === "copy"){ copy(summary()); }
+});
+document.addEventListener("change", e => {
+  const el = e.target; if(!el.dataset || !S) return;
+  if(el.dataset.gname) send({ t:"renameGroup", id:el.dataset.gname, name:el.value.trim().slice(0,30) });
+  if(el.dataset.ctext) send({ t:"editCand", id:el.dataset.ctext, text:el.value.trim().slice(0,200) });
+  if(el.dataset.creason) send({ t:"editCand", id:el.dataset.creason, reason:el.value.trim().slice(0,300) });
+});
+
+/* 화면 그리기 — 입력 중인 칸은 지키면서 다시 그림 */
+function render(){
+  if(!S || !me) return;
+  const a = document.activeElement;
+  const keep = a && a.dataset && a.dataset.k ? { k:a.dataset.k, val:a.value, s:a.selectionStart, e:a.selectionEnd } : null;
+
+  const mine = S.cards.filter(c => c.name === me.name);
+  $("myCount").textContent = `(${mine.length})`;
+  $("teamCount").textContent = `우리 모둠 전체 ${S.cards.length}개`;
+  $("mine").innerHTML = mine.map(c => `<li><span>${esc(c.text)}</span><button data-act="delMine" data-id="${c.id}" aria-label="지우기">지우기</button></li>`).join("") || "";
+
+  // 묶기
+  const cardBtn = c => `<button class="card${selected === c.id ? " sel" : ""}" data-act="sel" data-id="${c.id}" aria-pressed="${selected === c.id}">${esc(c.text)}<small>${esc(c.name)}</small></button>`;
+  const inG = g => S.cards.filter(c => c.g === g);
+  const moveBtn = g => selected ? `<button class="moveto" data-act="moveTo" data-g="${g}">여기로</button>` : "";
+  let h = `<div class="bucket unsorted"><div class="bhead"><span class="title">아직 묶지 않은 질문</span><span class="n">${inG("").length}개</span>${moveBtn("")}</div><div class="cards">${inG("").map(cardBtn).join("") || '<p class="empty">모든 질문을 묶음.</p>'}</div></div>`;
+  S.groups.forEach((g, i) => {
+    const cs = inG(g.id);
+    h += `<div class="bucket"><div class="bhead"><input type="text" maxlength="30" placeholder="묶음 ${i+1} 이름 붙이기" value="${esc(g.name)}" data-k="g-${g.id}" data-gname="${g.id}" aria-label="묶음 이름">
+      <span class="n">${cs.length}개</span>${moveBtn(g.id)}${cs.length ? "" : `<button class="ghost" data-act="delGroup" data-id="${g.id}">삭제</button>`}</div>
+      <div class="cards">${cs.map(cardBtn).join("") || '<p class="empty">비어 있음</p>'}</div></div>`;
+  });
+  const asideCs = inG("aside");
+  h += `<div class="bucket aside"><div class="bhead"><span class="title">따로 두기</span><span class="n">${asideCs.length}개</span>${moveBtn("aside")}</div><div class="cards">${asideCs.map(cardBtn).join("") || '<p class="empty">비어 있음</p>'}</div></div>`;
+  $("buckets").innerHTML = h;
+  $("moveBar").hidden = !(tab === 2 && selected);
+
+  // 추리기: 후보
+  $("candCount").textContent = `(${S.cands.length}/3)`;
+  const textOf = id => (S.cards.find(c => c.id === id) || {}).text;
+  $("cands").innerHTML = S.cands.map((k, i) => {
+    const ai = k.ai, busyNow = aiBusy[k.id];
+    return `<div class="cand"><span class="num">후보 ${"①②③"[i]}</span>
+      <label for="ct-${k.id}">후보 탐구 질문</label>
+      <textarea id="ct-${k.id}" maxlength="200" data-k="ct-${k.id}" data-ctext="${k.id}" ${S.done ? "disabled" : ""}>${esc(k.text)}</textarea>
+      ${k.from.length ? `<p class="from">바탕이 된 질문: ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}
+      <label for="cr-${k.id}">이 질문을 고른 이유</label>
+      <textarea id="cr-${k.id}" maxlength="300" data-k="cr-${k.id}" data-creason="${k.id}" ${S.done ? "disabled" : ""}>${esc(k.reason)}</textarea>
+      ${S.done ? "" : `<div class="acts">
+        <button class="ghost" data-act="ai" data-id="${k.id}" ${busyNow || k.text.length < 5 ? "disabled" : ""}>${busyNow === "ai" ? "살펴보는 중…" : ai ? "AI 기준 다시 받기" : "AI 기준 받기"}</button>
+        ${ai && !k.aiEx ? `<button class="ghost" data-act="aiEx" data-id="${k.id}" ${busyNow ? "disabled" : ""}>${busyNow === "aiEx" ? "만드는 중…" : "예시 문장도 보기"}</button>` : ""}
+        <button class="ghost" data-act="delCand" data-id="${k.id}">후보에서 빼기</button></div>`}
+      ${ai ? `<div class="ai" aria-live="polite"><span class="status">${esc(ai.status)}</span>${ai.direction ? `여는 방향: <b>${esc(ai.direction)}</b>` : ""}
+        <p>${esc(ai.diagnosis)}</p><p>${esc(ai.tip)}</p>
+        ${k.aiEx ? `<div class="ex"><b>예시</b> ${esc(k.aiEx)}<br><small>그대로 옮기지 말고 모둠의 말로 고쳐 쓰기</small></div>` : ""}</div>` : ""}
+    </div>`;
+  }).join("") || '<p class="empty">아래 묶음에서 [후보로]를 누르거나, 직접 써서 후보를 올리기</p>';
+  $("addCand").hidden = S.done || S.cands.length >= 3;
+
+  const ready = S.cands.length >= 2 && S.cands.every(k => k.text.trim().length >= 5 && k.reason.trim().length >= 5);
+  $("finalize").hidden = S.done; $("finalize").disabled = !ready;
+  $("finalHint").textContent = S.done ? "" : ready ? "" : "후보 2~3개에 질문과 고른 이유를 모두 써야 확정할 수 있음";
+  $("doneBox").innerHTML = S.done ? `<div class="done"><b>후보 탐구 질문을 확정함</b><pre>${esc(summary())}</pre>
+    <div class="acts"><button class="ghost" data-act="copy">공유문서용으로 복사</button><button class="ghost" data-act="reopen">다시 고치기</button></div></div>` : "";
+
+  // 추리기: 묶음별 고르기
+  const groupsForPick = [...S.groups.map(g => ({ id:g.id, name:g.name || "이름 없는 묶음" })), { id:"", name:"아직 묶지 않은 질문" }, { id:"aside", name:"따로 두기" }];
+  $("pick").innerHTML = groupsForPick.map(g => {
+    const cs = inG(g.id); if(!cs.length) return "";
+    return `<div class="pickg box"><h3>${esc(g.name)} <span class="hint">(${cs.length})</span></h3>${cs.map(c => `<div class="pickq"><span>${esc(c.text)} <small class="hint">${esc(c.name)}</small></span>
+      ${S.done ? "" : `<button class="ghost" data-act="toCand" data-id="${c.id}" ${S.cands.length >= 3 ? "disabled" : ""}>후보로</button>`}
+      ${S.done ? "" : S.cands.map((k, i) => k.from.includes(c.id) ? "" : `<button class="ghost" data-act="addFrom" data-id="${c.id}" data-g="${k.id}" title="후보 ${"①②③"[i]}에 합치기">${"①②③"[i]}에 합치기</button>`).join("")}</div>`).join("")}</div>`;
+  }).join("") || '<p class="empty">아직 올라온 질문이 없음</p>';
+
+  if(keep){ const el = document.querySelector(`[data-k="${keep.k}"]`); if(el){ el.value = keep.val; el.focus(); try{ el.setSelectionRange(keep.s, keep.e); }catch(_){} } }
+}
+
+function summary(){
+  const textOf = id => (S.cards.find(c => c.id === id) || {}).text;
+  let s = `[${me.moum}모둠] 질문 묶음\n`;
+  S.groups.forEach(g => { s += `■ ${g.name || "이름 없는 묶음"}: ${S.cards.filter(c => c.g === g.id).map(c => c.text).join(" / ")}\n`; });
+  const aside = S.cards.filter(c => c.g === "aside"); if(aside.length) s += `■ 따로 두기: ${aside.map(c => c.text).join(" / ")}\n`;
+  s += `\n후보 탐구 질문\n`;
+  S.cands.forEach((k, i) => { s += `${"①②③"[i]} ${k.text}\n   고른 이유: ${k.reason}\n`; });
+  return s.trim();
+}
+async function copy(text){
+  try{ await navigator.clipboard.writeText(text); toast("복사함. 공유문서에 붙여 넣기"); }
+  catch(e){ const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); toast("복사함. 공유문서에 붙여 넣기"); }
+}
+
+setInterval(poll, 4000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) poll(); });
+if(me){ api({ action:"state", v:-1 }).then(d => { S = d.state; show(); }).catch(() => { me = null; }); }
+</script>
+</body>
+</html>
