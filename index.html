@@ -1290,7 +1290,7 @@ VIEWS["5-1"] = () => {
       ${pf("s5qs", "", { dis:D, rows:7, max:2000 })}</div>`;
 };
 const myQs = () => pv("s5qs").split(/\n+/).map(x => x.trim()).filter(Boolean);
-const PL = [["s5start","출발 · 고른 질문",""],["s5c1","① 개념 연결하기","일상 표현을 공간 불평등, 필수 서비스 접근 기회, 지역의 구조적 조건 같은 개념과 연결하기"],
+const PL = [["s5start","출발 · 고른 질문",""],["s5c1","① 개념 연결하기","일상 표현을 공간 불평등, 필수 서비스 접근 기회, 지역의 구조적 조건 같은 개념과 연결하기. <b>내 진로·관심 교과의 개념을 연결해도 좋아요.</b> 단, ‘사는 곳에 따라 누릴 기회가 달라지는가’라는 물음은 그대로 두고, 다른 교과 개념은 그 차이를 설명하거나 재는 데 쓰기"],
   ["s5c2","② 범위와 대상 구체화하기","막연한 말을 조사할 수 있는 대상으로 좁히기"],["s5c3","③ 탐구형으로 넓히기","사실 확인을 원인·영향·관계를 묻는 질문(왜? 어떻게?)으로"],["s5myq","도착 · 나의 탐구 질문","고친 요소를 모두 모아 하나의 질문으로"]];
 VIEWS["5-2"] = () => {
   if(me.teacher) return teacherNote;
@@ -1300,7 +1300,9 @@ VIEWS["5-2"] = () => {
     <div class="ladder"><div class="lhead"><b>나의 질문 사다리</b></div>
       ${PL.map(([f, t, h], i) => `<div class="rung${i === 0 || i === 4 ? " ends" : ""}"><label for="pf-${f}">${t}</label>${h ? `<p class="hint">${h}</p>` : ""}
         <textarea id="pf-${f}" data-k="pf-${f}" data-pf="${f}" data-qc="${f === "s5myq" ? "open" : ""}" maxlength="300" ${D ? "disabled" : ""}>${esc(pv(f))}</textarea>${qc("pf-" + f, pv(f), f === "s5myq" ? "open" : "")}
-        ${D || i === 0 ? "" : `<div class="tools"><button class="chip" data-act="pcopyUp" data-g="${f}">위 칸 질문 가져와 고치기</button>${f === "s5c1" ? ["공간 불평등","필수 서비스","이용 기회","지역의 구조적 조건","인구 감소와 고령화","수익성 중심 운영"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("") : ""}</div>`}</div>`).join("")}</div>
+        ${D || i === 0 ? "" : `<div class="tools"><button class="chip" data-act="pcopyUp" data-g="${f}">위 칸 질문 가져와 고치기</button>${f === "s5c1" ? ["공간 불평등","필수 서비스","이용 기회","지역의 구조적 조건","인구 감소와 고령화","수익성 중심 운영"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("")
+          + `<span class="hint" style="flex:1 1 100%;margin:6px 0 0">다른 교과 개념 예시 — 내 분야의 개념을 직접 써도 돼요</span>`
+          + ["접근성","인구 밀도","교통망","디지털 격차","시장 실패","규모의 경제","열섬 현상","골든타임"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("") : ""}</div>`}</div>`).join("")}</div>
     <div class="box"><span class="tag">탐구 질문 체크리스트</span>${CHK2.map((c, i) => pchk(`s5k${i+1}`, c, D)).join("")}</div>
     <div class="panel">${pf("s5reason", "이 사례가 단순한 지역 차이를 넘어 공간 불평등에 해당하는 이유 (구조적 원인 포함)", { dis:D })}</div>`;
 };
