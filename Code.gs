@@ -1,8 +1,8 @@
 /**
- * Q-메이커스 서버 (Google Apps Script)
- * - 1차시 질문 생성하기 + 2차시 질문 정교화하기 + 선생님 화면 연동
+ * Q-메이커스 서버 (Google Apps Script) — 1~6차시 통합 워크북
+ * - 학번·이름으로 들어가면 모둠 활동과 개인 활동이 계속 이어짐
+ * - 선생님 화면 연동, 집중 모드(전체 화면)와 화면 이탈 기록
  * - 이 파일 전체를 Apps Script의 Code.gs에 붙여 넣고, [배포 관리]에서 새 버전으로 배포하기
- *   (자세한 방법은 저장소의 「서버_업데이트_방법.md」)
  */
 
 /* ===== 선생님이 바꾸는 곳 ===== */
@@ -13,8 +13,12 @@ const MOUMS = 8;                              // 모둠 수 (index.html의 MOUMS
 const SHEET_ID = "";                          // 스프레드시트에 붙은 스크립트면 비워 둠
 /* ============================ */
 
-const STEP_IDS = ["1-1", "1-2", "1-3", "2-1", "2-2", "2-3"];
+const STEP_IDS = ["1-1", "1-2", "1-3", "2-1", "2-2", "2-3", "3-1", "3-2", "3-3", "4-1", "4-2", "4-3", "5-1", "5-2", "5-3", "6-1"];
+const STEP_NAME = { "1-1":"질문 쏟아내기", "1-2":"비슷한 것끼리 묶기", "1-3":"후보 탐구 질문 추리기", "2-1":"후보 질문 정교화하기", "2-2":"최종 탐구 질문 정하기",
+  "2-3":"하위 질문·조사 계획", "3-1":"하위 질문 자료 조사", "3-2":"조사 내용 공유·보완", "3-3":"답변 작성", "4-1":"발표 준비", "4-2":"발표와 댓글",
+  "4-3":"배움 정리", "5-1":"채점 기준·자료 (3) 확인", "5-2":"진로 분야 새 사례 찾기", "5-3":"평가 준비지 작성·제출", "6-1":"제안서 작성(수행평가)" };
 const CACHE_SEC = 21600; // 6시간
+const OWNED = ["addCard", "delCard", "addLad", "editLad", "delLad", "addFb", "delFb"];
 
 function doGet(){
   return ContentService.createTextOutput("Q-메이커스 서버가 작동 중입니다.");
@@ -31,30 +35,104 @@ function handle_(p){
   const code = String(p.classCode || "").trim();
   const cls = findClass_(code);
   if(!cls) throw new Error("수업 코드를 다시 확인해 주세요.");
-  const moum = String(p.moum || "");
-  if(!/^\d+$/.test(moum) || +moum < 1 || +moum > MOUMS) throw new Error("모둠을 다시 골라 주세요.");
+  const teacher = String(p.name || "") === "선생님" && !String(p.sid || "").trim();
+  if(teacher) checkTeacher_(p.key);
+  const sid = String(p.sid || "").trim().slice(0, 10);
   const name = String(p.name || "").trim().slice(0, 10);
-  if(!name) throw new Error("이름을 써 주세요.");
+  if(!teacher){
+    if(!/^\d{3,10}$/.test(sid)) throw new Error("학번을 숫자로 써 주세요.");
+    if(!name) throw new Error("이름을 써 주세요.");
+  }
+  const uid = teacher ? "선생님" : sid + " " + name;
+  const moumOk = m => /^\d+$/.test(String(m)) && +m >= 1 && +m <= MOUMS;
+
+  if(p.action === "login"){
+    let moum = String(p.moum || "");
+    let pp = teacher ? blankP_() : loadP_(code, uid);
+    if(!teacher){
+      if(moumOk(moum) && pp.moum !== moum){ pp.moum = moum; pp.v++; saveP_(code, uid, pp); }
+      moum = pp.moum;
+    }
+    if(!moumOk(moum)) throw new Error(teacher ? "볼 모둠을 골라 주세요." : "처음 들어올 때는 모둠을 골라 주세요.");
+    return { ok:true, uid, moum, state:load_(code, moum), p:pp, cls:getCls_(code) };
+  }
+
+  const moum = String(p.moum || "");
+  if(!moumOk(moum)) throw new Error("모둠을 다시 골라 주세요.");
 
   switch(p.action){
     case "state": {
       const st = load_(code, moum);
-      return { ok:true, state:(p.v === st.v ? null : st), cls:getCls_(code) };
+      const pp = teacher ? null : loadP_(code, uid);
+      return { ok:true, state:(p.v === st.v ? null : st), p:(!pp || p.pv === pp.v ? null : pp), cls:getCls_(code) };
     }
     case "op": {
       const op = p.op || {};
-      if(["addCard", "delCard", "addLad", "editLad", "delLad"].indexOf(op.t) >= 0) op.name = name; // 남의 이름으로 바꾸지 못하게
+      if(OWNED.indexOf(op.t) >= 0) op.name = uid; // 남의 이름으로 바꾸지 못하게
       const lock = LockService.getScriptLock();
       lock.waitLock(20000);
-      let st, before;
+      let st;
       try{
         st = load_(code, moum);
-        before = JSON.stringify(st);
+        const before = JSON.stringify(st);
         applyOp(st, op);
         if(JSON.stringify(st) !== before){ st.v = (st.v || 0) + 1; save_(code, moum, st); }
       } finally { lock.releaseLock(); }
-      try{ log_(cls, moum, name, op, st); }catch(err){ console.error(err); }
+      try{ log_(cls, moum, sid, name, op, st); }catch(err){ console.error(err); }
       return { ok:true, state:st, cls:getCls_(code) };
+    }
+    case "pset": {
+      if(teacher) throw new Error("선생님 화면에서는 쓸 수 없어요.");
+      const f = String(p.f || "");
+      if(!/^s[456][a-z0-9]{1,12}$/.test(f)) throw new Error("저장할 수 없는 칸이에요.");
+      const lock = LockService.getScriptLock();
+      lock.waitLock(20000);
+      let pp, submitted = false;
+      try{
+        pp = loadP_(code, uid);
+        if(f.indexOf("s6") === 0 && pp.f.s6sub) throw new Error("제출한 제안서는 고칠 수 없어요.");
+        if(/sub$/.test(f)){
+          const on = !!p.val;
+          if(f === "s6sub" && !on) throw new Error("제출한 제안서는 고칠 수 없어요.");
+          pp.f[f] = on ? Utilities.formatDate(new Date(), "Asia/Seoul", "M월 d일 HH:mm") : "";
+          submitted = on;
+        } else {
+          if((f.indexOf("s4") === 0 && pp.f.s4sub) || (f.indexOf("s5") === 0 && pp.f.s5sub)) throw new Error("제출한 뒤에는 고칠 수 없어요. 제출을 취소한 뒤 고쳐 주세요.");
+          pp.f[f] = String(p.val == null ? "" : p.val).slice(0, 3000);
+        }
+        pp.v++; saveP_(code, uid, pp);
+      } finally { lock.releaseLock(); }
+      if(submitted){ try{ logSubmit_(cls, moum, sid, name, f, pp); }catch(err){ console.error(err); } }
+      return { ok:true, p:pp };
+    }
+    case "notes": {
+      if(teacher) return { ok:true };
+      const n = p.notes || {};
+      const notes = { marks:(Array.isArray(n.marks) ? n.marks : []).slice(0, 600), memos:(n.memos && typeof n.memos === "object") ? n.memos : {} };
+      if(JSON.stringify(notes).length > 60000) throw new Error("표시와 메모가 너무 많아요.");
+      const lock = LockService.getScriptLock();
+      lock.waitLock(20000);
+      let pp;
+      try{ pp = loadP_(code, uid); pp.notes = notes; pp.v++; saveP_(code, uid, pp); }
+      finally { lock.releaseLock(); }
+      return { ok:true, pv:pp.v };
+    }
+    case "leave": {
+      if(teacher) return { ok:true };
+      const sec = Math.max(0, Math.round(+p.sec || 0));
+      const st = String(p.step || "");
+      sheet_("화면이탈", ["기록 시각", "반 코드", "반", "모둠", "학번", "이름", "차시·활동", "종류", "벗어난 시각", "돌아온 시각", "이탈 시간(초)", "이탈 시간"])
+        .appendRow([new Date(), code, cls.name, moum, sid, name, st + " " + (STEP_NAME[st] || ""), String(p.type || "").slice(0, 40),
+          String(p.start || "").slice(0, 12), String(p.end || "").slice(0, 12), sec, Math.floor(sec / 60) + "분 " + (sec % 60) + "초"]);
+      return { ok:true };
+    }
+    case "leaves": {
+      checkTeacher_(p.key);
+      const sh = book_().getSheetByName("화면이탈");
+      const rows = !sh || sh.getLastRow() < 2 ? [] : sh.getRange(2, 1, sh.getLastRow() - 1, 12).getValues()
+        .filter(r => String(r[1]) === code).slice(-200).reverse()
+        .map(r => [r[3] + "모둠", r[4], r[5], r[6], r[7], r[8], r[9], r[11]].map(String));
+      return { ok:true, rows };
     }
     case "teacher": {
       checkTeacher_(p.key);
@@ -67,6 +145,7 @@ function handle_(p){
       try{
         const c = getCls_(code);
         if(p.live !== undefined) c.live = !!p.live;
+        if(p.lock !== undefined) c.lock = !!p.lock;
         if(p.step !== undefined && STEP_IDS.indexOf(p.step) >= 0) c.step = p.step;
         c.push = !!p.push;
         c.seq = (c.seq || 0) + 1;
@@ -113,39 +192,44 @@ function findClass_(code){
   return old && String(old).trim() === code ? { name:"Q-메이커스", code } : null;
 }
 
-/* ===== 모둠 상태: 캐시에서 빠르게 읽고, ‘앱상태’ 시트에 늘 저장 ===== */
-function stKey_(code, moum){ return "st:" + code + ":" + moum; }
-function blank_(){ return norm({ v:0 }); }
-
-function load_(code, moum){
-  const k = stKey_(code, moum), cache = CacheService.getScriptCache();
+/* ===== 저장: 캐시에서 빠르게 읽고, 시트에 늘 저장 ===== */
+function loadRow_(sheetName, key1, key2, blank){
+  const k = sheetName + ":" + key1 + ":" + key2, cache = CacheService.getScriptCache();
   const hit = cache.get(k);
-  if(hit){ try{ return norm(JSON.parse(hit)); }catch(e){} }
-  const sh = sheet_("앱상태", ["반 코드", "모둠", "상태(JSON)", "저장 시각"]);
-  const row = findRow_(sh, code, moum);
-  let st = blank_();
-  if(row){ try{ st = norm(JSON.parse(sh.getRange(row, 3).getValue() || "{}")); }catch(e){} }
-  cache.put(k, JSON.stringify(st), CACHE_SEC);
-  return st;
+  if(hit){ try{ return JSON.parse(hit); }catch(e){} }
+  const sh = sheet_(sheetName, ["반 코드", "모둠·학생", "상태(JSON)", "저장 시각"]);
+  const row = findRow_(sh, key1, key2);
+  let obj = blank;
+  if(row){ try{ obj = JSON.parse(sh.getRange(row, 3).getValue() || "null") || blank; }catch(e){} }
+  cache.put(k, JSON.stringify(obj), CACHE_SEC);
+  return obj;
 }
-
-function save_(code, moum, st){
-  const json = JSON.stringify(st);
-  CacheService.getScriptCache().put(stKey_(code, moum), json, CACHE_SEC);
-  const sh = sheet_("앱상태", ["반 코드", "모둠", "상태(JSON)", "저장 시각"]);
-  const row = findRow_(sh, code, moum);
+function saveRow_(sheetName, key1, key2, obj){
+  const json = JSON.stringify(obj);
+  CacheService.getScriptCache().put(sheetName + ":" + key1 + ":" + key2, json, CACHE_SEC);
+  const sh = sheet_(sheetName, ["반 코드", "모둠·학생", "상태(JSON)", "저장 시각"]);
+  const row = findRow_(sh, key1, key2);
   if(row) sh.getRange(row, 3, 1, 2).setValues([[json, new Date()]]);
-  else sh.appendRow([code, moum, json, new Date()]);
+  else sh.appendRow([key1, key2, json, new Date()]);
 }
-
-function findRow_(sh, code, moum){
+function findRow_(sh, key1, key2){
   const n = sh.getLastRow(); if(n < 2) return 0;
   const vals = sh.getRange(2, 1, n - 1, 2).getValues();
   for(let i = 0; i < vals.length; i++){
-    if(String(vals[i][0]) === code && String(vals[i][1]) === String(moum)) return i + 2;
+    if(String(vals[i][0]) === String(key1) && String(vals[i][1]) === String(key2)) return i + 2;
   }
   return 0;
 }
+function blank_(){ return norm({ v:0 }); }
+function load_(code, moum){ return norm(loadRow_("앱상태", code, moum, blank_())); }
+function save_(code, moum, st){ saveRow_("앱상태", code, moum, st); }
+function blankP_(){ return { v:0, moum:"", f:{}, notes:{ marks:[], memos:{} } }; }
+function loadP_(code, uid){
+  const pp = loadRow_("개인상태", code, uid, blankP_());
+  pp.v = pp.v || 0; pp.f = pp.f || {}; pp.notes = pp.notes || { marks:[], memos:{} }; pp.moum = pp.moum || "";
+  return pp;
+}
+function saveP_(code, uid, pp){ saveRow_("개인상태", code, uid, pp); }
 
 /* ===== 선생님 화면 연동 상태 ===== */
 function getCls_(code){
@@ -154,7 +238,7 @@ function getCls_(code){
   if(hit){ try{ return JSON.parse(hit); }catch(e){} }
   let c = null;
   try{ c = JSON.parse(PropertiesService.getScriptProperties().getProperty(k) || "null"); }catch(e){}
-  c = c || { live:false, step:"", seq:0, push:false };
+  c = c || { live:false, lock:false, step:"", seq:0, push:false };
   cache.put(k, JSON.stringify(c), CACHE_SEC);
   return c;
 }
@@ -165,17 +249,18 @@ function putCls_(code, c){
 }
 
 /* ===== 기록 시트 (선생님이 보기 좋게) ===== */
-function log_(cls, moum, name, op, st){
+function log_(cls, moum, sid, name, op, st){
   const now = new Date();
+  const who = sid ? name : "선생님";
   if(op.t === "addCard"){
     const c = st.cards.find(x => x.id === op.id); if(!c) return;
     sheet_("질문카드", ["시각", "반", "모둠", "학번", "이름", "질문", "자료", "자료에서 고른 부분"])
-      .appendRow([now, cls.name, moum, "", name, c.text, c.src || "", c.q || ""]);
+      .appendRow([now, cls.name, moum, sid, who, c.text, c.src || "", c.q || ""]);
   }
   if(op.t === "done" && op.done){
     const textOf = id => (st.cards.find(c => c.id === id) || {}).text || "";
     const sh = sheet_("후보탐구질문", ["시각", "반", "모둠", "번호", "후보 탐구 질문", "고른 이유", "바탕이 된 질문", "마지막 AI 판단", "확정한 학생"]);
-    st.cands.forEach((k, i) => sh.appendRow([now, cls.name, moum, i + 1, k.text, k.reason, k.from.map(textOf).filter(String).join(" / "), "", name]));
+    st.cands.forEach((k, i) => sh.appendRow([now, cls.name, moum, i + 1, k.text, k.reason, k.from.map(textOf).filter(String).join(" / "), "", who]));
   }
   if(op.t === "done2" && op.done){
     const lsh = sheet_("정교화사다리", ["시각", "반", "모둠", "이름", "출발", "① 개념 연결", "② 범위·대상", "③ 탐구형", "도착(종합)"]);
@@ -183,24 +268,66 @@ function log_(cls, moum, name, op, st){
     const ladText = id => { const l = st.lads.find(x => x.id === id); return l ? (l.end || l.c3 || l.c2 || l.c1 || l.start) : ""; };
     const row = [now, cls.name, moum, st.fin.text, st.fin.reason, st.fin.from.map(ladText).filter(String).join(" / ")];
     ["a", "b", "c"].forEach(k => { const s = st.subs[k]; row.push(s.q, s.check, s.src, s.who); });
-    row.push(name);
+    row.push(who);
     sheet_("2차시탐구계획", ["시각", "반", "모둠", "최종 탐구 질문", "고른 이유", "바탕이 된 질문",
       "하위①실태 질문", "하위① 확인할 것", "하위① 자료·출처", "하위① 담당",
       "하위②원인 질문", "하위② 확인할 것", "하위② 자료·출처", "하위② 담당",
       "하위③영향 질문", "하위③ 확인할 것", "하위③ 자료·출처", "하위③ 담당", "확정한 학생"]).appendRow(row);
   }
+  if(op.t === "done3" && op.done){
+    const row = [now, cls.name, moum, st.fin.text];
+    ["a", "b", "c"].forEach(k => { const s = st.subs[k], r = st.res[k];
+      row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text).join(" / "), r.fix); });
+    row.push(st.concl.answer, st.concl.evidence, st.concl.more, who);
+    const h = ["시각", "반", "모둠", "탐구 질문"];
+    ["①", "②", "③"].forEach(n => h.push("하위" + n + " 질문", "하위" + n + " 담당", "하위" + n + " 조사 내용", "하위" + n + " 출처", "하위" + n + " 해석", "하위" + n + " 보완 의견", "하위" + n + " 수정"));
+    h.push("답변", "핵심 근거", "더 확인하고 싶은 점", "확정한 학생");
+    sheet_("3차시탐구문서", h).appendRow(row);
+  }
+}
+function logSubmit_(cls, moum, sid, name, f, pp){
+  const v = k => pp.f[k] || "";
+  const base = [new Date(), cls.name, moum, sid, name];
+  if(f === "s4sub"){
+    const memo = [1, 2, 3, 4, 5].map(i => v("s4c" + i + "t") ? "(" + v("s4c" + i + "m") + "모둠) " + v("s4c" + i + "t") : "").filter(String).join(" / ");
+    sheet_("4차시배움정리", ["시각", "반", "모둠", "학번", "이름", "처음 떠올렸던 질문", "깊어진 생각", "새롭게 떠오른 질문", "종합 질문 답변", "댓글 메모"])
+      .appendRow(base.concat([v("s4first"), v("s4deep"), v("s4new"), v("s4synth"), memo]));
+  }
+  if(f === "s5sub"){
+    sheet_("5차시평가준비지", ["시각", "반", "모둠", "학번", "이름", "진로 분야", "사례를 고른 이유", "사례 제목", "출처", "핵심 사실", "공간 불평등인 이유",
+      "해결 질문(제도)", "제도적 방안", "제도 필요 이유", "해결 질문(시민)", "시민 실천 방안", "시민 실천 필요 이유", "스스로 점검(체크 수)"])
+      .appendRow(base.concat([v("s5career"), v("s5why"), v("s5title"), v("s5source"), v("s5facts"), v("s5reason"), v("s5q2"), v("s5inst"), v("s5instwhy"),
+        v("s5q3"), v("s5civic"), v("s5civicwhy"), [1, 2, 3, 4].filter(i => v("s5k" + i)).length + "/4"]));
+  }
+  if(f === "s6sub"){
+    sheet_("6차시제안서", ["제출 시각", "반", "모둠", "학번", "이름", "제안서 제목", "1 현상 및 문제 진단", "2 제도적 방안", "3 시민 실천 방안", "글자 수"])
+      .appendRow(base.concat([v("s6title"), v("s6a1"), v("s6a2"), v("s6a3"), (v("s6a1") + v("s6a2") + v("s6a3")).length]));
+  }
 }
 
 /* ===== 선생님이 편집기에서 직접 실행하는 함수 ===== */
-/** 연습용 수업 코드(PRACTICE_CODE)의 모든 모둠 기록과 화면 연동을 비움 */
+/** 연습용 수업 코드(PRACTICE_CODE)의 모둠 기록·개인 기록과 화면 연동을 비움 */
 function resetPractice(){
   const code = PRACTICE_CODE;
   for(let m = 1; m <= MOUMS; m++) save_(code, String(m), blank_());
-  putCls_(code, { live:false, step:"", seq:0, push:false });
+  const sh = book_().getSheetByName("개인상태");
+  if(sh && sh.getLastRow() >= 2){
+    const vals = sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues();
+    for(let i = vals.length - 1; i >= 0; i--){
+      if(String(vals[i][0]) === code){ CacheService.getScriptCache().remove("개인상태:" + code + ":" + vals[i][1]); sh.deleteRow(i + 2); }
+    }
+  }
+  putCls_(code, { live:false, lock:false, step:"", seq:0, push:false });
   CacheService.getScriptCache().remove("classes");
 }
 /** 반목록 시트를 고친 뒤 바로 반영하고 싶을 때 */
 function refreshClasses(){ CacheService.getScriptCache().remove("classes"); }
+/** 학생 한 명의 6차시 제안서 제출을 풀어 줌 (편집기에서 학번·이름을 넣고 실행) */
+function unlockProposal(code, sid, name){
+  const uid = String(sid) + " " + String(name);
+  const pp = loadP_(code, uid);
+  pp.f.s6sub = ""; pp.v++; saveP_(code, uid, pp);
+}
 
 /* ===== 공통 규칙 시작 — Code.gs와 글자 하나까지 같아야 함 ===== */
 function norm(st){
@@ -214,6 +341,11 @@ function norm(st){
   ["a", "b", "c"].forEach(k => { st.subs[k] = st.subs[k] || {}; ["q", "check", "src", "who"].forEach(f => { st.subs[k][f] = st.subs[k][f] || ""; }); });
   st.subChk = st.subChk || [false, false, false];
   st.done2 = !!st.done2;
+  st.res = st.res || {};
+  ["a", "b", "c"].forEach(k => { const r = st.res[k] = st.res[k] || {}; ["data", "src", "interp", "fix"].forEach(f => { r[f] = r[f] || ""; }); r.fb = r.fb || []; });
+  st.concl = st.concl || {}; ["answer", "evidence", "more"].forEach(f => { st.concl[f] = st.concl[f] || ""; });
+  st.pres = st.pres || {}; ["p1", "p2", "p3"].forEach(f => { st.pres[f] = st.pres[f] || ""; });
+  st.done3 = !!st.done3;
   return st;
 }
 function applyOp(st, op){
@@ -222,11 +354,16 @@ function applyOp(st, op){
   const card = id => st.cards.find(x => x.id === id);
   const cand = id => st.cands.find(k => k.id === id);
   const lad = id => st.lads.find(l => l.id === id);
+  const prune = () => { st.groups = st.groups.filter(g => st.cards.some(c => c.g === g.id)); };
+  const K3 = ["a", "b", "c"];
   switch(op.t){
-    case "addCard": if(!card(op.id) && st.cards.length < 400) st.cards.push({ id:op.id, name:op.name, text:cut(op.text, 200), g:"", src:cut(op.src, 8), q:cut(op.q, 80) }); break;
+    case "addCard": if(!card(op.id) && st.cards.length < 400) st.cards.push({ id:op.id, name:op.name, text:cut(op.text, 200), g:"", src:cut(op.src, 20), q:cut(op.q, 80) }); break;
     case "delCard": { const n = st.cards.length; st.cards = st.cards.filter(x => !(x.id === op.id && x.name === op.name));
-      if(st.cards.length !== n) st.cands.forEach(k => { k.from = k.from.filter(f => f !== op.id); }); break; }
-    case "move": { const x = card(op.id); if(x) x.g = cut(op.g, 40); break; }
+      if(st.cards.length !== n){ st.cands.forEach(k => { k.from = k.from.filter(f => f !== op.id); }); prune(); } break; }
+    case "move": { const x = card(op.id); if(x) x.g = cut(op.g, 40); prune(); break; }
+    case "moveMany": (op.ids || []).slice(0, 100).forEach(i => { const x = card(i); if(x) x.g = cut(op.g, 40); }); prune(); break;
+    case "group": if(!st.groups.find(g => g.id === op.id) && st.groups.length < 30){
+      st.groups.push({ id:op.id, name:"" }); (op.ids || []).slice(0, 100).forEach(i => { const x = card(i); if(x) x.g = op.id; }); prune(); } break;
     case "addGroup": if(!st.groups.find(g => g.id === op.id) && st.groups.length < 30) st.groups.push({ id:op.id, name:cut(op.name, 30) }); break;
     case "renameGroup": { const g = st.groups.find(g => g.id === op.id); if(g) g.name = cut(op.name, 30); break; }
     case "delGroup": st.groups = st.groups.filter(g => g.id !== op.id);
@@ -246,9 +383,16 @@ function applyOp(st, op){
       if(Array.isArray(op.from)) st.fin.from = op.from.filter(f => lad(f)).slice(0, 5); break;
     case "finFrom": if(lad(op.lad) && !st.fin.from.includes(op.lad) && st.fin.from.length < 5) st.fin.from.push(op.lad); break;
     case "finChk": if(op.i >= 0 && op.i < 4) st.fin.chk[op.i] = !!op.val; break;
-    case "sub": if(["a", "b", "c"].includes(op.k) && ["q", "check", "src", "who"].includes(op.f)) st.subs[op.k][op.f] = cut(op.val, 200); break;
+    case "sub": if(K3.includes(op.k) && ["q", "check", "src", "who"].includes(op.f)) st.subs[op.k][op.f] = cut(op.val, 200); break;
     case "subChk": if(op.i >= 0 && op.i < 3) st.subChk[op.i] = !!op.val; break;
     case "done2": st.done2 = !!op.done; break;
+    case "res": if(K3.includes(op.k) && ["data", "src", "interp", "fix"].includes(op.f)) st.res[op.k][op.f] = cut(op.val, 1000); break;
+    case "addFb": if(K3.includes(op.k) && st.res[op.k].fb.length < 40 && !st.res[op.k].fb.find(x => x.id === op.id))
+      st.res[op.k].fb.push({ id:op.id, name:op.name, tag:cut(op.tag, 20), text:cut(op.text, 300) }); break;
+    case "delFb": if(K3.includes(op.k)) st.res[op.k].fb = st.res[op.k].fb.filter(x => !(x.id === op.id && x.name === op.name)); break;
+    case "concl": if(["answer", "evidence", "more"].includes(op.f)) st.concl[op.f] = cut(op.val, 1000); break;
+    case "pres": if(["p1", "p2", "p3"].includes(op.f)) st.pres[op.f] = cut(op.val, 300); break;
+    case "done3": st.done3 = !!op.done; break;
   }
   return st;
 }
