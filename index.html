@@ -516,6 +516,28 @@ details.box summary{cursor:pointer;font-weight:700}
             </section>
           </div>
 
+          <div class="doc" data-doc="d9">
+            <p class="doc-title">진로 계열별 개념 가이드</p>
+            <section class="src"><h4><span class="lbl">!</span>탐구 질문과 하위 질문은 이렇게 나눠요</h4>
+              <p>· <b>나의 탐구 질문</b>은 공간 불평등이 중심 — ‘사는 곳에 따라 누릴 기회가 왜, 어떻게 달라지는가?’<br>· <b>하위 질문</b>에는 내 진로 분야의 <b>원리·이론</b>을 탐구하는 질문을 넣어도 좋아요. 과학 원리로 원인을 밝히거나, 내 분야의 방법으로 차이를 재 보기</p>
+              <div class="where"><b>예) 환경·과학 관심 학생</b><br>탐구 질문: 폭염 쉼터를 이용할 기회는 왜 동네마다 다를까?<br>· 하위 질문 ① 동네마다 폭염 쉼터는 몇 곳이고 걸어서 얼마나 걸릴까? (실태)<br>· 하위 질문 ② <b>열섬 현상은 어떤 원리로 특정 동네를 더 덥게 만들까?</b> (과학 원리)<br>· 하위 질문 ③ 쉼터가 먼 동네의 노인과 야외 노동자는 어떤 위험을 겪을까? (영향)</div></section>
+            <section class="src"><h4><span class="lbl">개념</span>내 진로 분야의 개념으로 질문 다듬기</h4>
+              <table class="wtable">
+                <tr><th>진로 계열</th><th>연결해 볼 개념</th></tr>
+                <tr><td>미디어·방송·문화·예술</td><td>문화 접근성, 문화 향유 기회, 문화 자본, 공공 문화 시설, 정보 격차, 미디어 리터러시</td></tr>
+                <tr><td>경영·경제·홍보·마케팅</td><td>시장 실패, 공공재, 규모의 경제, 수익성, 수요와 공급, 외부 효과, 비용-편익 분석, 금융 소외</td></tr>
+                <tr><td>공학·도시·교통</td><td>접근성, 이동 시간, 교통망·배차 간격, 수요 응답형 교통, 기반 시설(인프라), 도시 계획, 입지 선정</td></tr>
+                <tr><td>정보·컴퓨터</td><td>디지털 격차, 통신망 보급률, 지리 정보 시스템(GIS), 데이터 시각화, 최적 배치 알고리즘</td></tr>
+                <tr><td>의약·보건·의공학·생명</td><td>의료 접근성, 골든타임, 치료 가능 사망률, 건강 형평성, 1차 의료, 원격 의료, 감염병 확산</td></tr>
+                <tr><td>자연과학 (물리·화학·생명·지구과학)</td><td>열섬 현상(복사·열 저장), 대류와 확산, 미세먼지 입자 크기와 이동, 수질 오염과 정화, 지형과 기후, 생태계 교란</td></tr>
+                <tr><td>환경·에너지</td><td>환경 정의, 님비(NIMBY) 현상, 에너지 빈곤, 에너지 전환, 기후 위기 취약 계층, 폐기물 처리 시설 입지</td></tr>
+                <tr><td>교육·사범</td><td>교육 기회의 평등, 학습 격차, 통학 거리, 학교 통폐합, 교육 복지, 돌봄 공백</td></tr>
+                <tr><td>행정·법·사회</td><td>기본권(생명권·건강권), 형평성, 보편적 서비스, 지방 재정, 균형 발전, 사회 안전망</td></tr>
+                <tr><td>외교·통상·국제</td><td>다문화 사회, 언어 장벽, 통번역 서비스, 이주민 정착 지원, 국제 협력</td></tr>
+              </table>
+              <p class="hint" style="margin:6px 0 0">표에 없는 분야는 내 교과서·진로 분야에서 자주 쓰는 개념을 찾아 연결해 보기</p></section>
+          </div>
+
           <div class="doc" data-doc="d7">
             <p class="doc-title">내 탐구 계획서 (5차시)</p>
             <div id="prepDoc" class="doc"></div>
@@ -618,6 +640,7 @@ function applyOp(st, op){
     case "addFb": if(K3.includes(op.k) && st.res[op.k].fb.length < 40 && !st.res[op.k].fb.find(x => x.id === op.id))
       st.res[op.k].fb.push({ id:op.id, name:op.name, tag:cut(op.tag, 20), text:cut(op.text, 300) }); break;
     case "delFb": if(K3.includes(op.k)) st.res[op.k].fb = st.res[op.k].fb.filter(x => !(x.id === op.id && x.name === op.name)); break;
+    case "fbDone": if(K3.includes(op.k)){ const x = st.res[op.k].fb.find(f => f.id === op.id); if(x) x.done = !!op.val; } break;
     case "concl": if(["answer", "evidence", "more"].includes(op.f)) st.concl[op.f] = cut(op.val, 1000); break;
     case "pres": if(["p1", "p2", "p3"].includes(op.f)) st.pres[op.f] = cut(op.val, 300); break;
     case "done3": st.done3 = !!op.done; break;
@@ -636,10 +659,10 @@ const LESSON = {
   2:{ stage:"질문으로 학습 설계하기", title:"공간 불평등 개념으로 질문 다듬고 탐구 설계하기", docs:["d2","d1"] },
   3:{ stage:"질문에 답 찾기", title:"자료 조사로 탐구 질문에 답하기", docs:["d8","d3","d2","d1"] },
   4:{ stage:"내 말로 학습 종합하기", title:"탐구 결과 발표하고 내 말로 종합하기", docs:["d4","d2"] },
-  5:{ stage:"자기주도 탐구 · 질문 생성하기 · 학습 설계하기", title:"내 진로 분야에서 탐구 계획 세우기", docs:["d6","d2","d5"] },
-  6:{ stage:"자기주도 탐구 · 질문에 답 찾기 · 내 말로 종합하기", title:"조사하고 공간 불평등 완화 정책 제안서 쓰기", docs:["d7","d5","d6"] },
+  5:{ stage:"자기주도 탐구 · 질문 생성하기 · 학습 설계하기", title:"내 진로 분야에서 탐구 계획 세우기", docs:["d6","d9"] },
+  6:{ stage:"자기주도 탐구 · 질문에 답 찾기 · 내 말로 종합하기", title:"조사하고 공간 불평등 완화 정책 제안서 쓰기", docs:["d7","d9","d5","d6"] },
 };
-const DOCNAME = { d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁" };
+const DOCNAME = { d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드" };
 const STEPS = {
   "1-1":{ label:"질문 쏟아내기", who:"개인", q:"자료 (1)을 읽으며 떠오른 질문을 자유롭게 적어 보자." },
   "1-2":{ label:"비슷한 것끼리 묶기", who:"모둠", q:"모둠원의 질문을 모두 펼쳐 놓고, 비슷한 질문끼리 묶어 보자." },
@@ -825,8 +848,8 @@ function drawReport(){
       ${sec("5", "2차시 · 하위 질문과 조사 계획", keys.map(([k, n]) => { const v = st.subs[k]; return `<div class="rgroup"><b>${n} ${esc(v.q) || "-"}</b><p class="ro"><b>확인할 것</b> ${esc(v.check) || "-"} · <b style="min-width:0">자료</b> ${esc(v.src) || "-"} · <b style="min-width:0">담당</b> ${esc(who(v.who))}</p></div>`; }).join(""))}
       ${sec("6", "3차시 · 조사, 보완 의견, 수정", keys.map(([k, n]) => { const v = st.subs[k], r = st.res[k]; return `<div class="rgroup"><b>${n} ${esc(v.q) || "-"}</b> <small>${esc(who(v.who))}</small>
         <p class="ro"><b>조사 내용</b> ${esc(r.data) || "-"}</p><p class="ro"><b>출처</b> ${esc(r.src) || "-"}</p><p class="ro"><b>해석</b> ${esc(r.interp) || "-"}</p>${r.ai ? `<p class="ro"><b>AI 활용</b> ${esc(r.ai)}</p>` : ""}
-        ${r.fb.length ? `<div class="rfb">${r.fb.map(x => `<div>💬 ${x.tag ? `[${esc(x.tag)}] ` : ""}${esc(x.text)} <small>${esc(al(x.name))}</small></div>`).join("")}</div>` : ""}
-        ${r.fix ? `<p class="ro"><b>수정</b> ${esc(r.fix)}</p>` : ""}</div>`; }).join(""))}
+        ${r.fb.length ? `<div class="rfb">${r.fb.map(x => `<div>💬 ${x.tag ? `[${esc(x.tag)}] ` : ""}${esc(x.text)} <small>${esc(al(x.name))}</small>${x.done ? " <b>✓ 반영</b>" : ""}</div>`).join("")}</div>` : ""}
+        ${r.fix ? `<p class="ro"><b>수정한 점</b> ${esc(r.fix)}</p>` : ""}</div>`; }).join(""))}
       ${sec("7", "3차시 · 탐구 질문에 대한 결론", `<p class="ro"><b>답변</b> ${esc(st.concl.answer) || "-"}</p><p class="ro"><b>핵심 근거</b> ${esc(st.concl.evidence) || "-"}</p><p class="ro"><b>더 알고 싶은 점</b> ${esc(st.concl.more) || "-"}</p>`)}
       ${sec("8", "4차시 · 다른 모둠에게 받은 댓글", st.cmts.length ? KINDS.map(([k, n]) => { const l = st.cmts.filter(x => x.kind === k); return l.length ? `<div class="rgroup"><b>${n} (${l.length})</b>${l.map(x => `<p class="ro">${esc(x.text) || "👍"} <small>— ${esc(cmtWho(x))}</small></p>`).join("")}</div>` : ""; }).join("") : '<p class="empty">-</p>')}
     </div>`;
@@ -1185,7 +1208,7 @@ VIEWS["3-1"] = () => {
     <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로 풀어 설명<br><small>왼쪽 ‘보조 자료’와 공공 데이터 사이트를 활용하기</small></div>
     ${!me.teacher && !S.done2 ? '<p class="locked">2차시 활동 3에서 탐구 계획을 확정하면 내가 맡은 하위 질문이 여기에 나타나요.</p>'
       : `${!me.teacher && !mine.length ? '<p class="locked">2차시 조사 계획에 내 이름이 담당자로 적혀 있지 않아요. 2차시 활동 3에서 담당자를 정해 주세요.</p>' : ""}
-    ${showK.map(k => resPanel(k, D)).join("")}`}`;
+    ${showK.map(k => resPanel(k, D) + "</div>").join("")}`}`;
 };
 function resPanel(k, D, ro){
   const v = S.subs[k], r = S.res[k], t = KS().find(x => x[0] === k)[1], id = f => `res-${k}-${f}`;
@@ -1195,19 +1218,29 @@ function resPanel(k, D, ro){
     <p class="ro"><b>하위 질문</b> ${esc(v.q) || "-"}</p><p class="ro"><b>확인할 내용</b> ${esc(v.check) || "-"}</p>
     ${fld("data", "조사 내용 (수치·사실)")}${fld("src", "출처", "기관·매체, 연도, 제목")}${fld("interp", "해석 (하위 질문에 대한 답)")}
     ${ro ? (r.ai ? `<p class="ro"><b>AI 활용 표시</b> ${esc(r.ai)}</p>` : "") : `<label for="${id("ai")}">AI 활용 표시 (쓴 경우만)</label><input type="text" id="${id("ai")}" maxlength="200" data-k="${id("ai")}" data-rk="${k}" data-rf="ai" value="${esc(r.ai)}" placeholder="예) 검색어를 추천받음 / 용어 뜻을 물어봄" ${D ? "disabled" : ""}>`}
-    ${ro ? "" : (r.fb.length ? `<label>모둠원 보완 의견</label><ul class="fbl">${r.fb.map(x => `<li>${x.tag ? `<b>[${esc(x.tag)}]</b> ` : ""}${esc(x.text)} <small>${esc(dn(x.name))}</small></li>`).join("")}</ul>${fld("fix", "보완 의견을 반영한 수정")}` : "")}`;
+    ${ro ? "" : r.fb.length ? `<label>받은 보완 의견 <small class="hint" style="font-weight:400">— 의견을 보고 위 칸을 고친 뒤 ‘반영함’에 체크</small></label>
+      <ul class="fbl">${r.fb.map(x => `<li><label class="chk" style="margin:0"><input type="checkbox" data-fbdone="${x.id}" data-fbk="${k}" ${x.done ? "checked" : ""} ${D ? "disabled" : ""}><span>${x.tag ? `<b>[${esc(x.tag)}]</b> ` : ""}${esc(x.text)} <small>${esc(dn(x.name))}</small> <small><b>반영함</b></small></span></label></li>`).join("")}</ul>
+      ${fld("fix", "수정한 점", "어떤 의견을 보고 무엇을 어떻게 고쳤는지 한두 문장으로")}` : '<p class="hint">아직 받은 보완 의견이 없어요. 모둠원이 의견을 남기면 여기에 나와요.</p>'}`;
 }
 const FBTAG = ["질문과 답의 연결","자료의 적절성","설명의 충분성"];
 VIEWS["3-2"] = () => {
-  const D = S.done3;
-  return `<div class="box"><span class="tag">조사 내용 검토 기준</span>
-      <ul><li><b>질문과 답의 연결</b>: 조사 내용과 해석이 하위 질문에서 물은 것에 정확하게 답하고 있는가?</li><li><b>자료의 적절성</b>: 비교한 지역, 대상, 기준 연도가 적절하며 출처가 믿을 만한가?</li><li><b>설명의 충분성</b>: 개인의 사정이 아니라 ‘지역의 구조적 조건’ 때문임을 드러내는 설명이 충분한가?</li></ul>
-      <small>다른 모둠원의 하위 질문 칸을 모두 읽고, 칸마다 보완 의견을 한 가지 이상 남기기</small></div>
-    ${KS().map(([k]) => { const r = S.res[k];
+  const D = S.done3, mine = me.teacher ? [] : myK();
+  const fbItem = (x, k) => `<li>${x.tag ? `<b>[${esc(x.tag)}]</b> ` : ""}${esc(x.text)} <small>${esc(dn(x.name))}</small>${x.done ? ' <small><b>✓ 반영함</b></small>' : ""}${x.name === me.uid && !D ? `<button data-act="delFb" data-id="${x.id}" data-g="${k}">지우기</button>` : ""}</li>`;
+  const others = KS().map(([k]) => k).filter(k => !mine.includes(k));
+  return `<div class="box"><span class="tag">이렇게 해요</span>
+      <ol><li><b>모둠원 칸에 보완 의견 남기기</b> — 아래 검토 기준 하나를 고르고, 무엇을 더하면 좋을지 구체적으로 쓰기 (칸마다 한 가지 이상)</li>
+      <li><b>내 칸에 달린 의견 보고 고치기</b> — 조사 내용·출처·해석을 직접 고치기</li>
+      <li><b>반영한 의견에 ✓ ‘반영함’</b> 체크하고, <b>‘수정한 점’</b>에 무엇을 고쳤는지 쓰기</li></ol>
+      <span class="tag" style="margin-top:6px">검토 기준</span>
+      <ul><li><b>질문과 답의 연결</b>: 조사 내용과 해석이 하위 질문에서 물은 것에 정확하게 답하고 있는가?</li><li><b>자료의 적절성</b>: 비교한 지역, 대상, 기준 연도가 적절하며 출처가 믿을 만한가?</li><li><b>설명의 충분성</b>: 개인의 사정이 아니라 ‘지역의 구조적 조건’ 때문임을 드러내는 설명이 충분한가?</li></ul></div>
+    ${mine.length ? `<h2>내 하위 질문 — 받은 의견 보고 고치기</h2>${mine.map(k => `${resPanel(k, D)}</div>`).join("")}` : ""}
+    ${others.length ? `<h2>${mine.length ? "모둠원 하위 질문 — 보완 의견 남기기" : "하위 질문별 조사 내용"}</h2>` : ""}
+    ${others.map(k => { const r = S.res[k];
       return `${resPanel(k, D, true)}
-        <label>보완 의견</label><ul class="fbl">${r.fb.map(x => `<li>${x.tag ? `<b>[${esc(x.tag)}]</b> ` : ""}${esc(x.text)} <small>${esc(dn(x.name))}</small>${x.name === me.uid && !D ? `<button data-act="delFb" data-id="${x.id}" data-g="${k}">지우기</button>` : ""}</li>`).join("") || '<li class="empty" style="border:0;background:none">아직 없음</li>'}</ul>
+        <label>보완 의견</label><ul class="fbl">${r.fb.map(x => fbItem(x, k)).join("") || '<li class="empty" style="border:0;background:none">아직 없음</li>'}</ul>
+        ${r.fix ? `<p class="ro"><b>수정한 점</b> ${esc(r.fix)}</p>` : ""}
         ${D || me.teacher ? "" : `<div class="fbin"><select data-fbtag="${k}" aria-label="검토 기준"><option value="">기준 고르기</option>${FBTAG.map(t => `<option>${t}</option>`).join("")}</select>
-          <input type="text" maxlength="300" data-k="fb-${k}" data-fbtext="${k}" placeholder="보완 의견 쓰기"><button class="ghost" data-act="addFb" data-g="${k}">남기기</button></div>`}
+          <input type="text" maxlength="300" data-k="fb-${k}" data-fbtext="${k}" placeholder="무엇을 더하거나 고치면 좋을지"><button class="ghost" data-act="addFb" data-g="${k}">남기기</button></div>`}
       </div>`; }).join("")}`;
 };
 VIEWS["3-3"] = () => {
@@ -1301,7 +1334,7 @@ VIEWS["5-2"] = () => {
       ${PL.map(([f, t, h], i) => `<div class="rung${i === 0 || i === 4 ? " ends" : ""}"><label for="pf-${f}">${t}</label>${h ? `<p class="hint">${h}</p>` : ""}
         <textarea id="pf-${f}" data-k="pf-${f}" data-pf="${f}" data-qc="${f === "s5myq" ? "open" : ""}" maxlength="300" ${D ? "disabled" : ""}>${esc(pv(f))}</textarea>${qc("pf-" + f, pv(f), f === "s5myq" ? "open" : "")}
         ${D || i === 0 ? "" : `<div class="tools"><button class="chip" data-act="pcopyUp" data-g="${f}">위 칸 질문 가져와 고치기</button>${f === "s5c1" ? ["공간 불평등","필수 서비스","이용 기회","지역의 구조적 조건","인구 감소와 고령화","수익성 중심 운영"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("")
-          + `<span class="hint" style="flex:1 1 100%;margin:6px 0 0">다른 교과 개념 예시 — 내 분야의 개념을 직접 써도 돼요</span>`
+          + `<span class="hint" style="flex:1 1 100%;margin:6px 0 0">다른 교과 개념 예시 — 왼쪽 ‘개념 가이드’에서 내 분야 개념을 더 찾아보기</span>`
           + ["접근성","인구 밀도","교통망","디지털 격차","시장 실패","규모의 경제","열섬 현상","골든타임"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("") : ""}</div>`}</div>`).join("")}</div>
     <div class="box"><span class="tag">탐구 질문 체크리스트</span>${CHK2.map((c, i) => pchk(`s5k${i+1}`, c, D)).join("")}</div>
     <div class="panel">${pf("s5reason", "이 사례가 단순한 지역 차이를 넘어 공간 불평등에 해당하는 이유 (구조적 원인 포함)", { dis:D })}</div>`;
@@ -1311,6 +1344,7 @@ VIEWS["5-3"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56(), sub = pv("s5sub");
   return `${dlNote()}<div class="qbox"><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">활동 2에서 먼저 정하기</span>'}</b></div>
+    <div class="box"><span class="tag">하위 질문 만들기</span> 나의 탐구 질문에 답하려면 무엇을 알아야 할지 질문으로 쓰기. <b>내 진로 분야의 원리·이론을 탐구하는 하위 질문</b>을 넣어도 좋아요. <small>왼쪽 ‘개념 가이드’의 예시 참고</small></div>
     ${H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span>${pf("s5h" + i, "하위 질문", { dis:D })}${pf("s5h" + i + "s", "찾을 자료·출처", { line:true, dis:D })}</div>`).join("")}
     <div class="box"><span class="tag">하위 질문 체크리스트</span>${["모든 하위 질문이 나의 탐구 질문을 해결하는 데 기여하는가?","하위 질문들이 단계적으로 이어지는가?","내가 조사할 수 있는 자료가 있는가?"].map((c, i) => pchk(`s5j${i+1}`, c, D)).join("")}</div>
     <div class="panel"><span class="num">탐구 일정</span> <small class="hint">12. 20.(일)까지</small>
@@ -1486,6 +1520,7 @@ document.addEventListener("change", e => {
   if(d.sk) send({ t:"sub", k:d.sk, f:d.sf, val:v.slice(0,200) });
   if(d.subchk) send({ t:"subChk", i:+d.subchk, val:el.checked });
   if(d.rk) send({ t:"res", k:d.rk, f:d.rf, val:v.slice(0,1000) });
+  if(d.fbdone) send({ t:"fbDone", k:d.fbk, id:d.fbdone, val:el.checked });
   if(d.cf) send({ t:"concl", f:d.cf, val:v.slice(0,1000) });
   if(d.prf) send({ t:"pres", f:d.prf, val:v.slice(0,300) });
   if(d.pf){ clearTimeout(pTimers[d.pf]); delete pTimers[d.pf]; if(el.value !== pv(d.pf)) psend(d.pf, el.value); }
@@ -1528,8 +1563,8 @@ function summary3(){
   KS().forEach(([k, n]) => { const v = S.subs[k], r = S.res[k];
     s += `하위 질문 ${n}: ${v.q} (담당 ${v.who})\n   조사 내용: ${r.data}\n   출처: ${r.src}\n   해석: ${r.interp}\n`;
     if(r.ai) s += `   AI 활용 표시: ${r.ai}\n`;
-    if(r.fb.length) s += `   보완 의견: ${r.fb.map(x => (x.tag ? `[${x.tag}] ` : "") + x.text).join(" / ")}\n`;
-    if(r.fix) s += `   수정: ${r.fix}\n`; });
+    if(r.fb.length) s += `   보완 의견: ${r.fb.map(x => (x.tag ? `[${x.tag}] ` : "") + x.text + (x.done ? " (반영)" : "")).join(" / ")}\n`;
+    if(r.fix) s += `   수정한 점: ${r.fix}\n`; });
   s += `\n답변: ${S.concl.answer}\n핵심 근거: ${S.concl.evidence}\n더 확인하고 싶은 점: ${S.concl.more}`;
   return s.trim();
 }
