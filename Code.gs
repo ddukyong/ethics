@@ -439,6 +439,7 @@ function applyOp(st, op){
       if(op.text !== undefined) k.text = cut(op.text, 200);
       if(op.reason !== undefined) k.reason = cut(op.reason, 300); break; }
     case "addFrom": { const k = cand(op.id); if(k && card(op.card) && !k.from.includes(op.card)) k.from.push(op.card); break; }
+    case "delFrom": { const k = cand(op.id); if(k) k.from = k.from.filter(f => f !== op.card); break; }
     case "delCand": st.cands = st.cands.filter(k => k.id !== op.id); break;
     case "done": st.done = !!op.done; break;
     case "addLad": if(!lad(op.id) && st.lads.length < 30) st.lads.push({ id:op.id, name:op.name, cand:cut(op.cand, 40), start:cut(op.start, 200), c1:"", c2:"", c3:"", end:"" }); break;
