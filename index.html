@@ -144,6 +144,11 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .hbox.ex{border-style:dashed}
 .hbox.rec{border-style:double;border-width:4px}
 .hbox.ref{border-style:dotted}
+.hbox.openq{border-width:2px 2px 2px 8px}
+.hbox.openq summary{cursor:pointer;list-style:none}
+.hbox.openq summary::-webkit-details-marker{display:none}
+.hbox.openq summary::before{content:"▸ ";font-size:13px}
+.hbox.openq[open] summary::before{content:"▾ "}
 .hbox ul{margin:2px 0;padding-left:18px}
 .hbox li{margin:2px 0}
 .follow{margin-top:12px;padding:8px 14px;border-radius:10px;background:var(--soft);font-size:14px}
@@ -152,6 +157,13 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .lessons{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:16px}
 .lessons button{border:1.5px solid var(--hair);background:var(--paper);padding:8px 6px;line-height:1.25;font-size:15px;text-align:center}
 .lessons button small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.slots{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap}
+.slots small{font-size:12px;color:var(--muted);margin-right:2px;white-space:nowrap}
+.slot{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);font-size:16px;padding:0;line-height:1}
+.slot.on{background:var(--ink);color:var(--paper)}
+.slot:disabled{opacity:.3;border-style:dashed}
+.credit{text-align:center;font-size:13px;color:var(--muted);padding:18px 16px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--hair);margin-top:24px}
+.credit a{color:inherit;text-underline-offset:3px}
 .kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .cmt{padding:8px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--hair);margin-top:6px;font-size:14px}
 .cmt b{font-size:13px;margin-right:6px}
@@ -646,6 +658,8 @@ details.box summary{cursor:pointer;font-weight:700}
   </div>
 </section>
 
+<footer class="credit">© 2026 제작: 김수경 · 수도여자고등학교 (<a href="mailto:26su92@gmail.com">26su92@gmail.com</a>)</footer>
+
 <div id="lockOv" hidden><div>
   <span class="t">화면을 벗어났어요</span>
   <p id="lockMsg"></p>
@@ -722,6 +736,7 @@ function applyOp(st, op){
       if(op.text !== undefined) k.text = cut(op.text, 200);
       if(op.reason !== undefined) k.reason = cut(op.reason, 300); break; }
     case "addFrom": { const k = cand(op.id); if(k && card(op.card) && !k.from.includes(op.card)) k.from.push(op.card); break; }
+    case "delFrom": { const k = cand(op.id); if(k) k.from = k.from.filter(f => f !== op.card); break; }
     case "delCand": st.cands = st.cands.filter(k => k.id !== op.id); break;
     case "done": st.done = !!op.done; break;
     case "addLad": if(!lad(op.id) && st.lads.length < 30) st.lads.push({ id:op.id, name:op.name, cand:cut(op.cand, 40), start:cut(op.start, 200), c1:"", c2:"", c3:"", end:"" }); break;
@@ -1186,6 +1201,7 @@ VIEWS["1-2"] = () => {
       <li>이미 있는 묶음에 더 넣으려면, 카드를 고른 뒤 그 묶음의 <b>[고른 질문 여기에 넣기]</b></li></ol>
       <small>잘못 넣은 카드는 다시 골라서 ‘아직 묶지 않은 질문’의 [고른 질문 여기에 넣기]로 되돌리면 돼요.</small></div>
     <div class="bucket pool"><div class="bhead"><span class="title">아직 묶지 않은 질문</span><span class="n">${pool.length}개</span>${moveBtn("")}</div>
+      ${me.teacher ? "" : `<div class="fbin"><input type="text" id="qin2" data-k="qin2" maxlength="200" placeholder="질문이 더 떠오르면 여기에 바로 올리기"><button class="ghost" data-act="addQ2">올리기</button></div>`}
       <div class="cards">${pool.map(cardBtn).join("") || '<p class="empty">모든 질문을 묶었어요. 묶음마다 이름이 있는지 확인하기</p>'}</div></div>
     ${S.groups.map((g, i) => { const cs = inG(g.id);
       return `<div class="bucket"><div class="bhead"><span class="title" style="flex:none">묶음 ${i+1}</span>
@@ -1206,17 +1222,18 @@ VIEWS["1-3"] = () => {
         <div class="ex-pair"><span>의료취약지는 몇 곳일까?</span><i>→</i><span>의료취약지는 <b>왜</b> 비수도권 군 지역에 몰려 있을까?</span></div>
         <div class="ex-pair"><span>지방 병원은 의사 연봉이 높을까?</span><i>→</i><span>높은 연봉에도 의사가 오지 않으면 지역 응급실은 <b>어떻게</b> 운영될까?</span></div>
         <div class="ex-pair"><span>닥터헬기는 밤에 못 뜰까?</span><i>→</i><span>닥터헬기가 밤에 뜨지 못하는 것은 군 지역 주민에게 <b>어떤 영향을 미칠까?</b></span></div></li></ul></div>
-    <h2>① 묶음에서 대표 질문 고르기</h2>
-    <p class="hint">[후보로]를 누르면 아래 후보 칸에 들어가요. 두 질문을 한 문장으로 합치려면 [①에 합치기]처럼 눌러 바탕 질문으로 더한 뒤, 후보 칸에서 고쳐 쓰기</p>
+    <h2>① 묶음에서 대표 질문 골라 후보로 보내기</h2>
+    <p class="hint">질문 옆 <b>①②③</b>을 누르면 그 번호의 후보 칸으로 들어가요. 같은 번호에 두 질문을 보내면 합쳐 쓸 바탕 질문이 되고, 다시 누르면 빠져요.</p>
     ${groupsForPick.map(g => { if(!g.cs.length) return "";
       return `<div class="pickg box"><h3>${esc(g.name)} <span class="hint">(${g.cs.length})</span></h3>${g.cs.map(c => `<div class="pickq"><span>${esc(c.text)} <small class="hint">${esc(dn(c.name))}</small></span>
-        ${S.done ? "" : `<button class="ghost" data-act="toCand" data-id="${c.id}" ${S.cands.length >= 3 ? "disabled" : ""}>후보로</button>`}
-        ${S.done ? "" : S.cands.map((k, i) => k.from.includes(c.id) ? "" : `<button class="ghost" data-act="addFrom" data-id="${c.id}" data-g="${k.id}">${NUM[i]}에 합치기</button>`).join("")}</div>`).join("")}</div>`; }).join("") || '<p class="empty">아직 올라온 질문이 없음</p>'}
+        ${S.done ? "" : `<span class="slots"><small>후보로 보내기</small>${[0,1,2].map(i => { const k = S.cands[i], on = k && k.from.includes(c.id), ok = k || i === S.cands.length;
+          return `<button class="slot${on ? " on" : ""}" data-act="toSlot" data-id="${c.id}" data-g="${i}" aria-pressed="${!!on}" ${ok ? "" : "disabled"} title="${k ? `후보 ${NUM[i]}` : "새 후보"}">${NUM[i]}</button>`; }).join("")}</span>`}</div>`).join("")}</div>`; }).join("") || '<p class="empty">아직 올라온 질문이 없음</p>'}
     <h2>② 우리 모둠 후보 탐구 질문 (${S.cands.length}/3)</h2>
     ${S.cands.map((k, i) => `<div class="cand"><span class="num">후보 ${NUM[i]}</span>
       <label for="ct-${k.id}">후보 탐구 질문</label>
       <textarea id="ct-${k.id}" maxlength="200" data-k="ct-${k.id}" data-ctext="${k.id}" data-qc="open" ${S.done ? "disabled" : ""}>${esc(k.text)}</textarea>${qc("ct-" + k.id, k.text, "open")}
       ${k.from.length ? `<p class="from">바탕이 된 질문: ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}
+      ${k.from.length >= 2 && !S.done ? '<p class="hint warn">바탕 질문이 2개 이상이에요 — 위 칸에서 한 문장으로 합쳐 쓰기</p>' : ""}
       ${S.done ? "" : `<div class="acts"><button class="ghost" data-act="delCand" data-id="${k.id}">후보에서 빼기</button></div>`}</div>`).join("")
       || '<p class="empty">위에서 [후보로]를 누르거나, 아래 단추로 새로 써서 후보를 올리기</p>'}
     ${S.done || S.cands.length >= 3 ? "" : `<button class="ghost" data-act="addCand" style="margin-top:12px">+ 새로 쓰기</button>`}
@@ -1510,7 +1527,12 @@ function zoneHelp(z){
     + hb("tip", "판단 기준", ul(["세 물음에 모두 ‘그렇다’고 답할 수 있으면 탐구 사례로 알맞음"]));
   if(z === 3) return hb("rec", "1회 우리 모둠 기록", moumRec1())
     + hb("ex", "다듬기 예시", ul(["다듬기 전: 시골에는 왜 큰 응급실이 없을까?", "다듬은 뒤: 인구 감소 지역의 구조적 조건(수익성 악화, 전문의 부족)은 응급의료 접근 기회에 어떤 영향을 미칠까?"]))
-    + hb("tip", "이번에는", ul(["같은 세 단계를 내 사례에 혼자 적용해 보기"]));
+    + hb("tip", "이번에는", ul(["같은 세 단계를 내 사례에 혼자 적용해 보기"]))
+    + `<details class="hbox openq"><summary><span class="hl">열린 질문으로 바꾸기</span> <small class="hint">누르면 열려요</small></summary>
+      ${[["판단 → 이유·근거","심각한가?","<b>무엇을</b> 근거로 심각하다고 볼 수 있을까?"],["양자택일 → 관점·대안","A인가, B인가?","A와 B는 각각 <b>무엇을</b> 할 수 있을까?"],
+         ["사실 확인 → 원인·영향","몇 곳인가?","<b>왜</b> 한곳에 몰리며, 주민에게 어떤 영향을 미칠까?"],["가정·다른 입장","효과가 있는가?","○○의 입장에서 가장 큰 공백은 <b>무엇</b>일까?"]]
+        .map(([t, a, b]) => `<p class="hint" style="margin:8px 0 2px">${t}</p><div class="ex-pair"><span>${a}</span><i>→</i><span>${b}</span></div>`).join("")}
+      ${ul(["<b>왜·어떻게·무엇</b>으로 시작하고, 답을 정해 둔 질문은 피하기", "연 뒤에는 구역 4에서 지역·대상·연도로 범위 좁히기"])}</details>`;
   if(z === 4) return hb("ex", "넓은 범위 → 좁은 범위", ul(["시골 사람들 → 강원도 군 지역의 65세 이상 주민", "문화 시설 → 공연장·영화관"]))
     + hb("tip", "기준 연도", ul(["통계는 보통 1~2년 늦게 나오므로, 찾을 통계의 가장 최근 연도를 먼저 확인하기", "지역을 견줄 때는 같은 기준 연도, 같은 단위로"]));
   if(z === 5){ const tips = [...document.querySelectorAll('[data-doc="d8"] .src')].map(x => x.outerHTML).join("");
@@ -1633,6 +1655,17 @@ document.addEventListener("click", async e => {
   if(act === "delMine"){ if(await ask("이 질문을 지울까?")) send({ t:"delCard", id, name:me.uid }); }
   if(act === "sel"){ selected.has(id) ? selected.delete(id) : selected.add(id); render(); }
   if(act === "moveTo"){ if(selected.size){ const ids = [...selected]; selected.clear(); send({ t:"moveMany", ids, g }); } }
+  if(act === "addQ2"){
+    const el = $("qin2"), text = el ? el.value.trim() : ""; if(text.length < 3) return toast("질문을 써 주세요");
+    if(!hasQ(text)) toast("물음표(?)로 끝나는 질문 모양이면 더 좋아요", true);
+    el.value = ""; send({ t:"addCard", id:uid(), name:me.uid, text, src:"", q:"" }); return;
+  }
+  if(act === "toSlot"){
+    const i = +g, k = S.cands[i];
+    if(k){ send(k.from.includes(id) ? { t:"delFrom", id:k.id, card:id } : { t:"addFrom", id:k.id, card:id }); }
+    else if(i === S.cands.length && i < 3){ const c = S.cards.find(x => x.id === id); send({ t:"addCand", id:uid(), text:c ? c.text : "", from:[id] }); }
+    return;
+  }
   if(act === "toCand"){
     if(S.cands.length >= 3) return toast("후보는 3개까지만 올릴 수 있음");
     const c = S.cards.find(x => x.id === id); send({ t:"addCand", id:uid(), text:c.text, from:[id] });
@@ -1747,7 +1780,8 @@ document.addEventListener("input", e => {
     if(!P || me.preview) return; P.f[d.pf] = el.value; qset(d.pf, el.value); }, 1500); }
   if(d.memo){ NOTES.memos[d.memo] = el.value; saveNotes(); }
 });
-document.addEventListener("keydown", e => { if(e.target.id === "qin" && e.key === "Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); addQuestion(); } });
+document.addEventListener("keydown", e => { if(e.target.id === "qin" && e.key === "Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); addQuestion(); }
+  if(e.target.id === "qin2" && e.key === "Enter" && !e.isComposing){ e.preventDefault(); document.querySelector('[data-act="addQ2"]').click(); } });
 
 function summary(){
   const textOf = id => (S.cards.find(c => c.id === id) || {}).text;
