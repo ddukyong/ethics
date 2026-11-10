@@ -327,6 +327,15 @@ details.box summary{cursor:pointer;font-weight:700}
 #modal > div{background:var(--paper);border-radius:14px;padding:22px;max-width:380px;width:100%}
 #modal p{margin:0 0 16px}
 #modal .acts{justify-content:flex-end}
+.map{cursor:zoom-in}
+.maphint{margin:0 0 6px;font-size:13px}
+#zoomOv{position:fixed;inset:0;z-index:70;background:#0A0A08;display:flex;flex-direction:column}
+#zoomOv .zbar{display:flex;align-items:center;gap:10px;padding:10px 14px calc(10px);color:#ddd;font-size:14px}
+#zoomOv .zbar span{flex:1}
+#zoomOv .zbar button{border:0;background:var(--yellow);color:#16150F;padding:6px 14px;font-size:15px}
+#zoomOv .zwrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;display:flex}
+#zoomOv img{margin:auto;max-width:100%;max-height:100%;cursor:zoom-in;background:#fff}
+#zoomOv.big img{max-width:none;max-height:none;width:min(1600px,260vw);cursor:zoom-out;margin:0}
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);max-width:90%;background:var(--warn);color:#fff;padding:9px 16px;border-radius:10px;font-size:14px;z-index:40}
 #toast.info{background:#16150F;color:var(--yellow)}
 
@@ -433,8 +442,9 @@ details.box summary{cursor:pointer;font-weight:700}
             <p class="doc-title">자료 (1) 위급한 순간, 갈 수 있는 병원</p>
             <section class="src" data-sec="1가">
               <h4><span class="lbl">(가)</span>2025년 기준 전국 의료취약지<small>지도</small></h4>
-              <img class="map" src="map.png" alt="2025년 기준 전국 의료취약지 지도" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+              <img class="map" src="map.png" alt="2025년 기준 전국 의료취약지 지도" title="누르면 크게 보기" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
               <p class="mapnote" hidden>지도는 종이 학습지 1-2쪽 (가)에서 함께 보기</p>
+              <p class="hint maphint">🔍 지도를 누르면 크게 볼 수 있어요</p>
               <div class="src-body" data-sec="1가"><p><b>의료취약지 기준</b>: 종합병원까지 60분 안에 갈 수 없는 주민 비율과 60분 안에 종합병원을 이용한 비율을 함께 따져 의료취약도가 50점 이상인 시·군·구 (전국 250개 시·군·구 중 98곳, 비수도권 군 지역에 집중)</p></div>
             </section>
             <section class="src" data-sec="1나">
@@ -652,6 +662,10 @@ details.box summary{cursor:pointer;font-weight:700}
   <button class="off" data-mk="close">닫기</button>
 </div>
 <div id="modal" hidden><div><p id="modalMsg"></p><div class="acts"><button class="ghost" id="modalNo">아니요</button><button class="ghost" id="modalYes" style="background:var(--ink);color:var(--paper);border-color:var(--ink)">네</button></div></div></div>
+<div id="zoomOv" hidden role="dialog" aria-label="지도 크게 보기">
+  <div class="zbar"><span id="zoomTip">누르면 더 크게 · 손가락으로 밀어서 보기</span><button id="zoomClose">닫기 ✕</button></div>
+  <div class="zwrap" id="zoomWrap"><img id="zoomImg" alt=""></div>
+</div>
 <div id="toast" hidden></div>
 
 <script>
@@ -1856,6 +1870,15 @@ $("markBar").querySelectorAll("[data-mk]").forEach(btn => {
   btn.addEventListener("touchstart", fire, { passive:false });
   btn.addEventListener("mousedown", fire);
 });
+
+/* ===== 지도 크게 보기 ===== */
+document.addEventListener("click", e => {
+  const m = e.target.closest("img.map"); if(!m) return;
+  $("zoomImg").src = m.src; $("zoomImg").alt = m.alt; $("zoomOv").classList.remove("big"); $("zoomOv").hidden = false;
+});
+$("zoomImg").onclick = () => { const big = $("zoomOv").classList.toggle("big"); $("zoomTip").textContent = big ? "다시 누르면 화면에 맞추기 · 손가락으로 밀어서 보기" : "누르면 더 크게 · 손가락으로 밀어서 보기"; };
+$("zoomClose").onclick = () => { $("zoomOv").hidden = true; };
+document.addEventListener("keydown", e => { if(e.key === "Escape") $("zoomOv").hidden = true; });
 
 /* ===== 집중 모드: 다른 화면으로 가면 앱을 가리고, 벗어난 시간을 기록 ===== */
 let away = null;
