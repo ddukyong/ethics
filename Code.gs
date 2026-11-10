@@ -336,9 +336,9 @@ function log_(cls, moum, sid, name, op, st){
   if(op.t === "done3" && op.done){
     const row = [now, cls.name, moum, st.fin.text];
     ["a", "b", "c"].forEach(k => { const s = st.subs[k], r = st.res[k];
-      row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text).join(" / "), r.fix); });
+      row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text + (x.done ? " (반영)" : "")).join(" / "), r.fix); });
     row.push(st.concl.answer, st.concl.evidence, st.concl.more, who);
-    if(st.subN === 4){ const s = st.subs.d, r = st.res.d; row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text).join(" / "), r.fix); }
+    if(st.subN === 4){ const s = st.subs.d, r = st.res.d; row.push(s.q, s.who, r.data, r.src, r.interp, r.fb.map(x => (x.tag ? "[" + x.tag + "] " : "") + x.text + (x.done ? " (반영)" : "")).join(" / "), r.fix); }
     else row.push("", "", "", "", "", "", "");
     ["a", "b", "c", "d"].forEach(k => row.push(st.res[k].ai));
     const h = ["시각", "반", "모둠", "탐구 질문"];
@@ -454,6 +454,7 @@ function applyOp(st, op){
     case "addFb": if(K3.includes(op.k) && st.res[op.k].fb.length < 40 && !st.res[op.k].fb.find(x => x.id === op.id))
       st.res[op.k].fb.push({ id:op.id, name:op.name, tag:cut(op.tag, 20), text:cut(op.text, 300) }); break;
     case "delFb": if(K3.includes(op.k)) st.res[op.k].fb = st.res[op.k].fb.filter(x => !(x.id === op.id && x.name === op.name)); break;
+    case "fbDone": if(K3.includes(op.k)){ const x = st.res[op.k].fb.find(f => f.id === op.id); if(x) x.done = !!op.val; } break;
     case "concl": if(["answer", "evidence", "more"].includes(op.f)) st.concl[op.f] = cut(op.val, 1000); break;
     case "pres": if(["p1", "p2", "p3"].includes(op.f)) st.pres[op.f] = cut(op.val, 300); break;
     case "done3": st.done3 = !!op.done; break;
