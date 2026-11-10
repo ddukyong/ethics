@@ -118,6 +118,8 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .pvbar.on{border-style:solid;background:var(--soft)}
 .pvbar button{padding:4px 12px;border:1.5px solid var(--field);background:var(--paper);font-size:14px;border-radius:20px}
 .pvbar button.back{background:var(--ink);color:var(--paper);border-color:var(--ink);margin-left:auto}
+#docSlot{margin-top:14px}
+#docSlot #docPane{border:1.5px solid var(--hair)}
 .zone{margin-top:12px;border:1.5px solid var(--hair);border-radius:12px;background:var(--paper)}
 .zone[open]{border-color:var(--ink)}
 .zone > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 16px;font-weight:700}
@@ -921,7 +923,7 @@ function drawReport(){
       <div class="rephead"><span class="mark" style="width:34px;height:34px;font-size:22px">Q</span><div><b>${repMoum}모둠 탐구 흐름</b><br><small>응급의료 취약지 사례로 살펴보는 공간 불평등 · Q-메이커스</small></div></div>
       ${sec("1", "1차시 · 질문 쏟아내기와 묶기", (st.groups.map(g => `<div class="rgroup"><b>${esc(g.name || "이름 없는 묶음")}</b><ul>${st.cards.filter(c => c.g === g.id).map(qline).join("")}</ul></div>`).join("") +
         (rest.length ? `<div class="rgroup"><b>묶지 않은 질문</b><ul>${rest.map(qline).join("")}</ul></div>` : "")) || '<p class="empty">-</p>')}
-      ${sec("2", "1차시 · 후보 탐구 질문", st.cands.map((k, i) => `<div class="rgroup"><b>${NUM[i]} ${esc(k.text)}</b><p class="ro"><b>고른 이유</b> ${esc(k.reason) || "-"}</p>${k.from.length ? `<p class="ro"><b>바탕 질문</b> ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}</div>`).join("") || '<p class="empty">-</p>')}
+      ${sec("2", "1차시 · 후보 탐구 질문", st.cands.map((k, i) => `<div class="rgroup"><b>${NUM[i]} ${esc(k.text)}</b>${k.from.length ? `<p class="ro"><b>바탕 질문</b> ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}</div>`).join("") || '<p class="empty">-</p>')}
       ${sec("3", "2차시 · 질문 사다리 (정교화)", st.lads.map(l => `<div class="rgroup"><b>${esc(al(l.name))}</b>${[["start","출발"],["c1","① 개념"],["c2","② 범위·대상"],["c3","③ 탐구형"],["end","도착"]].filter(([f]) => l[f]).map(([f, n]) => `<p class="ro"><b>${n}</b> ${esc(l[f])}</p>`).join("")}</div>`).join("") || '<p class="empty">-</p>')}
       ${sec("4", "2차시 · 최종 탐구 질문", `<p class="rq">${esc(st.fin.text) || "-"}</p><p class="ro"><b>고른 이유</b> ${esc(st.fin.reason) || "-"}</p>${st.fin.from.length ? `<p class="ro"><b>바탕 질문</b> ${st.fin.from.map(f => esc(ladOf(f))).filter(Boolean).join(" / ")}</p>` : ""}`)}
       ${sec("5", "2차시 · 하위 질문과 조사 계획", keys.map(([k, n]) => { const v = st.subs[k]; return `<div class="rgroup"><b>${n} ${esc(v.q) || "-"}</b><p class="ro"><b>확인할 것</b> ${esc(v.check) || "-"} · <b style="min-width:0">자료</b> ${esc(v.src) || "-"} · <b style="min-width:0">담당</b> ${esc(who(v.who))}</p></div>`; }).join(""))}
@@ -1012,8 +1014,24 @@ function drawDocTabs(){
   document.querySelectorAll("#docPane .doc[data-doc]").forEach(x => x.hidden = x.dataset.doc !== cur);
 }
 $("docTabs").addEventListener("click", e => { const b = e.target.closest("[data-doc]"); if(!b) return; docSel[STEP_DOCS[step] ? step : lessonOf(step)] = b.dataset.doc; drawDocTabs(); });
-function drawDoc(){ $("split").classList.toggle("nodoc", !docOpen); $("docToggle").textContent = docOpen ? "접기" : "펼치기"; }
-$("docToggle").onclick = () => { docOpen = !docOpen; drawDoc(); };
+/* 좁은 화면에서는 자료를 활동 안내 바로 아래(SLOT)에 넣어 ‘안내 → 자료 → 쓰기’ 순서로 보이게 함 */
+const narrow = () => matchMedia("(max-width:959px)").matches;
+const READ = new Set(["1-1", "2-1", "3-1", "4-1", "5-1"]);
+const docUser = {};
+const docIsOpen = () => step in docUser ? docUser[step] : (narrow() ? READ.has(step) : docOpen);
+function drawDoc(){ const o = docIsOpen(); $("split").classList.toggle("nodoc", !o); $("docToggle").textContent = o ? "접기" : "펼치기"; }
+$("docToggle").onclick = () => { const o = !docIsOpen(); if(narrow()) docUser[step] = o; else { docOpen = o; Object.keys(docUser).forEach(k => delete docUser[k]); } drawDoc(); };
+const SLOT = '<div id="docSlot"></div>';
+function parkDoc(){ const pane = $("docPane"); if(pane.parentElement !== $("split")) $("split").insertBefore(pane, $("work")); }
+function placeDoc(){
+  const pane = $("docPane");
+  if(!narrow() || pane.hidden){ parkDoc(); drawDoc(); return; }
+  if(step === "5-3"){ parkDoc(); pane.hidden = true; return; }
+  let slot = $("docSlot");
+  if(!slot){ const sec = $("work").querySelector("section"); if(!sec) return; slot = document.createElement("div"); slot.id = "docSlot"; sec.appendChild(slot); }
+  slot.appendChild(pane); drawDoc();
+}
+matchMedia("(max-width:959px)").addEventListener("change", () => { if(S && me) render(); });
 drawDoc();
 
 /* ===== 활동 화면 틀 ===== */
@@ -1044,6 +1062,7 @@ function render(){
   const qinVal = $("qin") ? $("qin").value : "";
   const openD = [...document.querySelectorAll("#work details[open] > summary")].map(x => x.textContent);
   const fn = VIEWS[step], shut = closed56(step);
+  parkDoc();
   $("docPane").hidden = shut;
   $("work").innerHTML = `<section>${head(step)}${shut ? '<p class="locked">🔒 자기주도 탐구(5·6차시)는 특강이 끝난 뒤 선생님이 열면 시작할 수 있어요. 오늘 모둠과 함께 익힌 과정을 이제 혼자서 해 보게 돼요.</p>' : fn ? fn() : ""}</section>`;
   if(step === "4-2" && !BOARD && !boardBusy) loadBoard();
@@ -1054,6 +1073,7 @@ function render(){
   renderDocs();
   if(keep){ const el = document.querySelector(`[data-k="${keep.k}"]`); if(el && !el.disabled){ el.value = keep.val; el.focus(); try{ el.setSelectionRange(keep.s, keep.e); }catch(_){} } }
   if(step === "1-1"){ drawPend(); qinHint(); }
+  placeDoc();
   if(me.preview){ document.querySelectorAll("#work input, #work textarea, #work select, #qAdd").forEach(x => x.disabled = true); $("moveBar").hidden = true; }
   drawPv();
 }
@@ -1088,7 +1108,10 @@ const VIEWS = {};
 VIEWS["1-1"] = () => {
   const mine = S.cards.filter(c => c.name === me.uid);
   const tagOf = c => [c.src ? srcName(c.src) : "", c.q ? `“${c.q}”` : ""].filter(Boolean).join(" ");
-  return `<div class="box"><span class="tag">질문 쏟아내기 약속</span>
+  return `<div class="box"><span class="tag">이렇게 해요</span>
+      <ol><li>자료 (1)을 읽으며 눈에 띄거나 의아한 부분에 표시하기 <small>(글자를 길게 누르면 표시 도구가 나와요)</small></li><li>떠오른 질문을 아래 칸에 <b>하나씩</b> 올리기</li></ol></div>
+    ${SLOT}
+    <div class="box"><span class="tag">질문 쏟아내기 약속</span>
       <ul><li>한 번에 질문 하나씩 올리기</li><li>되도록 많이 쓰기 — 좋은 질문인지는 나중에 따지기</li><li>떠오른 그대로 쓰기 — 답을 달거나 고치지 않기</li><li>생각이 문장으로 떠오르면 물음표로 바꾸어 쓰기 <small>예) 군 지역은 응급실이 멀다 → 군 지역은 왜 응급실이 멀까?</small></li></ul></div>
     <div class="box"><span class="tag">더 나아가기</span>
       <ul><li>두 개 이상의 자료를 연결 지어 질문하기</li><li>숫자 뒤에 숨은 ‘왜’를 묻기</li><li>자료 속 사람의 자리에 서서 묻기</li><li>나와 우리 지역으로 가져와 묻기</li></ul></div>
@@ -1154,7 +1177,7 @@ VIEWS["1-2"] = () => {
 VIEWS["1-3"] = () => {
   const textOf = id => (S.cards.find(c => c.id === id) || {}).text;
   const has = inGroup(), inG = g => S.cards.filter(c => c.g === g);
-  const ready = S.cands.length >= 2 && S.cands.every(k => k.text.trim().length >= 5 && k.reason.trim().length >= 5);
+  const ready = S.cands.length >= 2 && S.cands.every(k => k.text.trim().length >= 5);
   const groupsForPick = [...S.groups.map(g => ({ name:g.name || "이름 없는 묶음", cs:inG(g.id) })), { name:"아직 묶지 않은 질문", cs:S.cards.filter(c => !has(c)) }];
   return `<div class="box"><span class="tag">도움말</span>
       <ul><li>묶음마다 대표가 되는 질문을 고르거나, 비슷한 질문을 한 문장으로 합치기</li>
@@ -1173,14 +1196,12 @@ VIEWS["1-3"] = () => {
       <label for="ct-${k.id}">후보 탐구 질문</label>
       <textarea id="ct-${k.id}" maxlength="200" data-k="ct-${k.id}" data-ctext="${k.id}" data-qc="open" ${S.done ? "disabled" : ""}>${esc(k.text)}</textarea>${qc("ct-" + k.id, k.text, "open")}
       ${k.from.length ? `<p class="from">바탕이 된 질문: ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}
-      <label for="cr-${k.id}">이 질문을 고른 이유</label>
-      <textarea id="cr-${k.id}" maxlength="300" data-k="cr-${k.id}" data-creason="${k.id}" ${S.done ? "disabled" : ""}>${esc(k.reason)}</textarea>
       ${S.done ? "" : `<div class="acts"><button class="ghost" data-act="delCand" data-id="${k.id}">후보에서 빼기</button></div>`}</div>`).join("")
       || '<p class="empty">위에서 [후보로]를 누르거나, 아래 단추로 새로 써서 후보를 올리기</p>'}
     ${S.done || S.cands.length >= 3 ? "" : `<button class="ghost" data-act="addCand" style="margin-top:12px">+ 새로 쓰기</button>`}
     ${S.done ? `<div class="done"><b>후보 탐구 질문을 확정함</b><pre>${esc(summary())}</pre>
       <div class="acts"><button class="ghost" data-act="copy" data-g="1">공유문서용으로 복사</button><button class="ghost" data-act="reopen" data-g="done">다시 고치기</button></div></div>`
-      : `<button class="primary" data-act="finalize" data-g="done" ${ready ? "" : "disabled"}>후보 탐구 질문 확정하기</button>${ready ? "" : '<p class="hint">후보 2~3개에 질문과 고른 이유를 모두 써야 확정할 수 있음</p>'}`}`;
+      : `<button class="primary" data-act="finalize" data-g="done" ${ready ? "" : "disabled"}>후보 탐구 질문 확정하기</button>${ready ? "" : '<p class="hint">후보 질문 2~3개를 써야 확정할 수 있음</p>'}`}`;
 };
 
 /* ----- 2차시 ----- */
@@ -1199,12 +1220,18 @@ const takers = id => S.lads.filter(l => l.cand === id).map(l => dn(l.name));
 
 VIEWS["2-1"] = () => {
   const mineL = S.lads.filter(l => l.name === me.uid), others = S.lads.filter(l => l.name !== me.uid), D = S.done2;
-  return `<div class="oldq"><b>우리 모둠 후보 탐구 질문 (1차시)</b>${S.cands.length ? `<ol>${S.cands.map(k => `<li>${esc(k.text) || "(비어 있음)"}${takers(k.id).length ? ` <small>— ${esc(takers(k.id).join(", "))} 맡음</small>` : ""}</li>`).join("")}</ol>` : `<p class="empty">1차시 후보가 아직 없어요. 아래에서 직접 써서 시작하기</p>`}</div>
-    <div class="box"><span class="tag">좋은 탐구 질문으로 다듬는 세 가지 방법</span>
+  const candList = S.cands.length ? S.cands.map((k, i) => `<div class="pickq"><span>${NUM[i]} ${esc(k.text) || "(비어 있음)"} ${takers(k.id).length ? `<small class="hint">${esc(takers(k.id).join(", "))} 맡음</small>` : ""}</span>${me.teacher ? "" : `<button class="ghost" data-act="takeCand" data-id="${k.id}">이 질문 맡기</button>`}</div>`).join("")
+    : '<p class="empty">1차시 후보 질문이 아직 없어요. 직접 써서 시작하기</p>';
+  return `<div class="box"><span class="tag">이렇게 해요</span>
+      <ol><li>자료 (2)를 모둠원과 함께 읽으며 중요한 내용에 표시하기</li><li>1차시 후보 질문을 모둠원끼리 <b>하나씩 나누어 맡기</b></li><li>맡은 질문을 <b>사다리</b>로 다듬기 — 바꿀 수 있는 요소만 고치고 도착 칸에서 종합하기</li></ol></div>
+    ${SLOT}
+    ${!mineL.length ? `<div class="panel"><span class="num">맡을 후보 질문 고르기</span>${candList}${me.teacher ? "" : `<div class="acts"><button class="ghost" data-act="takeOwn">직접 써서 시작하기</button></div>`}</div>
+      ${me.teacher ? "" : '<p class="hint">질문을 맡으면 다듬는 방법과 사다리가 나와요.</p>'}`
+    : `<div class="box"><span class="tag">다듬는 세 가지 방법</span>
       <ol><li><b>개념 연결하기</b>: 일상적인 표현을 자료 (2)의 개념(공간 불평등, 필수 서비스 접근 기회, 지역의 구조적 조건 등)과 연결 지어 질문의 깊이 더하기</li>
       <li><b>범위와 대상 구체화하기</b>: ‘시골’, ‘사람들’, ‘불편하다’처럼 막연한 표현을 ‘비수도권 군 지역의 중증 응급환자’와 같이 조사할 수 있는 대상으로 좁히기</li>
       <li><b>탐구형으로 넓히기</b>: 단답형 사실 확인 질문(몇 곳인가?)을 원인, 영향, 지역 조건의 관계를 묻는 질문(왜? 어떻게?)으로 바꾸기</li></ol>
-      <small>오르는 순서: 출발 칸에 내가 맡은 후보 질문 쓰기 → 바꿀 수 있는 요소만 고치기(순서 자유, 고칠 것이 없으면 비워 두기) → 도착 칸에서 종합하기</small></div>
+      <small>고칠 것이 없는 칸은 비워 두어도 돼요.</small></div>
     <details class="box"><summary>예시로 보는 사다리</summary>
       <p class="ro"><b>출발</b> 시골은 왜 응급실이 멀까?</p>
       <p class="ro"><b>① 개념</b> 시골 주민이 <u>필수 서비스</u>인 응급의료를 <u>이용할 기회</u>는 왜 도시보다 적을까?</p>
@@ -1212,22 +1239,16 @@ VIEWS["2-1"] = () => {
       <p class="ro"><b>③ 탐구형</b> 응급 진료를 받기 어려운 데에는 <u>어떤 지역의 구조적 조건</u>이 영향을 미칠까?</p>
       <p class="ro"><b>도착</b> 비수도권 군 지역의 중증 응급환자가 필수 서비스인 응급의료를 이용할 기회가 적은 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?</p>
       <small>예시는 방법을 보여 줄 뿐 — 그대로 옮기지 말고 우리 모둠의 질문으로 해 보기</small></details>
-    <h2>내 사다리</h2>
-    ${!mineL.length ? (me.teacher ? '<p class="empty">선생님 화면에서는 모둠원 사다리를 볼 수 있어요.</p>' :
-      `<div class="panel"><b>어떤 후보 질문을 맡을까?</b> <small class="hint">모둠원끼리 나누어 맡고, 맡은 질문을 다듬기</small>
-      ${S.cands.map((k, i) => `<div class="pickq"><span>${NUM[i]} ${esc(k.text) || "(비어 있음)"} ${takers(k.id).length ? `<small class="hint">${esc(takers(k.id).join(", "))} 맡음</small>` : ""}</span><button class="ghost" data-act="takeCand" data-id="${k.id}">이 질문 맡기</button></div>`).join("")}
-      <div class="acts"><button class="ghost" data-act="takeOwn">직접 써서 시작하기</button></div></div>`)
-    : mineL.map(l => `<div class="ladder"><div class="lhead"><b>${esc(me.name)}의 사다리</b><span class="hint">${candLabel(l.cand)}</span>${D ? "" : `<button class="ghost" data-act="delLad" data-id="${l.id}">다시 고르기</button>`}</div>
+    ${mineL.map(l => `<div class="ladder"><div class="lhead"><b>${esc(me.name)}의 사다리</b><span class="hint">${candLabel(l.cand)}</span>${D ? "" : `<button class="ghost" data-act="delLad" data-id="${l.id}">다시 고르기</button>`}</div>
       ${LF.map(x => { const fid = `lad-${l.id}-${x.f}`, ends = x.f === "start" || x.f === "end";
         return `<div class="rung${ends ? " ends" : ""}"><label for="${fid}">${x.t}</label><p class="hint">${x.h}</p>
           <textarea id="${fid}" maxlength="200" data-k="${fid}" data-lid="${l.id}" data-lf="${x.f}" data-qc="${x.f === "end" ? "open" : ""}" ${D ? "disabled" : ""}>${esc(l[x.f])}</textarea>${qc(fid, l[x.f], x.f === "end" ? "open" : "")}
           ${D || x.f === "start" ? "" : `<div class="tools"><button class="chip" data-act="copyUp" data-id="${l.id}" data-g="${x.f}">위 칸 질문 가져와 고치기</button>
-            ${x.words ? WORDS.map(w => `<button class="chip" data-act="word" data-w="${esc(w)}">+ ${esc(w)}</button>`).join("") : ""}</div>`}</div>`; }).join("")}</div>`).join("")}
+            ${x.words ? WORDS.map(w => `<button class="chip" data-act="word" data-w="${esc(w)}">+ ${esc(w)}</button>`).join("") : ""}</div>`}</div>`; }).join("")}</div>`).join("")}`}
     <h2>모둠원 사다리</h2>
     ${others.map(l => `<div class="ladder other"><div class="lhead"><b>${esc(dn(l.name))}</b><span class="hint">${candLabel(l.cand)}</span></div>
       ${LF.map(x => l[x.f] ? `<p class="ro"><b>${x.s}</b> ${esc(l[x.f])}</p>` : "").join("") || '<p class="empty">아직 쓰는 중</p>'}</div>`).join("") || '<p class="empty">아직 다른 모둠원의 사다리가 없어요.</p>'}`;
 };
-
 const CHK2 = ["너무 추상적이거나 지엽적이지 않은가?","단순 사실 확인을 넘어 의미나 이유를 탐구하게 하는가?","여러 개의 하위 질문으로 나누어 답해 갈 수 있는가?","중요한 사회적 쟁점이나 가치(생명권·건강권 등)와 연결되는가?"];
 VIEWS["2-2"] = () => {
   const F = S.fin, D = S.done2;
@@ -1284,7 +1305,8 @@ VIEWS["3-1"] = () => {
   const mine = myK(), D = S.done3;
   const showK = me.teacher ? KS().map(([k]) => k) : mine;
   return `<div class="qbox"><small class="hint">우리 모둠 최종 탐구 질문</small><br><b>${esc(S.fin.text) || '<span class="empty">2차시에서 정한 최종 탐구 질문이 여기에 나와요</span>'}</b></div>
-    <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로 풀어 설명<br><small>왼쪽 ‘보조 자료’와 공공 데이터 사이트를 활용하기</small></div>
+    <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로 풀어 설명<br><small>자료 칸 ‘조사 꿀팁’과 ‘보조 자료’를 활용하기</small></div>
+    ${SLOT}
     ${!me.teacher && !S.done2 ? '<p class="locked">2차시 활동 3에서 탐구 계획을 확정하면 내가 맡은 하위 질문이 여기에 나타나요.</p>'
       : `${!me.teacher && !mine.length ? '<p class="locked">2차시 조사 계획에 내 이름이 담당자로 적혀 있지 않아요. 2차시 활동 3에서 담당자를 정해 주세요.</p>' : ""}
     ${showK.map(k => resPanel(k, D) + "</div>").join("")}`}`;
@@ -1340,7 +1362,8 @@ VIEWS["3-3"] = () => {
 /* ----- 4차시 ----- */
 VIEWS["4-1"] = () => {
   const p = S.pres, fld = (f, lab) => `<label for="pr-${f}">${lab}</label><textarea id="pr-${f}" maxlength="300" data-k="pr-${f}" data-prf="${f}">${esc(p[f])}</textarea>`;
-  return `<div class="box"><span class="tag">발표 준비 가이드</span> 발표는 3분 이내 — 발표자를 정하거나, 모둠원이 1)~3)을 나누어 말할 수 있어요. 왼쪽 ‘모둠 결론’을 보며 준비하기</div>
+  return `<div class="box"><span class="tag">발표 준비 가이드</span> 발표는 3분 이내 — 발표자를 정하거나, 모둠원이 1)~3)을 나누어 말할 수 있어요. 자료 칸 ‘모둠 결론’을 보며 준비하기</div>
+    ${SLOT}
     <div class="panel">${fld("p1", "1) 질문의 발전 — 처음에 무엇이 궁금했고, 자료 (2)를 읽으며 최종 탐구 질문을 어떻게 다듬었는가? (말할 사람·메모)")}
     ${fld("p2", "2) 답변과 핵심 근거 — 우리 질문에 대한 답은 무엇이며, 이를 뒷받침하는 핵심 수치와 사실은? (말할 사람·메모)")}
     ${fld("p3", "3) 새로 생긴 질문 — 더 논의해 보고 싶거나 새로 떠오른 질문은? (말할 사람·메모)")}</div>`;
@@ -1392,7 +1415,7 @@ const dlNote = () => pastDL() ? '<p class="locked">마감(12. 20.)이 지나 더
 VIEWS["5-1"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56();
-  return `<div class="box"><span class="tag">자기주도 탐구</span> 1~4차시에 모둠과 함께 했던 과정을 이제 혼자 해 봐요.<br><b>자료 보고 질문 쏟아내기 → 질문 다듬기 → 하위 질문과 계획 세우기 → 조사하기 → 내 말로 제안하기</b><br><small>왼쪽 ‘진로 가이드’에서 내 계열의 질문을 출발점으로 삼아도 좋아요.</small></div>${dlNote()}
+  return `<div class="box"><span class="tag">자기주도 탐구</span> 1~4차시에 모둠과 함께 했던 과정을 이제 혼자 해 봐요.<br><b>자료 보고 질문 쏟아내기 → 질문 다듬기 → 하위 질문과 계획 세우기 → 조사하기 → 내 말로 제안하기</b><br><small>자료 칸 ‘진로 가이드’에서 내 계열의 질문을 출발점으로 삼아도 좋아요.</small></div>${SLOT}${dlNote()}
     <div class="panel"><span class="num">진로 연결</span>${pf("s5career", "내 진로(관심) 분야", { line:true, dis:D })}${pf("s5why", "이 분야에서 공간 불평등 사례를 찾으려는 이유", { dis:D })}</div>
     <div class="panel"><span class="num">새 공간 불평등 사례</span>
       <p class="hint">분만·응급의료 취약지가 아닌 새로운 사례 1가지</p>
@@ -1415,7 +1438,7 @@ VIEWS["5-2"] = () => {
   const ok = !!pv("s5qsub"), D = locked56() || ok, qs = myQs();
   const ready = pv("s5myq").trim().length >= 8 && [1,2,3,4].every(i => pv("s5k" + i));
   return `${dlNote()}<div class="box"><span class="tag">먼저 알아 두기 — 좋은 탐구 질문 체크리스트</span>
-      <ul>${CHK2.map(c => `<li>${c}</li>`).join("")}</ul><small>사다리를 다 오른 뒤 아래에서 하나씩 체크하고 확정해요.</small></div>
+      <ul>${CHK2.map(c => `<li>${c}</li>`).join("")}</ul><small>사다리를 다 오른 뒤 아래에서 하나씩 체크하고 확정해요.</small></div>${SLOT}
     <div class="panel"><span class="num">쏟아낸 질문 점검하고 고르기</span>
       <ul style="margin:6px 0;padding-left:20px;font-size:14px"><li>비슷한 질문은 <b>합쳐서</b> 한 문장으로</li><li>닫힌 질문은 <b>‘왜·어떻게·어떤 영향’</b>을 넣어 열린 질문으로</li><li>단순한 수치 확인보다 <b>가장 알아보고 싶은</b> 질문 하나 고르기</li></ul>
       ${qs.length ? `<div class="kinds">${qs.map((q, i) => `<button class="chip" data-act="pickQ" data-id="${i}" ${D ? "disabled" : ""}>${esc(q)}</button>`).join("")}</div><p class="hint">누르면 출발 칸에 들어가요. 두 질문을 합치려면 하나를 고른 뒤 출발 칸에서 이어 쓰기</p>` : '<p class="empty">활동 1에서 질문을 먼저 쏟아내 보기</p>'}</div>
@@ -1423,7 +1446,7 @@ VIEWS["5-2"] = () => {
       ${PL.map(([f, t, h], i) => `<div class="rung${i === 0 || i === 4 ? " ends" : ""}"><label for="pf-${f}">${t}</label>${h ? `<p class="hint">${h}</p>` : ""}<p class="hint" style="margin:0 0 6px">예) ${PLEX[f]}</p>
         <textarea id="pf-${f}" data-k="pf-${f}" data-pf="${f}" data-qc="${f === "s5myq" ? "open" : ""}" maxlength="300" ${D ? "disabled" : ""}>${esc(pv(f))}</textarea>${qc("pf-" + f, pv(f), f === "s5myq" ? "open" : "")}
         ${D || i === 0 ? "" : `<div class="tools"><button class="chip" data-act="pcopyUp" data-g="${f}">위 칸 질문 가져와 고치기</button>${f === "s5c1" ? ["공간 불평등","필수 서비스","이용 기회","지역의 구조적 조건","인구 감소와 고령화","수익성 중심 운영"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("")
-          + `<span class="hint" style="flex:1 1 100%;margin:6px 0 0">다른 교과 개념 예시 — 왼쪽 ‘개념 가이드’에서 내 분야 개념을 더 찾아보기</span>`
+          + `<span class="hint" style="flex:1 1 100%;margin:6px 0 0">다른 교과 개념 예시 — 자료 칸 ‘개념 가이드’에서 내 분야 개념을 더 찾아보기</span>`
           + ["접근성","인구 밀도","교통망","디지털 격차","시장 실패","규모의 경제","열섬 현상","골든타임"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("") : ""}</div>`}</div>`).join("")}</div>
     <div class="box"><span class="tag">탐구 질문 체크리스트</span>${CHK2.map((c, i) => pchk(`s5k${i+1}`, c, D)).join("")}</div>
     ${ok ? `<div class="done"><b>나의 탐구 질문을 확정함</b> <small>${esc(pv("s5qsub"))}</small><p style="margin:6px 0 0;font-weight:700">${esc(pv("s5myq"))}</p>${locked56() ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s5qsub" data-id="">다시 고치기</button></div>`}</div>`
@@ -1518,7 +1541,7 @@ VIEWS["6-1"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56();
   return `${dlNote()}<div class="qbox"><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">5차시에서 먼저 정하기</span>'}</b></div>
-    <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로</div>
+    <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로</div>${SLOT}
     ${H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span><p class="ro"><b>하위 질문</b> ${esc(pv("s5h" + i)) || "-"}</p>
       ${pf("s6r" + i + "d", "조사 내용 (수치·사실)", { dis:D })}${pf("s6r" + i + "s", "출처 (기관·매체, 연도, 제목)", { line:true, dis:D })}${pf("s6r" + i + "i", "해석 (하위 질문에 대한 답)", { dis:D })}</div>`).join("")}
     <div class="panel">${pf("s6more", "조사하며 새로 생긴 질문", { dis:D })}</div>`;
@@ -1526,7 +1549,7 @@ VIEWS["6-1"] = () => {
 VIEWS["6-2"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56(), sub = pv("s6sub");
-  return `${dlNote()}<div class="box"><b>마감</b> 12. 20.(일) — 마감 전까지는 언제든 고치고 다시 제출할 수 있어요. 쓰는 동안 자동으로 저장돼요.</div>
+  return `${dlNote()}<div class="box"><b>마감</b> 12. 20.(일) — 마감 전까지는 언제든 고치고 다시 제출할 수 있어요. 쓰는 동안 자동으로 저장돼요.</div>${SLOT}
     <div class="qbox">자신이 탐구한 공간 불평등 사례 1가지를 바탕으로 『공간 불평등 완화를 위한 제도 및 시민 실천 제안서』를 쓰기
       <ul style="margin:8px 0 0;padding-left:20px;font-size:14px"><li>분만·응급의료 취약지가 아닌 사례를 구체적 사실(수치 등)·출처와 함께 제시하고, 단순한 지역 차이와 구별하여 공간 불평등에 해당하는 이유를 설명하기</li>
       <li>구조적 원인을 고려하여 제도적 방안 한 가지와 시민으로서의 실천 방안 한 가지를 구체적으로 제안하고, 각각 필요한 이유를 근거를 들어 쓰기</li>
@@ -1711,7 +1734,7 @@ function summary(){
   S.groups.forEach(g => { s += `■ ${g.name || "이름 없는 묶음"}: ${S.cards.filter(c => c.g === g.id).map(c => c.text).join(" / ")}\n`; });
   const has = inGroup(), rest = S.cards.filter(c => !has(c)); if(rest.length) s += `■ 묶지 않은 질문: ${rest.map(c => c.text).join(" / ")}\n`;
   s += `\n후보 탐구 질문\n`;
-  S.cands.forEach((k, i) => { s += `${NUM[i]} ${k.text}\n   고른 이유: ${k.reason}\n   바탕이 된 질문: ${k.from.map(textOf).filter(Boolean).join(" / ")}\n`; });
+  S.cands.forEach((k, i) => { s += `${NUM[i]} ${k.text}\n   바탕이 된 질문: ${k.from.map(textOf).filter(Boolean).join(" / ")}\n`; });
   return s.trim();
 }
 function summary2(){
