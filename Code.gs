@@ -133,6 +133,12 @@ function handle_(p){
         .map(r => [r[3] + "모둠", r[4], r[5], r[6], r[7], r[9]].map(String));
       return { ok:true, rows };
     }
+    case "all": {
+      checkTeacher_(p.key);
+      const states = [];
+      for(let m = 1; m <= MOUMS; m++) states.push(load_(code, String(m)));
+      return { ok:true, states };
+    }
     case "board": {
       const board = [];
       for(let m = 1; m <= MOUMS; m++){
