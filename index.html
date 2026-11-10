@@ -118,6 +118,25 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .pvbar.on{border-style:solid;background:var(--soft)}
 .pvbar button{padding:4px 12px;border:1.5px solid var(--field);background:var(--paper);font-size:14px;border-radius:20px}
 .pvbar button.back{background:var(--ink);color:var(--paper);border-color:var(--ink);margin-left:auto}
+.zone{margin-top:12px;border:1.5px solid var(--hair);border-radius:12px;background:var(--paper)}
+.zone[open]{border-color:var(--ink)}
+.zone > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 16px;font-weight:700}
+.zone > summary::-webkit-details-marker{display:none}
+.zone > summary::before{content:"▸";font-size:14px}
+.zone[open] > summary::before{content:"▾"}
+.zone > summary .zt{flex:1}
+.zone > summary .zhelp{display:none;padding:2px 10px;border:1.5px solid var(--field);background:var(--paper);font-size:13px;border-radius:20px;font-weight:500}
+.zone .zin{padding:0 16px 16px}
+.zone, .zone *, .zone *::before, .zone *::after{box-sizing:border-box}
+.zone .zinline{margin:0 0 10px}
+@media (max-width:959px){ .zone > summary .zhelp{display:inline-block} }
+.hbox{border:2px solid var(--ink);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:14px;background:var(--paper)}
+.hbox .hl{display:inline-block;font-size:12px;font-weight:700;padding:0 8px;border:1.5px solid var(--ink);border-radius:4px;margin-bottom:4px}
+.hbox.ex{border-style:dashed}
+.hbox.rec{border-style:double;border-width:4px}
+.hbox.ref{border-style:dotted}
+.hbox ul{margin:2px 0;padding-left:18px}
+.hbox li{margin:2px 0}
 .follow{margin-top:12px;padding:8px 14px;border-radius:10px;background:var(--soft);font-size:14px}
 
 /* 차시·활동 탭 */
@@ -516,6 +535,63 @@ details.box summary{cursor:pointer;font-weight:700}
             </section>
           </div>
 
+          <div class="doc" data-doc="t51">
+            <p class="doc-title">탐구 꿀팁 — 주제와 사례 찾기</p>
+            <section class="src"><h4><span class="lbl">①</span>내 진로에서 출발하기</h4>
+              <p>· ‘진로 가이드’ 표에서 내 계열의 질문 하나를 고르기<br>· 내 분야에서 <b>사는 곳에 따라 누릴 기회가 달라지는 것</b>이 무엇인지 떠올리기 (시설·서비스·정보·안전·환경)</p></section>
+            <section class="src"><h4><span class="lbl">②</span>사례를 찾는 검색법</h4>
+              <p>· 검색어 = <b>대상 + 지역 + 격차</b> 예) “소아과 지역 격차”, “농촌 버스 배차”, “도서관 접근성 군 지역”<br>· 뉴스에서 출발 → 기사 속 수치의 <b>원래 출처</b>(기관·통계 이름)까지 찾아 들어가기<br>· 통계: <a href="https://kosis.kr" target="_blank" rel="noopener">KOSIS</a>, <a href="https://www.data.go.kr" target="_blank" rel="noopener">공공데이터포털</a>, 지방 자치 단체 누리집</p></section>
+            <section class="src"><h4><span class="lbl">③</span>좋은 사례인지 점검</h4>
+              <p>· 생활과 권리에 꼭 필요한 자원·서비스인가?<br>· 지역끼리 견줄 수 있는 <b>수치</b>가 있는가?<br>· 내가 찾을 수 있는 자료가 있는가?<br>· 분만·응급의료 취약지가 아닌 새로운 사례인가?</p></section>
+            <section class="src"><h4><span class="lbl">④</span>질문을 빠르게 쏟아내는 법</h4>
+              <p>· 3분 동안 멈추지 않고 쓰기 — 좋은 질문인지는 나중에 따지기<br>· 열린 시작말로 바로 쓰기: <b>왜 ~할까? / 어떻게 ~할까? / ~은 누구에게 어떤 영향을 미칠까? / 사는 곳에 따라 ~은 얼마나 다를까?</b><br>· 1차시처럼 넓히기: 숫자 뒤의 ‘왜’, 그 지역 사람의 자리, 우리 동네로 가져오기, 두 자료 연결하기</p></section>
+          </div>
+
+          <div class="doc" data-doc="t52">
+            <p class="doc-title">탐구 꿀팁 — 탐구 질문 다듬기</p>
+            <section class="src"><h4><span class="lbl">①</span>쏟아낸 질문 점검하기</h4>
+              <p>· 비슷한 질문은 <b>합쳐서</b> 한 문장으로 (1차시 묶기·합치기처럼)<br>· 닫힌 질문(예/아니요, 숫자 하나)은 <b>‘왜·어떻게·어떤 영향’</b>을 넣어 열린 질문으로<br>· 단순한 수치 확인보다 <b>더 알아보고 싶은</b> 질문을 고르기</p></section>
+            <section class="src"><h4><span class="lbl">②</span>질문의 크기 맞추기</h4>
+              <p>· 너무 넓으면 → 대상·지역을 좁히기<br>&nbsp;&nbsp;예) 우리나라 불평등은 왜 생길까? → 군 지역 노인의 대중교통 이용 기회는 왜 적을까?<br>· 너무 좁으면 → 원인·영향을 묻기<br>&nbsp;&nbsp;예) ○○군 버스는 하루 몇 번 다닐까? → ○○군의 적은 버스 배차는 주민 생활에 어떤 영향을 미칠까?</p></section>
+            <section class="src"><h4><span class="lbl">③</span>사다리 예시 한눈에</h4>
+              <p class="ro"><b>출발</b> 시골은 왜 버스가 적을까?</p>
+              <p class="ro"><b>① 개념</b> 시골 주민이 대중교통을 <u>이용할 기회</u>는 왜 도시보다 적을까?</p>
+              <p class="ro"><b>② 범위·대상</b> <u>군 지역 노인</u>이 병원에 갈 때 버스를 이용할 기회는 왜 대도시보다 적을까?</p>
+              <p class="ro"><b>③ 탐구형</b> 군 지역의 버스 배차에는 <u>어떤 지역의 구조적 조건</u>이 영향을 미칠까?</p>
+              <p class="ro"><b>도착</b> 군 지역 노인의 대중교통 이용 기회가 적은 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?</p></section>
+            <section class="src"><h4><span class="lbl">④</span>확정하기 전에</h4>
+              <p>· 탐구 질문 체크리스트 4가지를 모두 확인하기<br>· 소리 내어 읽어 보기 — 한 번에 이해되는 문장인가?<br>· 이 질문에 답하려면 무엇을 조사해야 할지 떠오르는가? 떠오르지 않으면 범위를 다시 좁히기</p></section>
+          </div>
+
+          <div class="doc" data-doc="t53">
+            <p class="doc-title">탐구 꿀팁 — 하위 질문과 탐구 계획</p>
+            <section class="src"><h4><span class="lbl">①</span>하위 질문 짜는 법</h4>
+              <p>· 탐구 질문에 답하려면 <b>무엇을 알아야 하는지</b> 3가지로 나누기<br>· 정해진 틀은 없어요. 다만 <b>무엇이 어떤가 → 왜 그런가 → 누구에게 어떤 영향이 있나</b>처럼 이어지면 답을 엮기 쉬워요<br>· 내 진로 분야의 <b>원리·이론</b>을 탐구하는 하위 질문도 좋아요 (‘개념 가이드’ 예시 참고)</p></section>
+            <section class="src"><h4><span class="lbl">②</span>찾을 자료 정하기</h4>
+              <p>· 하위 질문마다 <b>어떤 자료(통계·보고서·기사·인터뷰)</b>를 <b>어디서</b> 찾을지 미리 적기<br>· 자료를 찾을 수 없는 질문은 계획 단계에서 바꾸기<br>· 수치는 기준 연도·단위·비교 대상을 같이 적을 계획 세우기</p></section>
+            <section class="src"><h4><span class="lbl">③</span>일정 짜는 법</h4>
+              <p>· 마감(12. 20.)에서 <b>거꾸로</b> 계획하기: 자료 조사 → 정리·해석 → 제안서 초안 → 고쳐 쓰기<br>· 할 일을 작게 나누고 날짜를 붙이기 예) 11. 20. 하위 질문 ① 통계 찾기<br>· 마지막에 고쳐 쓸 시간을 꼭 남겨 두기</p></section>
+            <section class="src"><h4><span class="lbl">④</span>해결 방향은 원인과 짝짓기</h4>
+              <p>· 원인이 ‘수익이 나지 않음’이면 → 공공 재정 지원·공공 서비스<br>· 원인이 ‘인력 부족’이면 → 인력 양성·배치 제도<br>· 원인이 ‘정보·이동의 어려움’이면 → 찾아가는 서비스, 교통·통신 지원<br>· 시민 실천은 내가·우리가 실제로 할 수 있는 <b>구체적인 행동</b>으로</p></section>
+          </div>
+
+          <div class="doc" data-doc="t62">
+            <p class="doc-title">탐구 꿀팁 — 정책 제안서 쓰기</p>
+            <section class="src"><h4><span class="lbl">①</span>제안서 짜임</h4>
+              <p>· <b>제목</b> — 무엇을 어떻게 바꾸자는지 한눈에<br>· <b>1 현상 진단</b> — 사례, 수치와 출처, 왜 단순한 지역 차이가 아니라 공간 불평등인지<br>· <b>2 제도적 방안</b> — 국가·지방 자치 단체가 법·예산·서비스로 할 일과 그 근거<br>· <b>3 시민 실천</b> — 공동체 구성원으로서 할 수 있는 구체적인 행동과 그 근거<br>· <b>4 진로와의 연결</b> — 이 문제를 내 진로 분야에서 어떻게 이어 갈지</p></section>
+            <section class="src"><h4><span class="lbl">②</span>설득력 있게 쓰는 법</h4>
+              <p>· 한 단락 = <b>주장 → 근거(수치·사례) → 기대 효과</b><br>· 수치에는 출처와 기준 연도를 함께<br>· 조사 기록의 ‘해석’을 내 말로 다시 쓰기 — 자료를 그대로 옮기지 않기<br>· 방안은 진단에서 밝힌 <b>구조적 원인</b>을 겨냥하기</p></section>
+            <section class="src"><h4><span class="lbl">③</span>제출 전 고쳐 쓰기 점검</h4>
+              <p>· 분만·응급의료가 아닌 새로운 사례를 수치·출처와 함께 썼는가?<br>· 필수 자원·서비스에 접근할 기회의 불평등이라는 이유를 썼는가?<br>· 구조적 원인에 맞는 제도적 방안 1가지와 근거를 썼는가?<br>· 막연한 다짐이 아닌 구체적인 시민 실천 방안 1가지와 근거를 썼는가?<br>· 진로와의 연결이 내 경험·관심과 이어지는가?</p></section>
+            <section class="src"><h4><span class="lbl">④</span>AI를 쓴다면</h4>
+              <p>· 문장을 대신 쓰게 하지 않기 — 다 쓴 뒤 “논리가 끊긴 곳이 있는지 지적해 줘”처럼 점검에만<br>· AI가 말한 수치는 원래 출처에서 확인되지 않으면 쓰지 않기</p></section>
+          </div>
+
+          <div class="doc" data-doc="help">
+            <p class="doc-title" id="helpTitle">구역 1 도움 자료</p>
+            <div id="helpBody" class="doc"></div>
+          </div>
+
           <div class="doc" data-doc="d9">
             <p class="doc-title">진로 계열별 개념 가이드</p>
             <section class="src"><h4><span class="lbl">!</span>탐구 질문과 하위 질문은 이렇게 나눠요</h4>
@@ -662,7 +738,8 @@ const LESSON = {
   5:{ stage:"자기주도 탐구 · 질문 생성하기 · 학습 설계하기", title:"내 진로 분야에서 탐구 계획 세우기", docs:["d6","d9"] },
   6:{ stage:"자기주도 탐구 · 질문에 답 찾기 · 내 말로 종합하기", title:"조사하고 공간 불평등 완화 정책 제안서 쓰기", docs:["d7","d9","d5","d6"] },
 };
-const DOCNAME = { d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드" };
+const DOCNAME = { d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드", t51:"탐구 꿀팁", t52:"탐구 꿀팁", t53:"탐구 꿀팁", t62:"탐구 꿀팁", help:"도움 자료" };
+const STEP_DOCS = { "5-1":["t51","d6"], "5-2":["t52","d9"], "5-3":["help"], "6-1":["d8","d7"], "6-2":["t62","d7","d5"] };
 const STEPS = {
   "1-1":{ label:"질문 쏟아내기", who:"개인", q:"자료 (1)을 읽으며 떠오른 질문을 자유롭게 적어 보자." },
   "1-2":{ label:"비슷한 것끼리 묶기", who:"모둠", q:"모둠원의 질문을 모두 펼쳐 놓고, 비슷한 질문끼리 묶어 보자." },
@@ -719,7 +796,9 @@ function ask(msg){ return new Promise(r => { $("modalMsg").textContent = msg; $(
 /* ===== 저장 줄 ===== */
 const PVMSG = "학생 화면 미리 보기에서는 읽기만 할 수 있어요";
 function send(op){ if(!S) return; if(me.preview) return toast(PVMSG); applyOp(S, op); later(); queue.push({ action:"op", op }); pump(); }
-function psend(f, val){ if(!P) return; if(me.preview) return toast(PVMSG); P.f[f] = val; later(); queue = queue.filter(q => !(q.action === "pset" && q.f === f)); queue.push({ action:"pset", f, val }); pump(); }
+/* 같은 칸의 저장 대기만 새 값으로 바꿈 — 지금 보내는 중인 맨 앞 항목은 건드리지 않음 */
+function qset(f, val){ queue = queue.filter((q, i) => (busy && i === 0) || !(q.action === "pset" && q.f === f)); queue.push({ action:"pset", f, val }); pump(); }
+function psend(f, val){ if(!P) return; if(me.preview) return toast(PVMSG); P.f[f] = val; later(); qset(f, val); }
 function later(){ clearTimeout(later.t); later.t = setTimeout(render, 0); }
 async function pump(){
   if(busy || !queue.length) return;
@@ -928,11 +1007,11 @@ function drawNav(){
     `<button role="tab" data-go="${k}" aria-selected="${k === step}">활동 ${k.split("-")[1]}${CLS && CLS.step === k ? '<span class="badge">선생님</span>' : ""}<small>${v.label}</small></button>`).join("");
 }
 function drawDocTabs(){
-  const docs = LESSON[lessonOf(step)].docs, cur = docs.includes(docSel[lessonOf(step)]) ? docSel[lessonOf(step)] : docs[0];
+  const key = STEP_DOCS[step] ? step : lessonOf(step), docs = STEP_DOCS[step] || LESSON[lessonOf(step)].docs, cur = docs.includes(docSel[key]) ? docSel[key] : docs[0];
   $("docTabs").innerHTML = docs.map(d => `<button data-doc="${d}" aria-selected="${d === cur}">${DOCNAME[d]}</button>`).join("");
   document.querySelectorAll("#docPane .doc[data-doc]").forEach(x => x.hidden = x.dataset.doc !== cur);
 }
-$("docTabs").addEventListener("click", e => { const b = e.target.closest("[data-doc]"); if(!b) return; docSel[lessonOf(step)] = b.dataset.doc; drawDocTabs(); });
+$("docTabs").addEventListener("click", e => { const b = e.target.closest("[data-doc]"); if(!b) return; docSel[STEP_DOCS[step] ? step : lessonOf(step)] = b.dataset.doc; drawDocTabs(); });
 function drawDoc(){ $("split").classList.toggle("nodoc", !docOpen); $("docToggle").textContent = docOpen ? "접기" : "펼치기"; }
 $("docToggle").onclick = () => { docOpen = !docOpen; drawDoc(); };
 drawDoc();
@@ -1319,42 +1398,120 @@ VIEWS["5-1"] = () => {
       <p class="hint">분만·응급의료 취약지가 아닌 새로운 사례 1가지</p>
       ${pf("s5title", "사례 제목", { line:true, dis:D })}${pf("s5source", "출처 (기관·매체, 통계·기사 이름, 연도)", { dis:D })}${pf("s5facts", "핵심 사실 (수치·자료)", { dis:D })}</div>
     <div class="panel"><span class="num">질문 쏟아내기</span>
-      <p class="hint">한 줄에 질문 하나씩 — 되도록 많이, 떠오른 그대로, 물음표로 바꾸어 쓰기</p>
-      ${pf("s5qs", "", { dis:D, rows:7, max:2000 })}</div>`;
+      <div class="box" style="margin-top:8px"><span class="tag">빠르게 쏟아내는 팁</span>
+        <ul><li>3분 동안 멈추지 않고, <b>한 줄에 질문 하나씩</b> — 좋은 질문인지는 활동 2에서 따지기</li>
+        <li>처음부터 <b>열린 질문</b>으로: 아래 시작말을 누르면 새 줄에 들어가요</li>
+        <li>막히면 1차시처럼: 숫자 뒤의 ‘왜’ · 그 지역 사람의 자리 · 우리 동네로 가져오기 · 두 자료 연결</li></ul>
+        <div class="kinds">${["왜 ", "어떻게 ", "사는 곳에 따라 ", "누구에게 어떤 영향을 ", "만약 없다면 "].slice(0, 4).map(w => `<button class="chip" data-act="qstart" data-w="${w}" ${D ? "disabled" : ""}>${w.trim()}…?</button>`).join("")}</div></div>
+      ${pf("s5qs", "", { dis:D, rows:8, max:2000 })}<p class="hint">쓴 질문 ${myQs().length}개</p></div>`;
 };
 const myQs = () => pv("s5qs").split(/\n+/).map(x => x.trim()).filter(Boolean);
+const PLEX = { s5start:"시골은 왜 버스가 적을까?", s5c1:"시골 주민이 대중교통을 이용할 기회는 왜 도시보다 적을까?", s5c2:"군 지역 노인이 병원에 갈 때 버스를 이용할 기회는 왜 대도시보다 적을까?",
+  s5c3:"군 지역의 버스 배차에는 어떤 지역의 구조적 조건이 영향을 미칠까?", s5myq:"군 지역 노인의 대중교통 이용 기회가 적은 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?" };
 const PL = [["s5start","출발 · 고른 질문",""],["s5c1","① 개념 연결하기","일상 표현을 공간 불평등, 필수 서비스 접근 기회, 지역의 구조적 조건 같은 개념과 연결하기. <b>내 진로·관심 교과의 개념을 연결해도 좋아요.</b> 단, ‘사는 곳에 따라 누릴 기회가 달라지는가’라는 물음은 그대로 두고, 다른 교과 개념은 그 차이를 설명하거나 재는 데 쓰기"],
   ["s5c2","② 범위와 대상 구체화하기","막연한 말을 조사할 수 있는 대상으로 좁히기"],["s5c3","③ 탐구형으로 넓히기","사실 확인을 원인·영향·관계를 묻는 질문(왜? 어떻게?)으로"],["s5myq","도착 · 나의 탐구 질문","고친 요소를 모두 모아 하나의 질문으로"]];
 VIEWS["5-2"] = () => {
   if(me.teacher) return teacherNote;
-  const D = locked56(), qs = myQs();
-  return `${dlNote()}<div class="panel"><span class="num">쏟아낸 질문에서 고르기</span>
-      ${qs.length ? `<div class="kinds">${qs.map((q, i) => `<button class="chip" data-act="pickQ" data-id="${i}" ${D ? "disabled" : ""}>${esc(q)}</button>`).join("")}</div><p class="hint">누르면 출발 칸에 들어가요.</p>` : '<p class="empty">활동 1에서 질문을 먼저 쏟아내 보기</p>'}</div>
+  const ok = !!pv("s5qsub"), D = locked56() || ok, qs = myQs();
+  const ready = pv("s5myq").trim().length >= 8 && [1,2,3,4].every(i => pv("s5k" + i));
+  return `${dlNote()}<div class="box"><span class="tag">먼저 알아 두기 — 좋은 탐구 질문 체크리스트</span>
+      <ul>${CHK2.map(c => `<li>${c}</li>`).join("")}</ul><small>사다리를 다 오른 뒤 아래에서 하나씩 체크하고 확정해요.</small></div>
+    <div class="panel"><span class="num">쏟아낸 질문 점검하고 고르기</span>
+      <ul style="margin:6px 0;padding-left:20px;font-size:14px"><li>비슷한 질문은 <b>합쳐서</b> 한 문장으로</li><li>닫힌 질문은 <b>‘왜·어떻게·어떤 영향’</b>을 넣어 열린 질문으로</li><li>단순한 수치 확인보다 <b>가장 알아보고 싶은</b> 질문 하나 고르기</li></ul>
+      ${qs.length ? `<div class="kinds">${qs.map((q, i) => `<button class="chip" data-act="pickQ" data-id="${i}" ${D ? "disabled" : ""}>${esc(q)}</button>`).join("")}</div><p class="hint">누르면 출발 칸에 들어가요. 두 질문을 합치려면 하나를 고른 뒤 출발 칸에서 이어 쓰기</p>` : '<p class="empty">활동 1에서 질문을 먼저 쏟아내 보기</p>'}</div>
     <div class="ladder"><div class="lhead"><b>나의 질문 사다리</b></div>
-      ${PL.map(([f, t, h], i) => `<div class="rung${i === 0 || i === 4 ? " ends" : ""}"><label for="pf-${f}">${t}</label>${h ? `<p class="hint">${h}</p>` : ""}
+      ${PL.map(([f, t, h], i) => `<div class="rung${i === 0 || i === 4 ? " ends" : ""}"><label for="pf-${f}">${t}</label>${h ? `<p class="hint">${h}</p>` : ""}<p class="hint" style="margin:0 0 6px">예) ${PLEX[f]}</p>
         <textarea id="pf-${f}" data-k="pf-${f}" data-pf="${f}" data-qc="${f === "s5myq" ? "open" : ""}" maxlength="300" ${D ? "disabled" : ""}>${esc(pv(f))}</textarea>${qc("pf-" + f, pv(f), f === "s5myq" ? "open" : "")}
         ${D || i === 0 ? "" : `<div class="tools"><button class="chip" data-act="pcopyUp" data-g="${f}">위 칸 질문 가져와 고치기</button>${f === "s5c1" ? ["공간 불평등","필수 서비스","이용 기회","지역의 구조적 조건","인구 감소와 고령화","수익성 중심 운영"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("")
           + `<span class="hint" style="flex:1 1 100%;margin:6px 0 0">다른 교과 개념 예시 — 왼쪽 ‘개념 가이드’에서 내 분야 개념을 더 찾아보기</span>`
           + ["접근성","인구 밀도","교통망","디지털 격차","시장 실패","규모의 경제","열섬 현상","골든타임"].map(w => `<button class="chip" data-act="pword" data-g="s5c1" data-w="${w}">+ ${w}</button>`).join("") : ""}</div>`}</div>`).join("")}</div>
     <div class="box"><span class="tag">탐구 질문 체크리스트</span>${CHK2.map((c, i) => pchk(`s5k${i+1}`, c, D)).join("")}</div>
-    <div class="panel">${pf("s5reason", "이 사례가 단순한 지역 차이를 넘어 공간 불평등에 해당하는 이유 (구조적 원인 포함)", { dis:D })}</div>`;
+    ${ok ? `<div class="done"><b>나의 탐구 질문을 확정함</b> <small>${esc(pv("s5qsub"))}</small><p style="margin:6px 0 0;font-weight:700">${esc(pv("s5myq"))}</p>${locked56() ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s5qsub" data-id="">다시 고치기</button></div>`}</div>`
+      : locked56() ? "" : `<button class="primary" data-act="psub" data-g="s5qsub" data-id="1" ${ready ? "" : "disabled"}>나의 탐구 질문 확정하기</button>${ready ? "" : '<p class="hint">도착 칸에 나의 탐구 질문을 쓰고, 체크리스트 4가지를 모두 확인하면 확정할 수 있어요.</p>'}`}`;
 };
-const H3 = [["1","① 실태·현황"],["2","② 구조적 원인"],["3","③ 삶에 미치는 영향"]];
+const H3 = [["1","①"],["2","②"],["3","③"]];
+const ZONES = [[1,"탐구 출발점"],[2,"공간 불평등인지 확인하기"],[3,"탐구 질문 다듬기"],[4,"탐구 범위"],[5,"하위 질문별 조사 계획"],[6,"해결 방향 미리 생각하기"],[7,"탐구 일정"],[8,"선생님께"]];
+let planZone = 1, openZones = new Set([1]), inlineHelp = new Set();
+const hb = (kind, label, body) => `<div class="hbox ${kind}"><span class="hl">${label}</span>${body}</div>`;
+const ul = items => `<ul>${items.map(x => `<li>${x}</li>`).join("")}</ul>`;
+const CAREER0 = [["미디어·방송·문화·예술","영화관도 공연장도 없는 지역의 청소년은 어떤 문화 경험을 놓치고 있을까?","문화체육관광부 「전국 문화기반시설 총람」"],
+  ["경영·경제·홍보·마케팅","동네 은행과 ATM이 사라지면, 스마트폰 뱅킹이 어려운 사람은 어떻게 될까?","금융감독원 「국내 은행 점포 운영 현황」"],
+  ["공학·도시·교통","시골 버스가 하루 몇 번 안 다니면, 학생과 노인은 어디를 못 가게 될까?","국토교통부 「대중교통 현황조사」"],
+  ["의약·보건·의공학·생명","소아과·약국·정신건강 서비스는 사는 곳에 따라 얼마나 멀까?","건강보험심사평가원 지역별 의료기관 현황"],
+  ["교육·사범","공공 도서관과 돌봄 시설을 이용할 기회는 사는 곳에 따라 얼마나 다를까?","국가도서관통계시스템 공공도서관 현황"],
+  ["행정·법·사회","119가 늦게 도착하는 동네는 왜 생길까?","소방청 「소방청 통계연보」"],
+  ["환경·에너지","도시가스가 들어오지 않는 지역의 겨울 난방비는 누가 감당할까?","산업통상자원부 도시가스 보급률 통계"],
+  ["국제·외교·통상","외국인 주민이 많은 지역과 적은 지역에서 통번역·행정 서비스를 이용할 기회는 얼마나 다를까?","행정안전부 「지방자치단체 외국인주민 현황」"],
+  ["환경·에너지(추가)","폐기물·발전 시설이나 폭염 쉼터는 어느 지역에 몰려 있고, 그 영향은 누가 받을까?","환경부·기상청 자료, 지역 언론 보도"]];
+function moumRec1(){
+  const cands = S.cands.filter(k => k.text.trim()), lads = S.lads.filter(l => ladBest(l));
+  if(!cands.length && !lads.length && !S.fin.text.trim()) return '<p class="empty" style="margin:0">1회 모둠 기록이 없음</p>';
+  return `${cands.length ? `<p class="ro" style="margin:2px 0"><b>후보 탐구 질문</b></p>${ul(cands.map((k, i) => `${NUM[i]} ${esc(k.text)}`))}` : ""}
+    ${lads.map(l => `<p class="ro" style="margin:6px 0 2px"><b>사다리</b> ${esc(dn(l.name))}</p>${ul([["c1","개념 연결"],["c2","범위·대상"],["c3","탐구형"]].filter(([f]) => l[f]).map(([f, n]) => `${n}: ${esc(l[f])}`)) }`).join("")}
+    <p class="ro" style="margin:6px 0 0"><b>최종 탐구 질문</b> ${esc(S.fin.text) || "-"}</p>`;
+}
+function moumRec2(){
+  const ks = KS().filter(([k]) => S.subs[k].q.trim());
+  if(!ks.length) return '<p class="empty" style="margin:0">1회 모둠 기록이 없음</p>';
+  return ul(ks.map(([k, n]) => { const v = S.subs[k]; return `하위 질문 ${n} ${esc(v.q)}<br><small>확인할 것: ${esc(v.check) || "-"} · 자료·출처: ${esc(v.src) || "-"} · 담당: ${esc(v.who) || "-"}</small>`; }));
+}
+function zoneHelp(z){
+  if(z === 1) return hb("tip", "찾는 요령", ul(["내 분야의 시설·서비스 하나를 떠올리고, 서울과 군 지역에서 똑같이 이용할 수 있는지 물어보기"]))
+    + hb("ref", "진로 계열별 질문 예시", `<table class="wtable"><tr><th>진로 계열</th><th>진로의 눈으로 던지는 질문</th><th>찾아볼 통계·자료</th></tr>${CAREER0.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join("")}</tr>`).join("")}</table>`)
+    + hb("tip", "진로 미정이면", ul(["1회 응급의료 탐구에서 가장 궁금했던 점에서 출발하기"]));
+  if(z === 2) return hb("tip", "세 가지 물음", ul(["어떤 생활의 필요와 관련되는가? → 생명·건강·교육·이동처럼 기본적인 생활에 꼭 필요한 것인가",
+      "지역에 따라 이용 기회와 부담이 어떻게 다른가? → 시간·비용·거리·제때 이용할 기회를 견주기",
+      "그 불리함은 왜 나타나며 누구에게 되풀이되는가? → 개인의 선택이 아니라 인구 감소, 수익성, 인력·시설 집중 같은 지역의 구조적 조건 때문인가"]))
+    + hb("ex", "지역 차이와 공간 불평등 구별하기", ul(["제주에 감귤밭이 많고 평창에 스키장이 있음 → 지역 차이", "밤에 쓰러져도 1시간 안에 갈 응급실이 없음 → 공간 불평등"]))
+    + hb("tip", "판단 기준", ul(["세 물음에 모두 ‘그렇다’고 답할 수 있으면 탐구 사례로 알맞음"]));
+  if(z === 3) return hb("rec", "1회 우리 모둠 기록", moumRec1())
+    + hb("ex", "다듬기 예시", ul(["다듬기 전: 시골에는 왜 큰 응급실이 없을까?", "다듬은 뒤: 인구 감소 지역의 구조적 조건(수익성 악화, 전문의 부족)은 응급의료 접근 기회에 어떤 영향을 미칠까?"]))
+    + hb("tip", "이번에는", ul(["같은 세 단계를 내 사례에 혼자 적용해 보기"]));
+  if(z === 4) return hb("ex", "넓은 범위 → 좁은 범위", ul(["시골 사람들 → 강원도 군 지역의 65세 이상 주민", "문화 시설 → 공연장·영화관"]))
+    + hb("tip", "기준 연도", ul(["통계는 보통 1~2년 늦게 나오므로, 찾을 통계의 가장 최근 연도를 먼저 확인하기", "지역을 견줄 때는 같은 기준 연도, 같은 단위로"]));
+  if(z === 5){ const tips = [...document.querySelectorAll('[data-doc="d8"] .src')].map(x => x.outerHTML).join("");
+    return hb("rec", "1회 우리 모둠 기록 — 2차시 하위 질문과 조사 계획", moumRec2()) + hb("ref", "조사 꿀팁", `<div class="doc" style="margin-top:4px">${tips}</div>`); }
+  if(z === 6) return hb("tip", "공간 불평등을 완화하는 두 바퀴", ul(["제도: 국가·지방 자치 단체가 수익성만으로 유지되기 어려운 필수 시설·서비스에 공공 재정을 투입하고 제도로 보장함",
+      "시민 실천: 다른 지역 주민의 문제에 연대 의식을 갖고, 공론장 참여·청원·캠페인이나 지역 공공 시설 함께 살리기에 동참함"]))
+    + hb("ex", "원인과 방안 짝짓기 예시", ul(["원인: 인구가 적어 응급실 운영이 적자 → 방안: 취약지 응급실 운영비 공공 지원", "원인: 전문의가 지역을 떠남 → 방안: 지역 근무 의료 인력 지원 제도"]))
+    + hb("ex", "시민 실천 구별하기", ul(["막연한 다짐: 관심을 가져야 한다", "구체적 실천: 지역 응급의료 지원 예산에 대한 의견을 시민 참여 창구에 남김"]));
+  if(z === 7) return hb("tip", "일정 세우기", ul(["마감(12.18. 제안서)에서 거꾸로 계획 세우기", "자료 조사에 시간을 가장 많이 두기", "11.27.까지 피드백을 반영한 뒤 조사를 시작하면 늦지 않음"]));
+  return hb("ex", "질문 예시", ul(["제 사례가 공간 불평등에 해당하는지 확신이 없음", "○○ 통계를 찾을 수 없음 / 기준 연도가 서로 다름", "하위 질문이 너무 많은지 적은지 모르겠음"]));
+}
+function zoneBody(z, D){
+  if(z === 1) return pf("s5career", "내 진로(관심) 분야", { line:true, dis:D }) + pf("s5title", "탐구할 공간 불평등 사례", { line:true, dis:D }) + pf("s5source", "출처 (기관·매체, 통계·기사 이름, 연도)", { dis:D }) + pf("s5facts", "핵심 사실 (수치·자료)", { dis:D });
+  if(z === 2) return pf("s5n1", "어떤 생활의 필요와 관련되는가?", { dis:D }) + pf("s5n2", "지역에 따라 이용 기회와 부담이 어떻게 다른가?", { dis:D }) + pf("s5n3", "그 불리함은 왜 나타나며 누구에게 되풀이되는가?", { dis:D });
+  if(z === 3) return `<p class="ro"><b>출발 질문</b> ${esc(pv("s5start")) || "-"}</p>` + (pv("s5qsub") ? `<p class="ro"><b>나의 탐구 질문</b> ${esc(pv("s5myq"))}</p><p class="hint">활동 2에서 확정했어요. 고치려면 활동 2에서 [다시 고치기]</p>`
+      : pf("s5myq", "나의 탐구 질문", { dis:D, hint:"활동 2의 사다리에서 다듬어 확정하면 여기에 그대로 들어가요." }));
+  if(z === 4) return pf("s5who", "누구를 (대상)", { line:true, dis:D }) + pf("s5where", "어디를 (지역)", { line:true, dis:D }) + pf("s5year", "언제를 (기준 연도)", { line:true, dis:D });
+  if(z === 5) return `<p class="hint">나의 탐구 질문에 답하려면 무엇을 알아야 할지 스스로 정해서 질문으로 쓰기. 내 진로 분야의 원리·이론을 탐구하는 하위 질문도 좋아요.</p>`
+    + H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span>${pf("s5h" + i, "하위 질문", { dis:D })}${pf("s5h" + i + "s", "찾을 자료·출처", { line:true, dis:D })}</div>`).join("")
+    + `<div class="box"><span class="tag">하위 질문 체크리스트</span>${["모든 하위 질문이 나의 탐구 질문을 해결하는 데 기여하는가?","하위 질문들이 단계적으로 이어지는가?","내가 조사할 수 있는 자료가 있는가?"].map((c, i) => pchk(`s5j${i+1}`, c, D)).join("")}</div>`;
+  if(z === 6) return pf("s5q2", "해결 질문 — 제도", { line:true, dis:D }) + pf("s5inst", "떠오르는 제도적(국가·지방 자치 단체) 방안", { dis:D }) + pf("s5q3", "해결 질문 — 시민 실천", { line:true, dis:D }) + pf("s5civic", "떠오르는 시민 실천 방안", { dis:D });
+  if(z === 7) return [1,2,3,4].map(i => `<div class="sched"><input type="text" id="pf-s5d${i}" data-k="pf-s5d${i}" data-pf="s5d${i}" maxlength="20" value="${esc(pv("s5d" + i))}" placeholder="날짜" ${D ? "disabled" : ""}><input type="text" id="pf-s5t${i}" data-k="pf-s5t${i}" data-pf="s5t${i}" maxlength="200" value="${esc(pv("s5t" + i))}" placeholder="할 일" ${D ? "disabled" : ""}></div>`).join("");
+  return pf("s5ask", "선생님께 묻고 싶은 점", { dis:D });
+}
 VIEWS["5-3"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56(), sub = pv("s5sub");
-  return `${dlNote()}<div class="qbox"><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">활동 2에서 먼저 정하기</span>'}</b></div>
-    <div class="box"><span class="tag">하위 질문 만들기</span> 나의 탐구 질문에 답하려면 무엇을 알아야 할지 질문으로 쓰기. <b>내 진로 분야의 원리·이론을 탐구하는 하위 질문</b>을 넣어도 좋아요. <small>왼쪽 ‘개념 가이드’의 예시 참고</small></div>
-    ${H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span>${pf("s5h" + i, "하위 질문", { dis:D })}${pf("s5h" + i + "s", "찾을 자료·출처", { line:true, dis:D })}</div>`).join("")}
-    <div class="box"><span class="tag">하위 질문 체크리스트</span>${["모든 하위 질문이 나의 탐구 질문을 해결하는 데 기여하는가?","하위 질문들이 단계적으로 이어지는가?","내가 조사할 수 있는 자료가 있는가?"].map((c, i) => pchk(`s5j${i+1}`, c, D)).join("")}</div>
-    <div class="panel"><span class="num">탐구 일정</span> <small class="hint">12. 20.(일)까지</small>
-      ${[1,2,3,4].map(i => `<div class="sched"><input type="text" id="pf-s5d${i}" data-k="pf-s5d${i}" data-pf="s5d${i}" maxlength="20" value="${esc(pv("s5d" + i))}" placeholder="날짜" ${D ? "disabled" : ""}><input type="text" id="pf-s5t${i}" data-k="pf-s5t${i}" data-pf="s5t${i}" maxlength="200" value="${esc(pv("s5t" + i))}" placeholder="할 일" ${D ? "disabled" : ""}></div>`).join("")}</div>
-    <div class="panel"><span class="num">해결 방향 미리 생각하기</span>
-      ${pf("s5q2", "해결 질문 — 제도", { line:true, dis:D })}${pf("s5inst", "떠오르는 제도적(국가·지방 자치 단체) 방안", { dis:D })}
-      ${pf("s5q3", "해결 질문 — 시민 실천", { line:true, dis:D })}${pf("s5civic", "떠오르는 시민 실천 방안", { dis:D })}</div>
+  return `${dlNote()}<div class="box"><span class="tag">탐구 계획서</span> 구역을 펼쳐 차례로 채우기. 구역을 펼치거나 칸을 누르면 <b>옆 자료 칸에 그 구역의 도움 자료</b>가 나와요. <small>휴대폰에서는 구역 제목 옆 [도움 자료]를 누르기</small></div>
+    ${ZONES.map(([z, t]) => `<details class="zone" data-zone="${z}" ${openZones.has(z) ? "open" : ""}><summary data-zone="${z}"><span class="zt">구역 ${z} · ${t}</span><button class="zhelp" data-act="zoneHelp" data-id="${z}">도움 자료</button></summary>
+      <div class="zin">${inlineHelp.has(z) ? `<div class="zinline">${zoneHelp(z)}</div>` : ""}${zoneBody(z, D)}</div></details>`).join("")}
     ${sub ? `<div class="done"><b>탐구 계획서를 제출함</b> <small>${esc(sub)}</small><br>고친 뒤 다시 제출하면 선생님께 최신 내용이 전달돼요.${D ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s5sub" data-id="1">고친 내용으로 다시 제출하기</button></div>`}</div>`
-      : D ? "" : `<button class="primary" data-act="psub" data-g="s5sub" data-id="1">탐구 계획서 제출하기</button><p class="hint">제출한 뒤에도 12. 20.까지 고칠 수 있어요.</p>`}`;
+      : D ? "" : `<button class="primary" data-act="psub" data-g="s5sub" data-id="1">탐구 계획서 제출하기</button><p class="hint">제출한 뒤에도 마감 전까지 고칠 수 있어요.</p>`}`;
 };
+function drawHelp(){
+  if(step !== "5-3" || !$("helpBody")) return;
+  $("helpTitle").textContent = `구역 ${planZone} 도움 자료`;
+  $("helpBody").innerHTML = zoneHelp(planZone);
+}
+document.addEventListener("click", e => {
+  if(e.target.closest(".zhelp")) return;
+  const sm = e.target.closest("summary[data-zone]"); if(!sm) return;
+  const z = +sm.dataset.zone, det = sm.parentElement;
+  setTimeout(() => { if(det.open){ openZones.add(z); planZone = z; drawHelp(); } else openZones.delete(z); }, 0);
+});
+document.addEventListener("focusin", e => { const zn = e.target.closest && e.target.closest(".zone[data-zone]"); if(zn && +zn.dataset.zone !== planZone){ planZone = +zn.dataset.zone; drawHelp(); } });
 
 /* ----- 6차시 자기주도 탐구: 조사와 정책 제안서 ----- */
 VIEWS["6-1"] = () => {
@@ -1395,10 +1552,12 @@ function renderDocs(){
     ["b","구조적 원인","연구 보고서·정책 분석",'한국보건사회연구원(<a href="https://www.kihasa.re.kr" target="_blank" rel="noopener">kihasa.re.kr</a>), 국회입법조사처(<a href="https://www.nars.go.kr" target="_blank" rel="noopener">nars.go.kr</a>) 보고서, \'왜\'를 설명하는 기획 기사'],
     ["c","삶에 미치는 영향","사례·인터뷰·설문","지역 언론 보도, 설문 조사 결과 (개인 사례는 통계와 짝지어 쓰기)"]];
   $("tipWhere").innerHTML = '<p class="hint" style="margin:0">내 하위 질문이 무엇을 묻는지에 따라 골라 보기</p>' + WHERE.map(([k, n, kind, where]) => `<div class="where"><b>· ${n}</b> → ${kind}<br>→ ${where}</div>`).join("");
+  drawHelp();
   const c = S.concl;
   $("conclDoc").innerHTML = [["Q","탐구 질문",S.fin.text],["답","탐구 질문에 대한 답변",c.answer],["근거","답변을 뒷받침하는 핵심 근거",c.evidence],["+","더 확인하고 싶은 점 / 새로 생긴 질문",c.more]]
     .map(([l, t, v]) => `<section class="src"><h4><span class="lbl">${l}</span>${t}</h4><p style="margin:0">${esc(v) || "-"}</p></section>`).join("");
-  const PLAN = [["진로","진로 연결",[["s5career","진로(관심) 분야"],["s5why","이유"]]],["사례","새 공간 불평등 사례",[["s5title","사례 제목"],["s5source","출처"],["s5facts","핵심 사실"],["s5reason","공간 불평등인 이유"]]],
+  const PLAN = [["진로","진로 연결",[["s5career","진로(관심) 분야"],["s5why","이유"]]],["사례","새 공간 불평등 사례",[["s5title","사례 제목"],["s5source","출처"],["s5facts","핵심 사실"]]],["확인","공간 불평등인지 확인",[["s5n1","생활의 필요"],["s5n2","기회·부담의 차이"],["s5n3","구조적 원인"]]],
+    ["범위","탐구 범위",[["s5who","대상"],["s5where","지역"],["s5year","기준 연도"]]],
     ["Q","나의 탐구 질문",[["s5myq",""]]],["하위","하위 질문과 찾을 자료",H3.flatMap(([i, t]) => [["s5h" + i, t], ["s5h" + i + "s", "찾을 자료"]])],
     ["일정","탐구 일정",[1,2,3,4].map(i => ["s5d" + i + "|s5t" + i, ""])],["방향","해결 방향",[["s5q2","해결 질문(제도)"],["s5inst","제도적 방안"],["s5q3","해결 질문(시민)"],["s5civic","시민 실천 방안"]]]];
   $("prepDoc").innerHTML = PLAN.map(([l, g, fs]) => `<section class="src"><h4><span class="lbl">${l}</span>${g}</h4>${fs.map(([f, lab]) => {
@@ -1419,8 +1578,9 @@ document.addEventListener("click", async e => {
     drawPend(); return; }
   const b = e.target.closest("[data-act]"); if(!b || !S) return;
   const { act, id, g } = b.dataset;
-  if(me.preview && !["showSrcQ","boardSel","boardRefresh","copy","copyText","pvAs","pvBack","tGo","tRep","cmtKind"].includes(act)){ toast(PVMSG); return; }
+  if(me.preview && !["showSrcQ","boardSel","boardRefresh","copy","copyText","pvAs","pvBack","tGo","tRep","cmtKind","zoneHelp"].includes(act)){ toast(PVMSG); return; }
   if(act === "pvAs"){ startPreview(id); return; }
+  if(act === "zoneHelp"){ e.preventDefault(); const z = +id; inlineHelp.has(z) ? inlineHelp.delete(z) : inlineHelp.add(z); openZones.add(z); planZone = z; render(); return; }
   if(act === "pvBack"){ endPreview(); return; }
   if(act === "tGo"){ openMoum(id); return; }
   if(act === "tRep"){ repMoum = String(id); if(tmode !== "report") setTMode("report"); else drawReport(); return; }
@@ -1475,7 +1635,7 @@ document.addEventListener("click", async e => {
     inp.value = ""; send({ t:"addFb", k:g, id:uid(), name:me.uid, tag:tag.value, text });
   }
   if(act === "delFb"){ send({ t:"delFb", k:g, id, name:me.uid }); }
-  if(act === "psub"){ flushP(); psend(g, id); if(id) toast("제출했어요", true); }
+  if(act === "psub"){ flushP(); psend(g, id); if(id) toast(g === "s5qsub" ? "나의 탐구 질문을 확정했어요" : "제출했어요", true); }
   if(act === "boardSel"){ boardSel = id; render(); }
   if(act === "boardRefresh"){ BOARD = null; render(); }
   if(act === "cmtKind"){ const t = $("cmtText") ? $("cmtText").value : ""; cmtKind = id; render(); if($("cmtText")) $("cmtText").value = t; }
@@ -1491,6 +1651,11 @@ document.addEventListener("click", async e => {
     if(!(await ask("이 댓글을 지울까?"))) return;
     try{ const d = await api({ action:"uncmt", to:boardSel, id }); const t = BOARD.find(x => String(x.moum) === boardSel); if(t) t.cmts = d.cmts; }catch(err){ toast(err.message); }
     render();
+  }
+  if(act === "qstart"){
+    const el = $("pf-s5qs"); if(!el || el.disabled) return;
+    const pre = el.value && !/\n$/.test(el.value) ? "\n" : ""; el.value += pre + b.dataset.w; el.focus(); el.setSelectionRange(el.value.length, el.value.length);
+    el.dispatchEvent(new Event("input", { bubbles:true })); return;
   }
   if(act === "pickQ"){ const q = myQs()[+id]; if(q){ if(pv("s5start") && !(await ask("출발 칸을 이 질문으로 바꿀까?"))) return; psend("s5start", q); } }
   if(act === "pcopyUp"){
@@ -1535,7 +1700,7 @@ document.addEventListener("input", e => {
   if(d.qc !== undefined){ const box = el.parentElement.querySelector(`.qc[data-for="${el.id}"]`); if(box) box.innerHTML = qcHtml(el.value, d.qc); }
   if(d.cnt){ const c = el.parentElement.querySelector(`.cnt[data-for="${el.id}"]`); if(c) c.textContent = el.value.length + "자"; }
   if(d.pf){ clearTimeout(pTimers[d.pf]); pTimers[d.pf] = setTimeout(() => { delete pTimers[d.pf];
-    if(!P) return; P.f[d.pf] = el.value; queue = queue.filter(q => !(q.action === "pset" && q.f === d.pf)); queue.push({ action:"pset", f:d.pf, val:el.value }); pump(); }, 1500); }
+    if(!P || me.preview) return; P.f[d.pf] = el.value; qset(d.pf, el.value); }, 1500); }
   if(d.memo){ NOTES.memos[d.memo] = el.value; saveNotes(); }
 });
 document.addEventListener("keydown", e => { if(e.target.id === "qin" && e.key === "Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); addQuestion(); } });
