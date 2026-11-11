@@ -499,6 +499,77 @@ details.box summary{cursor:pointer;font-weight:700}
 
 @media (max-width:860px){ .landing{grid-template-columns:1fr;gap:32px;padding:32px 18px} .landing h1{font-size:34px} #join{align-items:flex-start} }
 @media (max-width:600px){ .lessons{grid-template-columns:repeat(4,1fr)} .row2,.steps2{grid-template-columns:1fr} .ex-pair{grid-template-columns:1fr} .ex-pair i{display:none} .shell{padding:0 12px 120px} #work > section{padding:0 14px 20px} .acthead{margin:0 -14px 14px;padding:12px 14px} }
+
+/* ===== 활기찬 테마: 차시마다 색 하나 (연습 빨강 · 1 주황 · 2 파랑 · 3 초록 · 4 보라 · 5·6 분홍) ===== */
+:root{ --acc:#FFB000; --acc-t:#FFF3C4; --r:14px; }
+body[data-l="0"],[data-l="0"]{ --acc:#E03131; --acc-t:#FFE3E3; }
+body[data-l="1"],[data-l="1"]{ --acc:#E8590C; --acc-t:#FFE8CC; }
+body[data-l="2"],[data-l="2"]{ --acc:#1971C2; --acc-t:#D0EBFF; }
+body[data-l="3"],[data-l="3"]{ --acc:#099268; --acc-t:#C3FAE8; }
+body[data-l="4"],[data-l="4"]{ --acc:#7048E8; --acc-t:#E5DBFF; }
+body[data-l="5"],[data-l="5"],body[data-l="6"],[data-l="6"]{ --acc:#D6336C; --acc-t:#FFDEEB; }
+@media (prefers-color-scheme: dark){ :root,body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 22%, #1A1A18); } }
+body{background-color:var(--bg);background-image:radial-gradient(color-mix(in srgb, var(--acc) 16%, transparent) 1.2px, transparent 1.3px);background-size:22px 22px}
+/* 머리 */
+.top{background:linear-gradient(100deg,#FFD02B 0%,#FFC21A 55%,color-mix(in srgb, var(--acc) 35%, #FFD02B) 100%);border-bottom:0;box-shadow:0 3px 0 #16150F}
+.top .mark{transform:rotate(-6deg);box-shadow:2px 2px 0 color-mix(in srgb, var(--acc) 70%, #16150F)}
+.top button{border-radius:999px;background:#fff}
+/* 차시 탭: 색 점 + 고르면 그 색으로 */
+.lessons{gap:8px}
+.lessons button{border-radius:var(--r);border:2px solid var(--hair);position:relative;transition:transform .12s, box-shadow .12s}
+.lessons button::before{content:"";display:block;width:26px;height:5px;border-radius:5px;background:var(--acc);margin:0 auto 5px}
+.lessons button:hover{transform:translateY(-2px);box-shadow:0 4px 0 var(--acc)}
+.lessons button[aria-selected=true]{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 4px 0 #16150F}
+.lessons button[aria-selected=true]::before{background:#fff}
+.lessons button[aria-selected=true] small{color:#fff;opacity:.9}
+.acts-nav button[aria-selected=true]{border-bottom:4px solid var(--acc);color:var(--ink)}
+.acts-nav button:hover{color:var(--ink)}
+.badge{border-radius:999px;padding:0 7px}
+/* 활동 판 */
+#work{border:2.5px solid #16150F;border-radius:20px;box-shadow:6px 6px 0 var(--acc)}
+.acthead{background:#16150F;color:#FBF8F1;border-bottom:5px solid var(--acc)}
+.acthead .slidebtn{background:#FBF8F1;color:#16150F}
+.acthead .no{background:var(--acc);color:#fff;padding:1px 10px;border-radius:999px;font-size:14px}
+#docPane{border-radius:20px}
+.box{border:0;border-left:6px solid var(--acc);background:var(--acc-t);border-radius:var(--r)}
+.box .tag,.tag{background:var(--acc);color:#fff;border-radius:999px;padding:2px 11px}
+.cand,.sub,.panel,.bucket,.zone,.ladder,.qbox,.dcard,.warm,.likebar{border-radius:var(--r)}
+.cand .num,.sub .num,.panel .num{color:var(--acc)}
+.qbox{border-color:var(--acc);border-width:2.5px;background:linear-gradient(90deg,var(--acc-t),transparent 70%)}
+.rung.ends{border-left-color:var(--acc);background:var(--acc-t)}
+.rung{border-left-color:color-mix(in srgb, var(--acc) 35%, var(--hair))}
+.done{background:linear-gradient(120deg,#FFD02B,color-mix(in srgb, var(--acc) 30%, #FFD02B));border-radius:var(--r);box-shadow:0 4px 0 #16150F}
+.done b::before{content:"🎉 "}
+.locked{background:var(--acc-t);border-radius:var(--r)}
+h2{display:flex;align-items:center;gap:8px}
+#work h2::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--acc);transform:rotate(45deg);flex:none}
+/* 단추: 통통 튀는 느낌 */
+.primary{border-radius:999px;box-shadow:0 4px 0 color-mix(in srgb, var(--acc) 80%, #16150F);transition:transform .08s, box-shadow .08s}
+.primary:not(:disabled):hover{transform:translateY(-1px)}
+.primary:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #16150F}
+.primary.y{box-shadow:0 4px 0 #16150F}
+.ghost{border-radius:999px}
+.ghost:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+.slot.on,.whos button[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+.srcpick button[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+input:focus,textarea:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb, var(--acc) 30%, transparent)}
+input[type=text],input[type=password],textarea,select{border-radius:12px}
+.chk input{accent-color:var(--acc)}
+/* 첫 화면 */
+.landing h1 em{background:linear-gradient(transparent 58%,#FFD02B 58%)}
+.flow li:nth-child(1) .no{color:#E8590C} .flow li:nth-child(2) .no{color:#1971C2} .flow li:nth-child(3) .no{color:#099268} .flow li:nth-child(4) .no{color:#7048E8}
+.flow li{border-bottom:2px dotted var(--hair)}
+.flow .no{font-size:22px}
+.card-login{border:2.5px solid #16150F;border-radius:22px;box-shadow:8px 8px 0 #FFD02B}
+#join{background:radial-gradient(circle at 8% 12%, #FFE8CC 0 120px, transparent 121px),radial-gradient(circle at 92% 85%, #D0EBFF 0 160px, transparent 161px),radial-gradient(circle at 70% 8%, #C3FAE8 0 70px, transparent 71px)}
+@media (prefers-color-scheme: dark){ #join{background:none} }
+/* 선생님 막대·현황판 */
+.tbar{border-radius:18px;box-shadow:0 4px 0 color-mix(in srgb, var(--acc) 70%, #000)}
+.tbar button{border-radius:999px}
+.dcard{border-width:2px;transition:transform .12s} .dcard:not(.empty):hover{transform:translateY(-2px);box-shadow:0 4px 0 var(--acc)}
+.dpill.ok{background:var(--acc-t);border-color:var(--acc)}
+#toast{border-radius:999px}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
 <body>
@@ -1236,7 +1307,7 @@ $("stepNav").addEventListener("click", e => { const b = e.target.closest("[data-
 function setStep(s, byUser){
   if(!STEPS[s]) return;
   flushP();
-  step = s; selected.clear(); lastStep[lessonOf(s)] = s;
+  step = s; selected.clear(); lastStep[lessonOf(s)] = s; document.body.dataset.l = lessonOf(s);
   const L = LESSON[lessonOf(s)];
   $("hsub").textContent = `${lessonOf(s)}차시 · ${L.stage}`; $("htitle").textContent = L.title;
   drawDocTabs(); drawNav(); render();
