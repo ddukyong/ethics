@@ -180,6 +180,20 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .wrank .nm{flex:1} .wrank .nm small{color:var(--muted)}
 .wrank li.me{background:var(--soft);border-radius:8px}
 .rb{font-weight:400;font-family:inherit;color:var(--muted);font-size:.78em;white-space:nowrap}
+#qrDock{position:fixed;right:14px;bottom:14px;z-index:40;display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border:2px solid var(--ink);border-radius:12px;background:#fff;color:#16150F;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer}
+#qrDock[hidden]{display:none}
+body.has-dock{padding-bottom:110px}
+#qrDockImg svg{width:84px;height:84px;display:block}
+#qrDock .qt{display:flex;flex-direction:column;align-items:flex-start;font-size:14px;line-height:1.35;text-align:left} #qrDock .qt small{color:#555;font-size:12px}
+@media (max-width:700px){ #qrDockImg svg{width:56px;height:56px} #qrDock .qt small:last-child{display:none} }
+#qrBig{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:16px}
+#qrBig[hidden]{display:none}
+#qrBig .qb{background:#fff;color:#16150F;border-radius:18px;padding:3vh 3vw;text-align:center;max-width:94vw;max-height:94vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+#qrBig .bh{font-size:clamp(20px,3.6vh,36px)} #qrBig p{margin:0;font-size:clamp(15px,2.4vh,24px)}
+#qrBigImg svg{width:min(62vh,80vw);height:min(62vh,80vw);display:block;margin:0 auto}
+#present .pg{display:flex;gap:1.2vw;align-items:center} #present .pg .pgt{flex:1;min-width:0}
+#present .pqr{flex:none;display:flex;flex-direction:column;align-items:center;gap:.3vh;background:#fff;border:0;padding:.6vh;border-radius:1vh;cursor:pointer;color:#16150F;font-size:clamp(10px,1.5vh,16px);line-height:1.2}
+#present .pqr svg{width:15vh;height:15vh;display:block}
 #present{position:fixed;inset:0;z-index:45;background:var(--bg);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:2vw;padding:2.5vh 2.5vw;overflow:hidden}
 #present .pv{display:flex;align-items:center;justify-content:center;min-height:0;background:var(--docbg);border-radius:2vh;overflow:hidden}
 #present .pv img{max-width:100%;max-height:95vh;object-fit:contain;display:block}
@@ -751,12 +765,19 @@ details.box summary{cursor:pointer;font-weight:700}
 </div>
 <div id="modal" hidden><div><p id="modalMsg"></p><div class="acts"><button class="ghost" id="modalNo">아니요</button><button class="ghost" id="modalYes" style="background:var(--ink);color:var(--paper);border-color:var(--ink)">네</button></div></div></div>
 <div id="present" hidden></div>
+<button id="qrDock" hidden aria-label="학생 접속 QR 크게 보기"><span id="qrDockImg"></span><span class="qt"><b>학생 접속</b><small id="qrDockCode"></small><small>누르면 크게</small></span></button>
+<div id="qrBig" hidden role="dialog" aria-label="학생 접속 QR"><div class="qb">
+  <b class="bh">학생 접속 QR</b><div id="qrBigImg"></div>
+  <p>수업 코드 <b id="qrBigCode"></b></p><p class="hint" id="qrBigUrl"></p>
+  <p class="hint">휴대폰 카메라로 찍으면 수업 코드가 들어간 첫 화면이 열려요. 학번·이름·모둠만 쓰면 이어서 할 수 있어요.</p>
+  <button class="primary" id="qrBigClose" style="width:auto;margin:6px auto 0;padding:10px 28px">닫기</button></div></div>
 <div id="zoomOv" hidden role="dialog" aria-label="지도 크게 보기">
   <div class="zbar"><span id="zoomTip">누르면 더 크게 · 손가락으로 밀어서 보기</span><button id="zoomClose">닫기 ✕</button></div>
   <div class="zwrap" id="zoomWrap"><img id="zoomImg" alt=""></div>
 </div>
 <div id="toast" hidden></div>
 
+<script src="qrcode.js"></script>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzfHP_EYODLuj0xLqBrmL_kVV-Y16oSoOtVF0DpyMKRLJoc4vdjRqpWnx5KLnPnJ1s/exec";
 const MOUMS = 8;
@@ -1079,6 +1100,7 @@ $("tLeaves").onclick = async () => {
 /* ===== 들어가기 ===== */
 $("jmoum").innerHTML += Array.from({length:MOUMS}, (_, i) => `<option value="${i+1}">${i+1}모둠</option>`).join("");
 let asTeacher = false;
+try{ const c0 = new URLSearchParams(location.search).get("c"); if(c0) $("jcode").value = c0.slice(0, 20); }catch(e){}
 function joinValid(){ $("joinBtn").disabled = !($("jcode").value.trim() && (asTeacher ? $("jkey").value.trim() : $("jsid").value.trim() && $("jname").value.trim())); }
 ["jcode","jsid","jname","jkey"].forEach(id => $(id).addEventListener("input", joinValid)); $("jmoum").addEventListener("change", joinValid);
 $("teacherToggle").onclick = () => {
@@ -1106,7 +1128,7 @@ $("leave").onclick = async () => {
   if(me && me.preview){ endPreview(); return; }
   if(!(await ask("이 기기에서 로그아웃할까요? 학번과 이름으로 다시 들어오면 이어서 할 수 있어요."))) return;
   endAway(); try{ localStorage.removeItem(LS); }catch(e){}
-  me = null; S = null; P = null; CLS = null; $("app").hidden = true; $("join").hidden = false; $("lockOv").hidden = true; hideMarkBar();
+  me = null; S = null; P = null; CLS = null; $("app").hidden = true; $("join").hidden = false; $("lockOv").hidden = true; hideMarkBar(); drawDock(); $("qrBig").hidden = true;
 };
 function show(cls){
   $("join").hidden = true; $("app").hidden = false;
@@ -1115,6 +1137,7 @@ function show(cls){
   loadNotes(); setStep(step);
   if(cls) applyCls(cls, true);
   render();
+  drawDock();
   if(me.teacher) setTMode("dash"); else { $("dash").hidden = true; $("report").hidden = true; $("lessonArea").hidden = false; }
 }
 
@@ -1268,8 +1291,24 @@ VIEWS["0-1"] = () => {
 };
 /* 발표 화면 — 화면 높이·너비에 맞춰 크기를 정해 확대해도 한 화면에 다 보임 */
 let presentOn = false, presentFrom = "";
+/* 학생 접속 QR — 수업 코드가 들어간 첫 화면 주소 */
+const joinUrl = () => location.origin + location.pathname + "?c=" + encodeURIComponent((me && (me.back || me).code) || "");
+const QRC = {};
+function qrSvg(text){ if(QRC[text]) return QRC[text]; if(typeof qrcode !== "function") return "";
+  try{ const q = qrcode(0, "M"); q.addData(text); q.make(); return QRC[text] = q.createSvgTag({ cellSize:4, margin:2, scalable:true, alt:"학생 접속 QR" }); }catch(e){ return ""; } }
+function drawDock(){
+  const T = me && (me.teacher || (me.preview && me.back && me.back.teacher)), d = $("qrDock");
+  d.hidden = !T || presentOn || $("app").hidden;
+  document.body.classList.toggle("has-dock", !d.hidden);
+  if(d.hidden) return;
+  const u = joinUrl(); if(d.dataset.u !== u){ d.dataset.u = u; $("qrDockImg").innerHTML = qrSvg(u); $("qrDockCode").textContent = "수업 코드 " + (me.back || me).code; }
+}
+function openQrBig(){ const u = joinUrl(); $("qrBigImg").innerHTML = qrSvg(u); $("qrBigCode").textContent = (me.back || me).code; $("qrBigUrl").textContent = u; $("qrBig").hidden = false; }
+$("qrDock").onclick = openQrBig;
+$("qrBigClose").onclick = () => { $("qrBig").hidden = true; };
+$("qrBig").onclick = e => { if(e.target.id === "qrBig") $("qrBig").hidden = true; };
 function drawPresent(){
-  const ov = $("present"); if(!ov) return;
+  const ov = $("present"); if(!ov) return; drawDock();
   if(!presentOn || step !== "0-1" || !me || !me.teacher){ ov.hidden = true; return; }
   ov.hidden = false;
   const ws = warmState(), w = ws.w, R1 = w && w.round && w.start ? w.round : 0, rk = WR && w && WR.game === w.game ? WR : null, last = R1 === 2 && ws.phase === "end";
@@ -1278,7 +1317,8 @@ function drawPresent(){
   const showPic = R1 && (ws.phase === "ready" || ws.phase === "run");
   ov.innerHTML = `<div class="pv">${showPic ? `<img src="${imgs[R1 - 1]}" alt="라운드 ${R1} 사진">` : `<p>${ws.phase === "end" ? "이번 라운드 끝!<br>다음 라운드를 시작하면<br>새 사진이 나와요" : "라운드를 시작하면<br>사진이 나와요"}</p>`}</div>
     <div class="pr">
-      <div class="pg"><b>질문 쏟아내기 연습</b><ol><li>사진을 보고 떠오르는 것은 <b>무엇이든</b> 질문으로</li><li>한 줄 쓰고 <b>Enter</b>, 바로 다음 질문!</li><li>라운드 1 <b>5분</b> · 라운드 2 <b>2분</b> — <b>총합</b> 1등에게 상품 🎁</li></ol></div>
+      <div class="pg"><div class="pgt"><b>질문 쏟아내기 연습</b><ol><li>사진을 보고 떠오르는 것은 <b>무엇이든</b> 질문으로</li><li>한 줄 쓰고 <b>Enter</b>, 바로 다음 질문!</li><li>라운드 1 <b>5분</b> · 라운드 2 <b>2분</b> — <b>총합</b> 1등에게 상품 🎁</li></ol></div>
+        <button class="pqr" data-act="qrBig" title="누르면 크게">${qrSvg(joinUrl())}<b>학생 접속</b><span>코드 ${esc(me.code)}</span></button></div>
       <div class="pt"><span class="wround">${R1 ? `라운드 ${R1} / 2` : "라운드 1부터"}</span><div class="num ${ws.phase}${ws.phase === "run" && ws.left <= 10 ? " hurry" : ""}" id="pNum">${timer}</div>
         <div class="msg">${ws.phase === "wait" ? "곧 시작해요" : ws.phase === "ready" ? "준비!" : ws.phase === "run" ? "쉴 새 없이 쏟아내기!" : last ? "두 라운드 끝! 총합 순위" : "이번 라운드 끝!"}</div></div>
       ${rk && !busyNow ? `<div class="prk"><b>${last ? "🏆 총합 순위 상위 5명" : "총합 순위 상위 5명"}</b><ol>${rk.total.slice(0, 5).map(r => `<li>${esc(r.name)} <small>${esc(r.moum)}모둠</small> — <b>총 ${r.n}개</b>${rBreak(r)}</li>`).join("") || "<li>아직 없음</li>"}</ol></div>` : ""}
@@ -1935,6 +1975,7 @@ document.addEventListener("click", async e => {
   if(act === "warmStart"){ acx(); try{ const d = await api({ action:"warmStart", round:+id }); CLS = d.cls; render(); }catch(err){ toast(err.message); } return; }
   if(act === "warmNew"){ if(!(await ask("새 게임을 시작할까요? 라운드 1부터 다시 세고, 총합도 0부터 시작해요."))) return;
     try{ const d = await api({ action:"warmStart", round:1, newGame:true, reset:true }); CLS = d.cls; WR = null; render(); }catch(err){ toast(err.message); } return; }
+  if(act === "qrBig"){ openQrBig(); return; }
   if(act === "warmReset"){ const w = CLS && CLS.warm; if(!w || !w.start) return;
     if(!(await ask("타이머를 멈추고 처음 상태로 되돌릴까요? 지금까지 올라온 질문 수와 순위는 그대로 남아요."))) return;
     stopMusic(); try{ const d = await api({ action:"warmStart", round:w.round || 1, reset:true }); CLS = d.cls; render(); drawPresent(); toast("타이머를 초기화했어요", true); }catch(err){ toast(err.message); } return; }
@@ -2244,7 +2285,7 @@ document.addEventListener("click", e => {
 });
 $("zoomImg").onclick = () => { const big = $("zoomOv").classList.toggle("big"); $("zoomTip").textContent = big ? "다시 누르면 화면에 맞추기 · 손가락으로 밀어서 보기" : "누르면 더 크게 · 손가락으로 밀어서 보기"; };
 $("zoomClose").onclick = () => { $("zoomOv").hidden = true; };
-document.addEventListener("keydown", e => { if(e.key === "Escape"){ $("zoomOv").hidden = true; if(presentOn){ presentOn = false; drawPresent(); if(presentFrom){ const m = presentFrom; presentFrom = ""; setTMode(m); } } } });
+document.addEventListener("keydown", e => { if(e.key === "Escape"){ $("zoomOv").hidden = true; if(!$("qrBig").hidden){ $("qrBig").hidden = true; return; } if(presentOn){ presentOn = false; drawPresent(); if(presentFrom){ const m = presentFrom; presentFrom = ""; setTMode(m); } } } });
 
 /* ===== 집중 모드: 다른 화면으로 가면 앱을 가리고, 벗어난 시간을 기록 ===== */
 let away = null;
