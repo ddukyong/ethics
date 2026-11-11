@@ -319,6 +319,7 @@ body.has-dock{padding-bottom:110px}
 .likeb.on{background:#FFD02B;border-color:var(--ink);color:#16150F}
 .likeb:disabled{cursor:default;opacity:.55} .likeb.on:disabled{opacity:1}
 .pickq.top{background:#FFF6D1;border-radius:8px}
+.pickhead{display:flex;justify-content:space-between;gap:8px;margin:4px 2px 0;font-size:13px;font-weight:700;color:var(--acc,#16150F)}
 .whot{width:100%;border-collapse:collapse;margin-top:6px;font-size:15px}
 .whot th{text-align:left;font-size:13px;color:var(--muted);font-weight:700;padding:4px 8px;border-bottom:2px solid var(--ink)}
 .whot td{padding:8px;border-bottom:1px solid var(--hair);vertical-align:middle}
@@ -1570,7 +1571,7 @@ function slideGuide(st){
   /* 학생 화면의 ‘이렇게 해요’ 안내를 그대로 가져와 크게 보여 줌 (학생 화면과 늘 같은 내용) */
   try{
     const tmp = document.createElement("div"); tmp.innerHTML = VIEWS[st]().split(SLOT).join("");
-    const box = tmp.querySelector(".box"); if(!box) return "";
+    const box = [...tmp.querySelectorAll(".box")].find(b => (b.querySelector(".tag") || {}).textContent === "이렇게 해요") || tmp.querySelector(".box"); if(!box) return "";
     box.querySelectorAll("button, input, textarea, select, details").forEach(x => x.remove());
     return box.innerHTML;
   }catch(e){ return ""; }
@@ -1908,34 +1909,35 @@ VIEWS["1-3"] = () => {
   const myL = S.cards.filter(c => (c.likes || []).includes(me.uid)).length, canL = !me.teacher && !me.preview && !S.done;
   const ranked = S.cards.filter(c => nL(c) > 0).sort((a, b) => nL(b) - nL(a)), topN = ranked.length ? nL(ranked[Math.min(2, ranked.length - 1)]) : 0;
   const voters = new Set(S.cards.flatMap(c => c.likes || [])).size, mem = memNames().length;
-  return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li><b>👍 좋아요 투표</b> — 모둠 질문을 읽고, 탐구하고 싶은 질문에 <b>한 사람 3개씩</b> 좋아요 누르기 <small>(다시 누르면 취소)</small></li>
-      <li><b>결과 보기</b> — 묶음마다 좋아요 많은 순으로 정렬돼요. 2개 이상 받은 상위 질문에 🏅 표시</li>
-      <li><b>후보 고르기</b> — 좋아요를 참고해 의논하고, 질문 옆 <b>①②③</b>으로 후보 칸에 보내 다듬기</li></ol>
-      <small>누르기 전에 생각하기: 자료로 답을 찾을 수 있을까? ‘왜·어떻게’를 묻는가? — 좋아요는 참고일 뿐, 후보는 모둠이 의논해 정해요.</small></div>
-    <div class="box"><span class="tag">도움말</span>
+  return `<div class="box"><span class="tag">도움말</span>
       <ul><li>묶음마다 대표가 되는 질문을 고르거나, 비슷한 질문을 한 문장으로 합치기</li>
       <li><b>닫힌 질문을 열린 질문으로 만드는 방법</b>: ‘예/아니요’나 숫자 하나로 끝나는 질문에 ‘왜’, ‘어떻게’, ‘어떤 영향’을 넣어 더 알아보고 싶은 질문으로 바꾸기
         <div class="ex-pair"><span>의료취약지는 몇 곳일까?</span><i>→</i><span>의료취약지는 <b>왜</b> 비수도권 군 지역에 몰려 있을까?</span></div>
         <div class="ex-pair"><span>지방 병원은 의사 연봉이 높을까?</span><i>→</i><span>높은 연봉에도 의사가 오지 않으면 지역 응급실은 <b>어떻게</b> 운영될까?</span></div>
         <div class="ex-pair"><span>닥터헬기는 밤에 못 뜰까?</span><i>→</i><span>닥터헬기가 밤에 뜨지 못하는 것은 군 지역 주민에게 <b>어떤 영향을 미칠까?</b></span></div></li></ul></div>
-    <h2>① 👍 좋아요 투표 → 대표 질문 골라 후보로 보내기</h2>
+    <div class="box"><span class="tag">이렇게 해요</span>
+      <ol><li><b>👍 좋아요 투표</b> — 아래 모둠 질문을 읽고, 탐구하고 싶은 질문에 <b>한 사람 3개씩</b> 👍 누르기 <small>(다시 누르면 취소)</small></li>
+      <li><b>후보로 보내기</b> — 좋아요가 많은 질문(🏅)을 참고해 의논하고, 질문 옆 <b>①②③</b>을 눌러 후보 칸에 보내기</li>
+      <li><b>다듬고 확정하기</b> — 맨 아래 후보 칸에서 위 도움말처럼 열린 질문으로 다듬고 [확정하기]</li></ol>
+      <small>누르기 전에 생각하기: 자료로 답을 찾을 수 있을까? ‘왜·어떻게’를 묻는가? — 좋아요는 참고일 뿐, 후보는 모둠이 의논해 정해요.</small></div>
+    <h2>① 👍 좋아요 투표 → ② 후보로 보내기</h2>
     <div class="likebar">${me.teacher || me.preview ? `<span>모둠 투표 참여 <b>${voters}</b>${mem ? ` / ${mem}` : ""}명 · 좋아요 합계 <b>${S.cards.reduce((a, c) => a + nL(c), 0)}</b>개</span>`
       : `<span>내 좋아요 <b>${3 - myL}</b>개 남음</span>${[0,1,2].map(i => `<i class="${i < myL ? "on" : ""}">👍</i>`).join("")}<span class="hint">· 투표 참여 ${voters}${mem ? ` / ${mem}` : ""}명</span>`}</div>
-    <p class="hint">질문 옆 <b>①②③</b>을 누르면 그 번호의 후보 칸으로 들어가요. 같은 번호에 두 질문을 보내면 합쳐 쓸 바탕 질문이 되고, 다시 누르면 빠져요.</p>
+    <div class="pickhead"><span>① 탐구하고 싶으면 👍</span><span>② 후보 칸 번호 누르기 ①②③</span></div>
+    <p class="hint" style="margin-top:2px">같은 번호에 두 질문을 보내면 합쳐 쓸 바탕 질문이 되고, 다시 누르면 빠져요.</p>
     ${groupsForPick.map(g => { if(!g.cs.length) return "";
       return `<div class="pickg box"><h3>${esc(g.name)} <span class="hint">(${g.cs.length})</span></h3>${g.cs.map(c => { const mine = (c.likes || []).includes(me.uid), top = topN && nL(c) >= Math.max(topN, 2);
         return `<div class="pickq${top ? " top" : ""}"><button class="likeb${mine ? " on" : ""}" data-act="like" data-id="${c.id}" aria-pressed="${mine}" ${canL && (mine || myL < 3) ? "" : "disabled"} title="${mine ? "좋아요 취소" : "탐구하고 싶어요"}">👍 ${nL(c)}</button><span>${top ? "🏅 " : ""}${esc(c.text)} <small class="hint">${esc(dn(c.name))}</small></span>
         ${S.done ? "" : `<span class="slots"><small>후보로 보내기</small>${[0,1,2].map(i => { const k = S.cands[i], on = k && k.from.includes(c.id), ok = k || i === S.cands.length;
           return `<button class="slot${on ? " on" : ""}" data-act="toSlot" data-id="${c.id}" data-g="${i}" aria-pressed="${!!on}" ${ok ? "" : "disabled"} title="${k ? `후보 ${NUM[i]}` : "새 후보"}">${NUM[i]}</button>`; }).join("")}</span>`}</div>`; }).join("")}</div>`; }).join("") || '<p class="empty">아직 올라온 질문이 없음</p>'}
-    <h2>② 우리 모둠 후보 탐구 질문 (${S.cands.length}/3)</h2>
+    <h2>③ 후보 탐구 질문 다듬고 확정하기 (${S.cands.length}/3)</h2>
     ${S.cands.map((k, i) => `<div class="cand"><span class="num">후보 ${NUM[i]}</span>
       <label for="ct-${k.id}">후보 탐구 질문</label>
       <textarea id="ct-${k.id}" maxlength="200" data-k="ct-${k.id}" data-ctext="${k.id}" ${S.done ? "disabled" : ""}>${esc(k.text)}</textarea>
       ${k.from.length ? `<p class="from">바탕이 된 질문: ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}
       ${k.from.length >= 2 && !S.done ? '<p class="hint warn">바탕 질문이 2개 이상이에요 — 위 칸에서 한 문장으로 합쳐 쓰기</p>' : ""}
       ${S.done ? "" : `<div class="acts"><button class="ghost" data-act="delCand" data-id="${k.id}">후보에서 빼기</button></div>`}</div>`).join("")
-      || '<p class="empty">위에서 [후보로]를 누르거나, 아래 단추로 새로 써서 후보를 올리기</p>'}
+      || '<p class="empty">위에서 질문 옆 ①②③을 누르거나, 아래 [+ 새로 쓰기]로 후보를 올리기</p>'}
     ${S.done || S.cands.length >= 3 ? "" : `<button class="ghost" data-act="addCand" style="margin-top:12px">+ 새로 쓰기</button>`}
     ${S.done ? `<div class="done"><b>후보 탐구 질문을 확정함</b><pre>${esc(summary())}</pre>
       <div class="acts"><button class="ghost" data-act="copy" data-g="1">공유문서용으로 복사</button><button class="ghost" data-act="reopen" data-g="done">다시 고치기</button></div></div>`
