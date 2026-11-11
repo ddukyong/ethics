@@ -179,7 +179,7 @@ function handle_(p){
       lock.waitLock(20000);
       try{
         const c = getCls_(code), w = c.warm || { game:0 };
-        const r = Math.min(3, Math.max(1, +p.round || 1));
+        const r = Math.min(2, Math.max(1, +p.round || 1));
         const game = p.newGame || !w.game ? (w.game || 0) + 1 : w.game;
         c.warm = { game, round:r, start:p.reset ? 0 : Date.now() + 3000, sec:60 };
         putCls_(code, c);
@@ -209,7 +209,7 @@ function handle_(p){
       const w = getCls_(code).warm;
       if(!w) return { ok:true, game:0, round:0, rank:[], total:[] };
       const list = cs => Object.keys(cs).map(u => ({ uid:u, name:cs[u].name, moum:cs[u].moum, n:cs[u].n })).sort((a, b) => b.n - a.n);
-      const per = [1, 2, 3].map(r => warmCounts_(code, w.game, r)), sum = {};
+      const per = [1, 2].map(r => warmCounts_(code, w.game, r)), sum = {};
       per.forEach(cs => Object.keys(cs).forEach(u => { const x = sum[u] = sum[u] || { name:cs[u].name, moum:cs[u].moum, n:0 }; x.n += cs[u].n; }));
       return { ok:true, game:w.game, round:w.round, rank:list(per[w.round - 1]), total:list(sum) };
     }

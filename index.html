@@ -477,9 +477,9 @@ details.box summary{cursor:pointer;font-weight:700}
 
           <div class="doc" data-doc="w0">
             <p class="doc-title">사진을 보고 질문 쏟아내기</p>
-            <p class="doctip">사진을 누르면 크게 볼 수 있어요. 어떤 사진이든, 무엇이든 궁금한 것을 물어보기</p>
+            <p class="doctip">사진을 누르면 크게 볼 수 있어요. 무엇이든 궁금한 것을 물어보기</p>
+            <p class="mapnote" id="warmWait">선생님이 라운드를 시작하면 사진이 나와요</p>
             <section class="src"><img class="map" src="warm1.jpg" alt="벽난로 앞에서 강아지를 찍는 사람"></section>
-            <section class="src"><img class="map" src="warm2.jpg" alt="도심 도로를 가득 메운 달리기 참가자들"></section>
             <section class="src"><img class="map" src="warm3.jpg" alt="영화관 무대 위 캐릭터 인형 탈"></section>
           </div>
 
@@ -1106,7 +1106,7 @@ const narrow = () => matchMedia("(max-width:959px)").matches;
 const READ = new Set(["0-1", "1-1", "2-1", "3-1", "4-1", "5-1"]);
 const docUser = {};
 const docIsOpen = () => step in docUser ? docUser[step] : (narrow() ? READ.has(step) : docOpen);
-function drawDoc(){ const o = docIsOpen(); $("split").classList.toggle("nodoc", !o); $("docToggle").textContent = o ? "접기" : "펼치기"; }
+function drawDoc(){ const o = docIsOpen() && !$("docPane").hidden; $("split").classList.toggle("nodoc", !o); $("docToggle").textContent = o ? "접기" : "펼치기"; }
 $("docToggle").onclick = () => { const o = !docIsOpen(); if(narrow()) docUser[step] = o; else { docOpen = o; Object.keys(docUser).forEach(k => delete docUser[k]); } drawDoc(); };
 const SLOT = '<div id="docSlot"></div>';
 function parkDoc(){ const pane = $("docPane"); if(pane.parentElement !== $("split")) $("split").insertBefore(pane, $("work")); }
@@ -1150,7 +1150,7 @@ function render(){
   const openD = [...document.querySelectorAll("#work details[open] > summary")].map(x => x.textContent);
   const fn = VIEWS[step], shut = closed56(step);
   parkDoc();
-  $("docPane").hidden = shut;
+  $("docPane").hidden = shut || (step === "0-1" && !me.teacher);
   $("work").innerHTML = `<section>${head(step)}${shut ? '<p class="locked">🔒 자기주도 탐구(5·6차시)는 특강이 끝난 뒤 선생님이 열면 시작할 수 있어요. 오늘 모둠과 함께 익힌 과정을 이제 혼자서 해 보게 돼요.</p>' : fn ? fn() : ""}</section>`;
   if(step === "4-2" && !BOARD && !boardBusy) loadBoard();
   if($("qin") && qinVal) $("qin").value = qinVal;
@@ -1204,15 +1204,15 @@ VIEWS["0-1"] = () => {
   const ws = warmState(), w = ws.w, T = me.teacher || me.preview, key = w ? `${w.game}-${w.round}` : "";
   if(key !== WM.key) WM = { key, mine:[], n:0 };
   const timer = ws.phase === "wait" ? "1:00" : ws.phase === "ready" ? `${ws.left}…` : ws.phase === "run" ? mmss2(ws.left) : "끝!";
-  const R1 = w && w.round ? w.round : 0, rk = WR && w && WR.game === w.game ? WR : null, last = R1 === 3 && ws.phase === "end";
+  const R1 = w && w.round ? w.round : 0, rk = WR && w && WR.game === w.game ? WR : null, last = R1 === 2 && ws.phase === "end";
   const myTotal = rk ? (rk.total.find(x => x.uid === me.uid) || { n:0 }).n : 0;
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>라운드마다 <b>사진 한 장</b>을 보고 떠오르는 것은 무엇이든 질문으로 쓰기 — 바보 같은 질문은 없어요</li><li>한 줄 쓰고 <b>Enter</b>, 바로 다음 질문! 맞춤법·좋은 질문인지는 신경 쓰지 않기</li><li>라운드 1·2·3 각 <b>1분</b> — 세 라운드 <b>총합</b>이 가장 많은 사람에게 상품! 🎁</li></ol></div>
+      <ol><li>라운드마다 <b>앞 화면의 사진 한 장</b>을 보고 떠오르는 것은 무엇이든 질문으로 쓰기 — 바보 같은 질문은 없어요</li><li>한 줄 쓰고 <b>Enter</b>, 바로 다음 질문! 맞춤법·좋은 질문인지는 신경 쓰지 않기</li><li>라운드 1·2 각 <b>1분</b> — 두 라운드 <b>총합</b>이 가장 많은 사람에게 상품! 🎁</li></ol></div>
     ${SLOT}
-    <div class="warm"><div class="wround">${R1 ? `라운드 ${R1} / 3 · 사진 ${R1}` : "라운드 1 · 사진 1부터"}</div>
+    <div class="warm"><div class="wround">${R1 && w.start ? `라운드 ${R1} / 2` : "라운드 1부터"}</div>
       ${me.teacher ? `<div class="wtimer big ${ws.phase}" id="wTimer">${timer}</div>` : `<div class="wstate ${ws.phase}">${ws.phase === "wait" ? "준비" : ws.phase === "ready" ? "곧 시작!" : ws.phase === "run" ? "지금 쏟아내기!" : "끝!"}</div>`}
-      <p class="hint" id="wMsg">${ws.phase === "wait" ? (me.teacher ? "라운드를 시작하면 3초 뒤 1분 타이머가 돌아가요. 이 화면을 크게 띄워 주세요." : "선생님이 시작하면 질문을 쓸 수 있어요") : ws.phase === "ready" ? "사진을 보며 준비하기" : ws.phase === "run" ? (me.teacher ? "학생들이 질문을 쏟아내는 중" : "타이머는 앞 화면을 보세요") : last ? "세 라운드 끝! 총합 순위를 확인해요" : "이번 라운드 끝! 다음 라운드를 기다려요"}</p>
-      ${me.teacher ? `<div class="acts" style="justify-content:center">${[1,2,3].map(r => `<button class="${r === (ws.phase === "end" || ws.phase === "wait" ? Math.min(3, R1 + (ws.phase === "end" ? 1 : 0) || 1) : 0) ? "primary y" : "ghost"}" style="width:auto;margin:0;padding:8px 16px" data-act="warmStart" data-id="${r}" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>라운드 ${r} 시작</button>`).join("")}</div>
+      <p class="hint" id="wMsg">${ws.phase === "wait" ? (me.teacher ? "라운드를 시작하면 3초 뒤 1분 타이머가 돌아가요. 이 화면을 크게 띄워 주세요." : "선생님이 시작하면 질문을 쓸 수 있어요") : ws.phase === "ready" ? "사진을 보며 준비하기" : ws.phase === "run" ? (me.teacher ? "학생들이 질문을 쏟아내는 중" : "타이머는 앞 화면을 보세요") : last ? "두 라운드 끝! 총합 순위를 확인해요" : "이번 라운드 끝! 다음 라운드를 기다려요"}</p>
+      ${me.teacher ? `<div class="acts" style="justify-content:center">${[1,2].map(r => `<button class="${r === (ws.phase === "end" || ws.phase === "wait" ? Math.min(2, R1 + (ws.phase === "end" ? 1 : 0) || 1) : 0) ? "primary y" : "ghost"}" style="width:auto;margin:0;padding:8px 16px" data-act="warmStart" data-id="${r}" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>라운드 ${r} 시작</button>`).join("")}</div>
           <div class="acts" style="justify-content:center"><button class="ghost" data-act="warmMusic">${musicOn ? "🔊 음악 켜짐" : "🔇 음악 꺼짐"}</button><button class="ghost" data-act="warmRank">순위 새로 고침</button><button class="ghost" data-act="warmNew" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>새 게임 (점수 0부터)</button></div>`
         : T ? "" : `<div class="fbin" style="margin-top:12px"><input type="text" id="wIn" data-k="wIn" maxlength="200" placeholder="${ws.phase === "run" ? "질문 쓰고 Enter" : "시작하면 여기에 써요"}" ${ws.phase === "run" ? "" : "disabled"}><button class="primary" style="width:auto;margin:0;padding:8px 18px" data-act="warmAdd" ${ws.phase === "run" ? "" : "disabled"}>올리기</button></div>
           <p class="wcount">이번 라운드 <b>${WM.n}</b>개${rk ? ` · 총합 <b>${Math.max(myTotal, 0)}</b>개` : ""}</p>`}
@@ -1761,7 +1761,9 @@ function renderDocs(){
   $("tipWhere").innerHTML = '<p class="hint" style="margin:0">내 하위 질문이 무엇을 묻는지에 따라 골라 보기</p>' + WHERE.map(([k, n, kind, where]) => `<div class="where"><b>· ${n}</b> → ${kind}<br>→ ${where}</div>`).join("");
   drawHelp();
   { const w = CLS && CLS.warm, r = w && w.game && w.round ? w.round : 0;
-    document.querySelectorAll('[data-doc="w0"] .src').forEach((x, i) => { x.hidden = !!r && i !== r - 1; }); }
+    const on = w && w.game && w.start ? r : 0;
+    document.querySelectorAll('[data-doc="w0"] .src').forEach((x, i) => { x.hidden = i !== on - 1; });
+    if($("warmWait")) $("warmWait").hidden = !!on; }
   if(step === "2-3" && $("ourQs")){
     const D = S.done2, keys = KS();
     const row = t => !t || !t.trim() ? "" : `<div class="pickq" style="margin:4px 0"><span>${esc(t)}</span>${D || me.teacher || me.preview ? "" : `<span class="slots">${keys.map(([k, n]) => `<button class="slot" data-act="toSub" data-g="${k}" data-w="${esc(t)}" title="하위 질문 ${n} 칸에 넣기">${n}</button>`).join("")}</span>`}</div>`;
