@@ -19,7 +19,7 @@ const STEP_NAME = { "0-1":"질문 쏟아내기 연습", "1-1":"질문 쏟아내�
   "2-3":"하위 질문·조사 계획", "3-1":"하위 질문 자료 조사", "3-2":"조사 내용 공유·보완", "3-3":"답변 작성", "4-1":"발표 준비", "4-2":"발표와 댓글",
   "4-3":"배움 정리", "5-1":"새 사례 찾고 질문 쏟아내기", "5-2":"나의 탐구 질문 정하기", "5-3":"하위 질문·탐구 계획", "6-1":"자료 조사 기록", "6-2":"정책 제안서" };
 const CACHE_SEC = 21600; // 6시간
-const OWNED = ["addCard", "delCard", "addLad", "editLad", "delLad", "addFb", "delFb"];
+const OWNED = ["addCard", "delCard", "addLad", "editLad", "delLad", "addFb", "delFb", "like"];
 
 function doGet(){
   return ContentService.createTextOutput("Q-메이커스 서버가 작동 중입니다.");
@@ -488,6 +488,10 @@ function applyOp(st, op){
     case "addCard": if(!card(op.id) && st.cards.length < 400) st.cards.push({ id:op.id, name:op.name, text:cut(op.text, 200), g:"", src:cut(op.src, 20), q:cut(op.q, 80) }); break;
     case "delCard": { const n = st.cards.length; st.cards = st.cards.filter(x => !(x.id === op.id && x.name === op.name));
       if(st.cards.length !== n){ st.cands.forEach(k => { k.from = k.from.filter(f => f !== op.id); }); prune(); } break; }
+    case "like": { const x = card(op.id); if(!x || st.done || !op.name) break; x.likes = x.likes || [];
+      const i = x.likes.indexOf(op.name);
+      if(i >= 0) x.likes.splice(i, 1);
+      else if(st.cards.filter(c => (c.likes || []).includes(op.name)).length < 3) x.likes.push(cut(op.name, 40)); break; }
     case "move": { const x = card(op.id); if(x) x.g = cut(op.g, 40); prune(); break; }
     case "moveMany": (op.ids || []).slice(0, 100).forEach(i => { const x = card(i); if(x) x.g = cut(op.g, 40); }); prune(); break;
     case "group": if(!st.groups.find(g => g.id === op.id) && st.groups.length < 30){
