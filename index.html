@@ -195,6 +195,37 @@ body.has-dock{padding-bottom:110px}
 #present .pqr{flex:none;display:flex;flex-direction:column;align-items:center;gap:.3vh;background:#fff;border:0;padding:.6vh;border-radius:1vh;cursor:pointer;color:#16150F;font-size:clamp(10px,1.5vh,16px);line-height:1.2}
 #present .pqr svg{width:15vh;height:15vh;display:block}
 .acthead .slidebtn{flex:none;width:auto;margin:0 0 0 8px;padding:4px 10px;font-size:13px;background:var(--paper);color:var(--ink)}
+#slides .snum{font-size:clamp(11px,1.7vh,18px);color:var(--muted)}
+#slides .sflowbar{display:flex;gap:.4vw;flex-wrap:wrap}
+#slides .sflowbar span{font-size:clamp(10px,1.5vh,16px);padding:.3vh .7vw;border-radius:2vh;background:var(--soft);color:var(--muted)}
+#slides .sflowbar span.on{background:#FFD02B;color:#16150F;font-weight:700}
+#slides .stitle.sm{font-size:clamp(22px,4.6vh,56px)}
+#slides .sxbody{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:1.8vh;font-size:clamp(13px,2.4vh,28px)}
+#slides .srow{display:flex;gap:1.2vw} #slides .srow>.scard{flex:1}
+#slides .sgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vh 1.2vw}
+#slides .scard{background:var(--paper);border:2px solid var(--ink);border-radius:1.8vh;padding:1.6vh 1.4vw}
+#slides .scard.dash{border-style:dashed;background:var(--soft)}
+#slides .scard h3{margin:0 0 .6vh;font-size:1.15em} #slides .scard p{margin:.3vh 0}
+#slides .sbig{font-size:1.3em;font-weight:900;word-break:break-all}
+#slides .snote{border:2px dashed var(--ink);border-radius:1.8vh;padding:1.4vh 1.6vw;background:var(--soft)} #slides .snote p{margin:.4vh 0}
+#slides .snote.y{background:#FFD02B;color:#16150F;border:0} #slides .snote h3{margin:0 0 .4vh}
+#slides .sflow{width:100%;border-collapse:collapse;font-size:clamp(12px,2.2vh,26px)}
+#slides .sflow th{background:var(--ink);color:#FFD02B;text-align:left;padding:.8vh .8vw}
+#slides .sflow td{padding:.9vh .8vw;border-bottom:1px solid var(--hair);vertical-align:top} #slides .sflow tr:nth-child(odd) td{background:var(--soft)}
+#slides .smeta{color:var(--muted);margin:0}
+#slides .aiflow.big{font-size:clamp(12px,2.2vh,24px);margin:0}
+#slides .sdates{display:grid;grid-template-columns:repeat(5,1fr);gap:1vw}
+#slides .sdates div{border:2px solid var(--ink);border-radius:1.8vh;padding:1.6vh 1vw;background:var(--paper);display:flex;flex-direction:column;gap:.6vh}
+#slides .sdates b{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:1.4em}
+#slides .sstate{flex:1;min-height:0;display:flex;align-items:center;gap:3vw;padding:0 2vw;border-radius:2.4vh;background:#1D1C1A;color:#FBF8F1}
+#slides .sstate>div:first-child{flex:1;min-width:0}
+#slides .sstate.y{background:#FFD02B;color:#16150F}
+#slides .sstate h1{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:clamp(48px,15vh,180px);line-height:1.05;margin:1vh 0}
+#slides .sstate .skick2{font-size:clamp(14px,2.8vh,32px);font-weight:700;color:#FFD02B;margin:0}
+#slides .sstate .ssub{font-size:clamp(18px,4.2vh,48px);font-weight:700;margin:0 0 2vh}
+#slides .sstate .smeta{color:inherit;opacity:.75;font-size:clamp(13px,2.6vh,30px);margin:.6vh 0}
+#slides .sstate .sside .pqr{border-color:#FFD02B}
+@media (max-aspect-ratio:1/1){ #slides .srow{flex-direction:column} #slides .sgrid3,#slides .sdates{grid-template-columns:1fr 1fr} }
 #slides{position:fixed;inset:0;z-index:46;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;gap:1.6vh;padding:2.4vh 3vw;overflow:hidden}
 #slides[hidden]{display:none}
 #slides .stop{display:flex;align-items:center;gap:.6vw;flex-wrap:wrap}
@@ -1057,7 +1088,7 @@ async function loadAll(){
   drawDash(); drawReport();
 }
 setInterval(() => { if(me && me.teacher && tmode === "dash" && !document.hidden) loadAll(); }, 10000);
-$("tSlide").onclick = () => openSlides(tmode === "moum" ? step : (CLS && CLS.step && STEPS[CLS.step] ? CLS.step : step));
+$("tSlide").onclick = () => openSlides(tmode === "moum" ? step : (CLS && CLS.step && STEPS[CLS.step] && CLS.step !== "0-1" ? CLS.step : "x:cover"));
 $("tWarm").onclick = async () => {
   presentFrom = tmode === "moum" ? "" : tmode;
   if(!me.moum || tmode !== "moum"){ if(!me.moum) await openMoum("1"); else setTMode("moum"); }
@@ -1332,34 +1363,85 @@ function slideGuide(st){
     return box.innerHTML;
   }catch(e){ return ""; }
 }
+/* 슬라이드 순서: 여는 화면 → 활동(단계) → 도움 화면. 단계가 아닌 것은 "x:" 로 시작 */
+const SEQ = ["x:cover","x:flow","x:login","x:tools","0-1","1-1","1-2","1-3","2-1","x:open1","x:open2","2-2","2-3","x:brk","3-1","x:tips","3-2","3-3","4-1","x:ptips","4-2","4-3","x:next","5-1","5-2","5-3","6-1","6-2"];
+const STIME = { "0-1":"라운드 1 5분 · 라운드 2 2분", "1-1":"7분", "1-2":"13분", "1-3":"15분", "2-1":"12분", "2-2":"8분", "2-3":"15분", "3-1":"18분", "3-2":"10분", "3-3":"12분", "4-1":"5분", "4-2":"20분", "4-3":"10분" };
+const FLOW = [["16:00","여는 활동","웹앱 들어가기 · 질문 쏟아내기 연습","",0],["16:10","1차시 질문 생성하기","질문 쏟아내기 → 묶기 → 후보 탐구 질문","01 질문 만드는 법",1],["16:45","2차시 질문으로 학습 설계하기","질문 다듬기 → 최종 탐구 질문 → 하위 질문","02 주제 좁히는 법",2],["17:20","휴식","10분","","brk"],["17:30","3차시 질문에 답 찾기","자료 조사 → 보완 의견 → 모둠 답변","03 자료로 답 찾는 법",3],["18:10","4차시 내 말로 학습 종합하기","발표 → 피드백 → 배움 정리","04 정리하고 발표하는 법",4],["18:45","다음 단계","나의 탐구 계획서 안내","05·06 내 분야로","next"]];
+let slideAt = 0;
+const slideKey = () => SEQ[slideAt] || SEQ[0];
+const flowPos = k => k === "x:brk" ? "brk" : k === "x:next" ? "next" : /^x:(cover|flow|login|tools)$/.test(k) ? 0 : (k.startsWith("x:") ? lessonOf(stepBefore(SEQ.indexOf(k))) : lessonOf(k));
+function stepBefore(i){ for(let j = i; j >= 0; j--) if(!SEQ[j].startsWith("x:")) return SEQ[j]; return "0-1"; }
+const card = (t, body, cls) => `<div class="scard${cls ? " " + cls : ""}"><h3>${t}</h3>${body}</div>`;
+function extraSlide(k){
+  const code = esc((me.back || me).code), url = esc(location.host + location.pathname.replace(/index\.html$/, "").replace(/\/$/, ""));
+  const X = {
+    cover: { big:true, kick:"1, 2학년 창의적 체험활동 · 자율 영역", title:"Q-메이커스", sub:"1회 · 질문으로 시작하는 탐구 방법 특강", body:`<p class="smeta">2026. 11. 11.(수) 16:00~19:00 · 본교 3층 미래창의실</p><p class="smeta">막연한 호기심을 날카로운 탐구 주제로 — 오늘은 응급의료 취약지 사례로 질문 만들기부터 발표까지 한 바퀴!</p>` },
+    flow: { kick:"여는 활동", title:"오늘의 흐름", body:`<table class="sflow"><tr><th>시간</th><th>단계</th><th>하는 일</th><th>탐구 기술</th></tr>${FLOW.map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</table><p class="smeta">성찰하기는 모든 단계에서 늘 함께 — 오늘은 공통 사례로 01~04를 한 바퀴, 05·06은 한 달 동안 내 진로 분야에서</p>` },
+    login: { kick:"여는 활동", title:"웹앱 들어가기", body:`<div class="srow">${card("① 주소", `<p class="sbig">${url}</p><p>또는 오른쪽 QR 찍기</p>`)}${card("② 수업 코드", `<p class="sbig">${code}</p><p>QR로 들어오면 자동으로 들어가요</p>`)}${card("③ 학번 · 이름 · 모둠", `<p>모둠 번호는 처음 한 번만 고르기</p>`)}</div>
+      <div class="snote"><p><b>학번과 이름은 정확히</b> — 다르게 쓰면 기록이 따로 쌓여요</p><p><b>자동 저장</b> — 쓰는 내용은 바로 저장되고, 다시 들어와도 이어서 할 수 있어요</p><p><b>화면 함께 이동</b> — 선생님이 활동을 넘기면 내 화면도 함께 넘어가요</p><p><b>튕겼다면</b> — QR을 다시 찍고 같은 학번·이름으로 들어오기</p></div>` },
+    tools: { kick:"여는 활동", title:"자료를 읽을 때 쓰는 도구", sub:"자료의 글자를 길게 누르거나 드래그하면 표시 도구가 나와요", body:`<div class="srow">${card("형광펜", "<p>눈에 띄는 부분 표시</p>")}${card("의아해요 ?", "<p>이상하거나 궁금한 부분</p>")}${card("이 표시 지우기", "<p>표시를 누르면 지울 수 있어요</p>")}</div>
+      <div class="snote y"><h3>이 부분으로 질문 쓰기</h3><p>고른 문장을 보고 바로 질문을 쓸 수 있어요 — 질문이 막힐 때 먼저 써 보기</p></div>` },
+    open1: { kick:"2차시 · 질문 다듬기 도움", title:"닫힌 질문을 열린 질문으로 바꾸는 네 가지 방법", body:`<table class="sflow"><tr><th>방법</th><th>닫힌 질문</th><th>열린 질문</th></tr>
+      <tr><td><b>① 판단 대신 이유·근거</b></td><td>응급의료 취약지 문제는 심각한가?</td><td>응급의료 취약지 문제를 심각하다고 판단할 수 있는 근거는 무엇인가?</td></tr>
+      <tr><td><b>② 양자택일 대신 관점·대안</b></td><td>이 문제는 국가가 해결해야 하는가, 지역이 해결해야 하는가?</td><td>이 문제를 해결하는 데 국가, 지방 자치 단체, 시민은 각각 어떤 역할을 할 수 있는가?</td></tr>
+      <tr><td><b>③ 사실 확인 대신 원인·영향</b></td><td>응급의료 취약지는 몇 곳인가?</td><td>응급의료 취약지가 비수도권 군 지역에 몰리는 까닭은 무엇이며, 주민의 삶에 어떤 영향을 미치는가?</td></tr>
+      <tr><td><b>④ 가정하거나 다른 입장에서</b></td><td>닥터헬기는 효과가 있는가?</td><td>닥터헬기가 밤에 뜰 수 없다면, 군 지역 주민의 입장에서 가장 큰 공백은 무엇인가?</td></tr></table>` },
+    open2: { kick:"2차시 · 질문 다듬기 도움", title:"다듬은 질문, 이렇게 점검하기", body:`<div class="srow">${card("첫 단어 점검", "<p>‘몇’, ‘있는가’, ‘~인가’로 끝나면 닫힌 질문이 되기 쉬움</p><p><b>→ ‘왜’, ‘어떻게’, ‘어떤’으로 시작해 보기</b></p>")}${card("답을 정해 둔 질문 피하기", "<p>“국가가 지원해야 하지 않을까?”</p><p><b>→ “국가 지원의 기대 효과와 한계는 무엇인가?”</b></p>")}${card("너무 열어 두지 않기", "<p>답을 찾을 수 없을 만큼 넓으면 탐구가 안 됨</p><p><b>→ 지역·대상·연도로 범위 좁히기</b></p>", "dash")}</div>` },
+    brk: { big:true, yellow:true, title:"10분 쉬기", sub:"17:30, 3차시 ‘질문에 답 찾기’로 돌아와요", body:`<p class="smeta">쉬는 동안 내가 맡은 하위 질문을 한 번 더 읽어 두기</p>` },
+    tips: { kick:"3차시 · 조사 꿀팁", title:"AI는 답이 아니라 길잡이", body:`<div class="aiflow big"><span>① 검색어 만들기</span><i>→</i><span>② 찾을 곳 묻기</span><i>→</i><span>③ 원래 출처에서 확인</span><i>→</i><span>④ 내 말로 해석, 점검받기</span></div>
+      <div class="srow">${card("검색어 만들기", "<p>· 핵심 개념어 2~3개 + 비슷한 말<br>· 연도 붙이기: 2025, 최근 5년<br>· 공공기관 자료만: 검색어 뒤에 site:go.kr</p>")}${card("수치 확인하기", "<p>· 기준 연도, 단위, 비교 대상 함께<br>· 지역 비교는 ‘인구 10만 명당’ 같은 비율로<br>· 기사 속 수치는 원래 출처까지</p>")}${card("지킬 것", "<p>· AI가 말한 수치는 원출처 확인, 안 되면 쓰지 않기<br>· 해석은 내가 쓰고 AI에게는 점검만<br>· AI를 썼다면 ‘AI 활용 표시’에 한 줄</p>", "dash")}</div>
+      <p class="smeta">더 찾기: 국가통계포털 KOSIS (kosis.kr) · 중앙응급의료센터 (e-gen.or.kr) · 앱 자료 칸 ‘조사 꿀팁’에 AI 질문 예시가 있어요</p>` },
+    ptips: { kick:"4차시 · 발표 팁", title:"3분 발표를 잘 전달하려면", sub:"결론부터, 질문의 변화를 보여 주기", body:`<div class="sgrid3">${card("① 결론부터", "<p>“저희 탐구 질문은 ○○이고, 답은 ○○입니다.”</p>")}${card("② 질문의 변화", "<p>“처음엔 ○○이 궁금했는데, 이렇게 바꿨습니다.”</p>")}${card("③ 숫자는 한두 개", "<p>가장 강한 근거 하나를 “서울은 ○, 군 지역은 ○”처럼 견주어서</p>")}${card("④ 화면 읽지 않기", "<p>화면은 보여 주고, 말로는 왜 그렇게 봤는지 설명하기</p>")}${card("⑤ 넘겨줄 때 한 문장", "<p>“그래서 저희는 원인을 알아봤습니다”처럼 이어 주기</p>")}${card("⑥ 새 질문으로 끝내기", "<p>남은 질문을 던지면 듣는 사람의 ‘궁금한 점’이 나와요</p>")}</div>` },
+    next: { kick:"다음 단계 · 05 내 분야에서 문제 찾기 · 06 해결 방안 제안하기", title:"오늘의 순서를, 이번엔 내 진로 분야에서 혼자", sub:"질문 → 다듬기 → 하위 질문 → 조사 → 해결 방안 · 앱 › 5차시에서 탐구 계획서 작성", body:`<div class="sdates">${[["11. 20.(금)","탐구 계획서 제출"],["11. 27.(금)","피드백 반영해 다시 제출"],["12. 18.(금)","정책 제안서 제출"],["12. 20.(일)","부스 요약지 제출"],["12. 21.(월)","2회 결과 공유회 15:00"]].map(([d, t]) => `<div><b>${d}</b><span>${t}</span></div>`).join("")}</div>
+      <p class="smeta">모든 마감은 그날 23:59 · 진로 계열별 질문 예시는 계획서 옆 도움 자료에서</p>` },
+  };
+  return X[k.slice(2)] || { title:"" };
+}
+function flowBar(k){
+  const pos = flowPos(k);
+  return `<div class="sflowbar">${FLOW.map(r => `<span class="${r[4] === pos ? "on" : ""}">${r[0]} ${r[1].split(" ")[0]}</span>`).join("")}</div>`;
+}
 function drawSlides(){
   const ov = $("slides"); if(!ov) return;
   if(!slideOn || !me || !me.teacher){ ov.hidden = true; return; }
   ov.hidden = false;
-  const st = step, L = lessonOf(st), i = STEP_KEYS.indexOf(st), prev = STEP_KEYS[i - 1], next = STEP_KEYS[i + 1];
-  const now = CLS && CLS.step && STEPS[CLS.step] ? `지금 학생 화면: ${lessonOf(CLS.step)}차시 ${STEPS[CLS.step].label}` : "학생 화면: 아직 보내지 않음";
-  const here = CLS && CLS.step === st;
-  ov.innerHTML = `<div class="stop"><div class="les">${[0,1,2,3,4,5,6].map(n => `<button data-act="slideGo" data-id="${n}-1" aria-pressed="${n === L}">${n ? n + "차시" : "연습"}</button>`).join("")}</div>
-      <button class="ghost" data-act="slideOff">닫기 ✕</button></div>
-    <div class="sbody"><div class="smain">
-      <div class="skick"><b>${L ? L + "차시" : "연습"} · 활동 ${st.split("-")[1]}</b>${esc(LESSON[L].stage)}</div>
-      <h1 class="stitle">${esc(STEPS[st].label)}</h1>
-      <p class="sq">${STEPS[st].q}</p>
-      <div class="sdo">${slideGuide(st) || '<p class="hint">이 활동은 학생 화면의 안내를 따라 진행해요.</p>'}</div>
-    </div>
-    <div class="sside"><span class="swho">${STEPS[st].who} 활동</span>
-      <button class="pqr" data-act="qrBig" title="누르면 크게">${qrSvg(joinUrl())}<b>학생 접속</b><span>코드 ${esc(me.code)}</span></button>
-      <p class="snow">${here ? "✓ 학생들이 이 활동 화면에 있어요" : esc(now)}</p></div></div>
-    <div class="sbar"><button class="ghost" data-act="slideGo" data-id="${prev || ""}" ${prev ? "" : "disabled"}>◀ 이전</button>
-      <button class="primary y go" data-act="slideStart">▶ 학생 활동 시작${st === "0-1" ? " (타이머 화면)" : ""}</button>
-      <button class="ghost" data-act="slideView">활동 화면만 보기</button>
-      <button class="ghost" data-act="slideGo" data-id="${next || ""}" ${next ? "" : "disabled"}>다음 ▶</button></div>`;
+  const k = slideKey(), isStep = !k.startsWith("x:"), canPrev = slideAt > 0, canNext = slideAt < SEQ.length - 1;
+  const pos = flowPos(k);
+  const chips = [["x:cover","여는 활동",0],["1-1","1차시",1],["2-1","2차시",2],["x:brk","휴식","brk"],["3-1","3차시",3],["4-1","4차시",4],["x:next","다음 단계","next"],["5-1","5·6차시",5]];
+  const top = `<div class="stop"><div class="les">${chips.map(([t, n, p]) => `<button data-act="slideGo" data-id="${t}" aria-pressed="${p === pos || (p === 5 && (pos === 5 || pos === 6))}">${n}</button>`).join("")}</div>
+      <span class="snum">${slideAt + 1} / ${SEQ.length}</span><button class="ghost" data-act="slideOff">닫기 ✕</button></div>`;
+  const side = `<div class="sside">${isStep ? `<span class="swho">${STEPS[k].who} 활동${STIME[k] ? " · " + STIME[k] : ""}</span>` : ""}
+      <button class="pqr" data-act="qrBig" title="누르면 크게">${qrSvg(joinUrl())}<b>학생 접속</b><span>코드 ${esc((me.back || me).code)}</span></button>
+      ${isStep ? `<p class="snow">${CLS && CLS.step === k ? "✓ 학생들이 이 활동 화면에 있어요" : CLS && CLS.step && STEPS[CLS.step] ? esc(`지금 학생 화면: ${lessonOf(CLS.step)}차시 ${STEPS[CLS.step].label}`) : "학생 화면: 아직 보내지 않음"}</p>` : ""}</div>`;
+  const bar = `<div class="sbar"><button class="ghost" data-act="slideStep" data-id="-1" ${canPrev ? "" : "disabled"}>◀ 이전</button>
+      ${isStep ? `<button class="primary y go" data-act="slideStart">▶ 학생 활동 시작${k === "0-1" ? " (타이머 화면)" : ""}</button><button class="ghost" data-act="slideView">활동 화면만 보기</button>` : ""}
+      <button class="${isStep ? "ghost" : "primary y go"}" data-act="slideStep" data-id="1" ${canNext ? "" : "disabled"}>다음 ▶</button></div>`;
+  if(isStep){
+    const L = lessonOf(k);
+    ov.innerHTML = `${top}<div class="sbody"><div class="smain">
+      ${flowBar(k)}
+      <div class="skick"><b>${L ? L + "차시" : "연습"} · 활동 ${k.split("-")[1]}</b>${esc(LESSON[L].stage)}</div>
+      <h1 class="stitle">${esc(STEPS[k].label)}</h1>
+      <p class="sq">${STEPS[k].q}</p>
+      <div class="sdo">${slideGuide(k) || '<p class="hint">이 활동은 학생 화면의 안내를 따라 진행해요.</p>'}</div>
+    </div>${side}</div>${bar}`;
+  } else {
+    const X = extraSlide(k);
+    ov.innerHTML = X.big ? `${top}<div class="sstate${X.yellow ? " y" : ""}"><div>${X.kick ? `<p class="skick2">${X.kick}</p>` : ""}<h1>${X.title}</h1>${X.sub ? `<p class="ssub">${X.sub}</p>` : ""}${X.body || ""}</div>${k === "x:cover" ? `<div class="sside">${side.replace('<div class="sside">', "").replace(/<\/div>$/, "")}</div>` : ""}</div>${bar}`
+      : `${top}<div class="sbody"><div class="smain">${flowBar(k)}<div class="skick">${X.kick || ""}</div><h1 class="stitle sm">${X.title}</h1>${X.sub ? `<p class="sq">${X.sub}</p>` : ""}<div class="sxbody">${X.body}</div></div>${side}</div>${bar}`;
+  }
+}
+function slideTo(i){
+  slideAt = Math.max(0, Math.min(SEQ.length - 1, i));
+  const k = slideKey(), st = k.startsWith("x:") ? stepBefore(slideAt) : k;
+  if(st !== step) setStep(st);
+  drawSlides();
 }
 async function openSlides(st){
   slideFrom = tmode;
   if(!me.moum) await openMoum("1");
-  setStep(st && STEPS[st] ? st : step);
-  slideOn = true; presentOn = false; drawPresent(); drawSlides(); drawDock();
+  const i = st ? SEQ.indexOf(st) : -1;
+  slideOn = true; slideTo(i >= 0 ? i : 0); presentOn = false; drawPresent(); drawSlides(); drawDock();
   try{ const d = document.documentElement; if(!document.fullscreenElement) (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); }catch(e){}
 }
 function closeSlides(toActivity){
@@ -2053,7 +2135,8 @@ document.addEventListener("click", async e => {
   if(act === "warmNew"){ if(!(await ask("새 게임을 시작할까요? 라운드 1부터 다시 세고, 총합도 0부터 시작해요."))) return;
     try{ const d = await api({ action:"warmStart", round:1, newGame:true, reset:true }); CLS = d.cls; WR = null; render(); }catch(err){ toast(err.message); } return; }
   if(act === "qrBig"){ openQrBig(); return; }
-  if(act === "slideGo"){ if(id && STEPS[id]){ setStep(id); drawSlides(); } return; }
+  if(act === "slideGo"){ const i = SEQ.indexOf(id); if(i >= 0) slideTo(i); return; }
+  if(act === "slideStep"){ slideTo(slideAt + (+id)); return; }
   if(act === "slideOff"){ closeSlides(false); return; }
   if(act === "slideView"){ closeSlides(true); return; }
   if(act === "slideStart"){
@@ -2373,9 +2456,8 @@ document.addEventListener("click", e => {
 $("zoomImg").onclick = () => { const big = $("zoomOv").classList.toggle("big"); $("zoomTip").textContent = big ? "다시 누르면 화면에 맞추기 · 손가락으로 밀어서 보기" : "누르면 더 크게 · 손가락으로 밀어서 보기"; };
 $("zoomClose").onclick = () => { $("zoomOv").hidden = true; };
 document.addEventListener("keydown", e => { if(slideOn && $("qrBig").hidden && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || "")){
-    const i = STEP_KEYS.indexOf(step);
-    if((e.key === "ArrowRight" || e.key === "PageDown") && STEP_KEYS[i + 1]){ setStep(STEP_KEYS[i + 1]); drawSlides(); return; }
-    if((e.key === "ArrowLeft" || e.key === "PageUp") && STEP_KEYS[i - 1]){ setStep(STEP_KEYS[i - 1]); drawSlides(); return; } }
+    if(e.key === "ArrowRight" || e.key === "PageDown" || e.key === " "){ e.preventDefault(); slideTo(slideAt + 1); return; }
+    if(e.key === "ArrowLeft" || e.key === "PageUp"){ e.preventDefault(); slideTo(slideAt - 1); return; } }
   if(e.key === "Escape"){ $("zoomOv").hidden = true; if(!$("qrBig").hidden){ $("qrBig").hidden = true; return; } if(slideOn){ closeSlides(false); return; } if(presentOn){ presentOn = false; drawPresent(); if(presentFrom){ const m = presentFrom; presentFrom = ""; setTMode(m); } } } });
 
 /* ===== 집중 모드: 다른 화면으로 가면 앱을 가리고, 벗어난 시간을 기록 ===== */
