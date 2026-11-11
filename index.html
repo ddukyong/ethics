@@ -459,6 +459,7 @@ details.box summary{cursor:pointer;font-weight:700}
       <label class="sw"><input type="checkbox" id="tLock"> 집중 모드(이탈 시간 기록)</label>
       <label class="sw"><input type="checkbox" id="tOpen"> 5·6차시 자기주도 탐구 열기</label>
       <button id="tPush">지금 이 활동으로 학생 모두 보내기</button>
+      <button id="tWarm">🖥 도입 활동 전체 화면</button>
       <button id="tDash">현황판</button>
       <button id="tReport">연수용 결과물</button>
       <button id="tLeaves">화면 이탈 기록</button>
@@ -1007,6 +1008,12 @@ async function loadAll(){
   drawDash(); drawReport();
 }
 setInterval(() => { if(me && me.teacher && tmode === "dash" && !document.hidden) loadAll(); }, 10000);
+$("tWarm").onclick = async () => {
+  presentFrom = tmode === "moum" ? "" : tmode;
+  if(!me.moum || tmode !== "moum"){ if(!me.moum) await openMoum("1"); else setTMode("moum"); }
+  setStep("0-1"); presentOn = true; drawPresent(); acx();
+  try{ const d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); }catch(e){}
+};
 $("tDash").onclick = () => setTMode("dash");
 $("tReport").onclick = () => setTMode("report");
 const pill = (label, val, ok) => `<span class="dpill${ok ? " ok" : ""}"><small>${label}</small>${val}</span>`;
@@ -1252,7 +1259,7 @@ VIEWS["0-1"] = () => {
       ${me.teacher ? `<div class="wtimer big ${ws.phase}" id="wTimer">${timer}</div>` : `<div class="wstate ${ws.phase}">${ws.phase === "wait" ? "준비" : ws.phase === "ready" ? "곧 시작!" : ws.phase === "run" ? "지금 쏟아내기!" : "끝!"}</div>`}
       <p class="hint" id="wMsg">${ws.phase === "wait" ? (me.teacher ? "라운드를 시작하면 3초 뒤 타이머가 돌아가요(라운드 1은 5분, 라운드 2는 2분). 이 화면을 크게 띄워 주세요." : "선생님이 시작하면 질문을 쓸 수 있어요") : ws.phase === "ready" ? "사진을 보며 준비하기" : ws.phase === "run" ? (me.teacher ? "학생들이 질문을 쏟아내는 중" : "타이머는 앞 화면을 보세요") : last ? "두 라운드 끝! 총합 순위를 확인해요" : "이번 라운드 끝! 다음 라운드를 기다려요"}</p>
       ${me.teacher ? `<div class="acts" style="justify-content:center">${[1,2].map(r => `<button class="${r === (ws.phase === "end" || ws.phase === "wait" ? Math.min(2, R1 + (ws.phase === "end" ? 1 : 0) || 1) : 0) ? "primary y" : "ghost"}" style="width:auto;margin:0;padding:8px 16px" data-act="warmStart" data-id="${r}" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>라운드 ${r} 시작</button>`).join("")}</div>
-          <div class="acts" style="justify-content:center"><button class="primary" style="width:auto;margin:0;padding:8px 16px" data-act="presentOn">🖥 발표 화면으로 크게 보기</button><button class="ghost" data-act="warmMusic">${musicOn ? "🔊 음악 켜짐" : "🔇 음악 꺼짐"}</button><button class="ghost" data-act="warmRank">순위 새로 고침</button><button class="ghost" data-act="warmNew" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>새 게임 (점수 0부터)</button></div>`
+          <div class="acts" style="justify-content:center"><button class="primary" style="width:auto;margin:0;padding:8px 16px" data-act="presentOn">🖥 발표 화면으로 크게 보기</button><button class="ghost" data-act="warmMusic">${musicOn ? "🔊 음악 켜짐" : "🔇 음악 꺼짐"}</button><button class="ghost" data-act="warmRank">순위 새로 고침</button><button class="ghost" data-act="warmReset" ${ws.w && ws.w.start ? "" : "disabled"}>⏹ 타이머 초기화</button><button class="ghost" data-act="warmNew" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>새 게임 (점수 0부터)</button></div>`
         : T ? "" : `<div class="fbin" style="margin-top:12px"><input type="text" id="wIn" data-k="wIn" maxlength="200" placeholder="${ws.phase === "run" ? "질문 쓰고 Enter" : "시작하면 여기에 써요"}" ${ws.phase === "run" ? "" : "disabled"}><button class="primary" style="width:auto;margin:0;padding:8px 18px" data-act="warmAdd" ${ws.phase === "run" ? "" : "disabled"}>올리기</button></div>
           <p class="wcount">이번 라운드 <b>${WM.n}</b>개${rk ? ` · 총합 <b>${Math.max(myTotal, 0)}</b>개` : ""}</p>`}
     </div>
@@ -1260,7 +1267,7 @@ VIEWS["0-1"] = () => {
     ${WM.mine.length ? `<h2>이번 라운드에 쏟아낸 질문</h2><ul class="mine">${WM.mine.slice().reverse().map(t => `<li><span>${esc(t)}</span></li>`).join("")}</ul>` : ""}`;
 };
 /* 발표 화면 — 화면 높이·너비에 맞춰 크기를 정해 확대해도 한 화면에 다 보임 */
-let presentOn = false;
+let presentOn = false, presentFrom = "";
 function drawPresent(){
   const ov = $("present"); if(!ov) return;
   if(!presentOn || step !== "0-1" || !me || !me.teacher){ ov.hidden = true; return; }
@@ -1275,7 +1282,7 @@ function drawPresent(){
         <div class="msg">${ws.phase === "wait" ? "곧 시작해요" : ws.phase === "ready" ? "준비!" : ws.phase === "run" ? "쉴 새 없이 쏟아내기!" : last ? "두 라운드 끝! 총합 순위" : "이번 라운드 끝!"}</div></div>
       ${rk && !busyNow ? `<div class="prk"><b>${last ? "🏆 총합 순위 상위 5명" : "총합 순위 상위 5명"}</b><ol>${rk.total.slice(0, 5).map(r => `<li>${esc(r.name)} <small>${esc(r.moum)}모둠</small> — <b>총 ${r.n}개</b>${rBreak(r)}</li>`).join("") || "<li>아직 없음</li>"}</ol></div>` : ""}
       <div class="pc">${[1, 2].map(r => `<button class="${r === nextR && !busyNow ? "primary y" : "ghost"}" style="width:auto;margin:0" data-act="warmStart" data-id="${r}" ${busyNow ? "disabled" : ""}>라운드 ${r} 시작</button>`).join("")}
-        <button class="ghost" data-act="warmMusic">${musicOn ? "🔊 음악" : "🔇 음악"}</button><button class="ghost" data-act="warmRank">순위</button><button class="ghost" data-act="presentOff">닫기 ✕</button></div>
+        <button class="ghost" data-act="warmMusic">${musicOn ? "🔊 음악" : "🔇 음악"}</button><button class="ghost" data-act="warmRank">순위</button><button class="ghost" data-act="warmReset" ${w && w.start ? "" : "disabled"}>⏹ 초기화</button><button class="ghost" data-act="presentOff">닫기 ✕</button></div>
     </div>`;
 }
 async function warmAdd(){
@@ -1322,6 +1329,7 @@ setInterval(() => {
   if(ph !== wLastPhase){ const prev = wLastPhase; wLastPhase = ph; render();
     if(ws.phase === "run"){ if($("wIn")) $("wIn").focus(); if(me.teacher) startMusic(ws.w); }
     if(ws.phase === "end"){ stopMusic(); if(prev) setTimeout(warmRank, 1500); }
+    if(ws.phase === "wait") stopMusic();
     return; }
   if(tm){ tm.textContent = ws.phase === "ready" ? `${ws.left}…` : ws.phase === "run" ? mmss2(ws.left) : tm.textContent; tm.classList.toggle("hurry", ws.phase === "run" && ws.left <= 10); }
   const pn = $("pNum"); if(pn && presentOn){ pn.textContent = ws.phase === "ready" ? `${ws.left}…` : ws.phase === "run" ? mmss2(ws.left) : pn.textContent; pn.classList.toggle("hurry", ws.phase === "run" && ws.left <= 10); }
@@ -1926,8 +1934,11 @@ document.addEventListener("click", async e => {
   if(act === "warmStart"){ acx(); try{ const d = await api({ action:"warmStart", round:+id }); CLS = d.cls; render(); }catch(err){ toast(err.message); } return; }
   if(act === "warmNew"){ if(!(await ask("새 게임을 시작할까요? 라운드 1부터 다시 세고, 총합도 0부터 시작해요."))) return;
     try{ const d = await api({ action:"warmStart", round:1, newGame:true, reset:true }); CLS = d.cls; WR = null; render(); }catch(err){ toast(err.message); } return; }
+  if(act === "warmReset"){ const w = CLS && CLS.warm; if(!w || !w.start) return;
+    if(!(await ask("타이머를 멈추고 처음 상태로 되돌릴까요? 지금까지 올라온 질문 수와 순위는 그대로 남아요."))) return;
+    stopMusic(); try{ const d = await api({ action:"warmStart", round:w.round || 1, reset:true }); CLS = d.cls; render(); drawPresent(); toast("타이머를 초기화했어요", true); }catch(err){ toast(err.message); } return; }
   if(act === "presentOn"){ presentOn = true; drawPresent(); try{ const d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); }catch(e){} return; }
-  if(act === "presentOff"){ presentOn = false; drawPresent(); try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){} return; }
+  if(act === "presentOff"){ presentOn = false; drawPresent(); if(presentFrom){ const m = presentFrom; presentFrom = ""; setTMode(m); } try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){} return; }
   if(act === "warmMusic"){ musicOn = !musicOn; if(!musicOn) stopMusic(); else { acx(); const ws = warmState(); if(ws.phase === "run") startMusic(ws.w); } render(); return; }
   if(act === "zoneHelp"){ e.preventDefault(); const z = +id; inlineHelp.has(z) ? inlineHelp.delete(z) : inlineHelp.add(z); openZones.add(z); planZone = z; render(); return; }
   if(act === "pvBack"){ endPreview(); return; }
@@ -2232,7 +2243,7 @@ document.addEventListener("click", e => {
 });
 $("zoomImg").onclick = () => { const big = $("zoomOv").classList.toggle("big"); $("zoomTip").textContent = big ? "다시 누르면 화면에 맞추기 · 손가락으로 밀어서 보기" : "누르면 더 크게 · 손가락으로 밀어서 보기"; };
 $("zoomClose").onclick = () => { $("zoomOv").hidden = true; };
-document.addEventListener("keydown", e => { if(e.key === "Escape"){ $("zoomOv").hidden = true; if(presentOn){ presentOn = false; drawPresent(); } } });
+document.addEventListener("keydown", e => { if(e.key === "Escape"){ $("zoomOv").hidden = true; if(presentOn){ presentOn = false; drawPresent(); if(presentFrom){ const m = presentFrom; presentFrom = ""; setTMode(m); } } } });
 
 /* ===== 집중 모드: 다른 화면으로 가면 앱을 가리고, 벗어난 시간을 기록 ===== */
 let away = null;
