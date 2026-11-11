@@ -321,6 +321,7 @@ function log_(cls, moum, sid, name, op, st){
   }
   if(op.t === "done2" && op.done){
     const lsh = sheet_("정교화사다리", ["시각", "반", "모둠", "이름", "출발", "① 개념 연결", "② 범위·대상", "③ 탐구형", "도착(종합)"]);
+    const G = st.glad; if(G.start || G.end) lsh.appendRow([now, cls.name, moum, "우리 모둠", G.start, G.c1, G.c2, G.c3, G.end]);
     st.lads.forEach(l => lsh.appendRow([now, cls.name, moum, l.name, l.start, l.c1, l.c2, l.c3, l.end]));
     const ladText = id => { const l = st.lads.find(x => x.id === id); return l ? (l.end || l.c3 || l.c2 || l.c1 || l.start) : ""; };
     const row = [now, cls.name, moum, st.fin.text, st.fin.reason, st.fin.from.map(ladText).filter(String).join(" / ")];
@@ -395,9 +396,11 @@ function norm(st){
   st.v = st.v || 0;
   st.cards = st.cards || []; st.groups = st.groups || []; st.cands = st.cands || []; st.done = !!st.done;
   st.lads = st.lads || [];
+  st.glad = st.glad || {}; ["cand", "start", "c1", "c2", "c3", "end"].forEach(f => { st.glad[f] = st.glad[f] || ""; }); st.glad.ok = !!st.glad.ok;
   st.fin = st.fin || {};
   st.fin.text = st.fin.text || ""; st.fin.reason = st.fin.reason || ""; st.fin.from = st.fin.from || [];
   st.fin.chk = st.fin.chk || [false, false, false, false];
+  st.fin.ok = !!st.fin.ok;
   st.subs = st.subs || {};
   ["a", "b", "c"].forEach(k => { st.subs[k] = st.subs[k] || {}; ["q", "check", "src", "who"].forEach(f => { st.subs[k][f] = st.subs[k][f] || ""; }); });
   st.subChk = st.subChk || [false, false, false];
@@ -444,12 +447,16 @@ function applyOp(st, op){
     case "done": st.done = !!op.done; break;
     case "addLad": if(!lad(op.id) && st.lads.length < 30) st.lads.push({ id:op.id, name:op.name, cand:cut(op.cand, 40), start:cut(op.start, 200), c1:"", c2:"", c3:"", end:"" }); break;
     case "editLad": { const l = lad(op.id); if(l && l.name === op.name && ["start", "c1", "c2", "c3", "end"].includes(op.f)) l[op.f] = cut(op.val, 200); break; }
+    case "gladPick": st.glad = { cand:cut(op.cand, 40), start:cut(op.start, 200), c1:"", c2:"", c3:"", end:"" }; break;
+    case "glad": if(!st.glad.ok && ["start", "c1", "c2", "c3", "end"].includes(op.f)) st.glad[op.f] = cut(op.val, 200); break;
+    case "gladOk": st.glad.ok = !!op.val && st.glad.end.trim().length > 0; break;
+    case "finOk": st.fin.ok = !!op.val && st.fin.text.trim().length > 0; break;
     case "delLad": st.lads = st.lads.filter(l => !(l.id === op.id && l.name === op.name));
       st.fin.from = st.fin.from.filter(f => lad(f)); break;
-    case "fin": if(op.f === "text" || op.f === "reason") st.fin[op.f] = cut(op.val, 300);
+    case "fin": if(st.fin.ok) break; if(op.f === "text" || op.f === "reason") st.fin[op.f] = cut(op.val, 300);
       if(Array.isArray(op.from)) st.fin.from = op.from.filter(f => lad(f)).slice(0, 5); break;
     case "finFrom": if(lad(op.lad) && !st.fin.from.includes(op.lad) && st.fin.from.length < 5) st.fin.from.push(op.lad); break;
-    case "finChk": if(op.i >= 0 && op.i < 4) st.fin.chk[op.i] = !!op.val; break;
+    case "finChk": if(!st.fin.ok && op.i >= 0 && op.i < 4) st.fin.chk[op.i] = !!op.val; break;
     case "sub": if(K3.includes(op.k) && ["q", "check", "src", "who"].includes(op.f)) st.subs[op.k][op.f] = cut(op.val, 200); break;
     case "subChk": if(op.i >= 0 && op.i < 3) st.subChk[op.i] = !!op.val; break;
     case "done2": st.done2 = !!op.done; break;

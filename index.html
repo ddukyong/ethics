@@ -618,6 +618,12 @@ details.box summary{cursor:pointer;font-weight:700}
               <p>· 문장을 대신 쓰게 하지 않기 — 다 쓴 뒤 “논리가 끊긴 곳이 있는지 지적해 줘”처럼 점검에만<br>· AI가 말한 수치는 원래 출처에서 확인되지 않으면 쓰지 않기</p></section>
           </div>
 
+          <div class="doc" data-doc="d10">
+            <p class="doc-title">우리 모둠이 만든 질문들</p>
+            <p class="doctip">하위 질문을 만들 때 참고하기. 질문 옆 ①②③을 누르면 그 하위 질문 칸에 들어가요 — 가져온 뒤 고쳐 쓰기</p>
+            <div id="ourQs" class="doc"></div>
+          </div>
+
           <div class="doc" data-doc="help">
             <p class="doc-title" id="helpTitle">구역 1 도움 자료</p>
             <div id="helpBody" class="doc"></div>
@@ -692,9 +698,11 @@ function norm(st){
   st.v = st.v || 0;
   st.cards = st.cards || []; st.groups = st.groups || []; st.cands = st.cands || []; st.done = !!st.done;
   st.lads = st.lads || [];
+  st.glad = st.glad || {}; ["cand", "start", "c1", "c2", "c3", "end"].forEach(f => { st.glad[f] = st.glad[f] || ""; }); st.glad.ok = !!st.glad.ok;
   st.fin = st.fin || {};
   st.fin.text = st.fin.text || ""; st.fin.reason = st.fin.reason || ""; st.fin.from = st.fin.from || [];
   st.fin.chk = st.fin.chk || [false, false, false, false];
+  st.fin.ok = !!st.fin.ok;
   st.subs = st.subs || {};
   ["a", "b", "c"].forEach(k => { st.subs[k] = st.subs[k] || {}; ["q", "check", "src", "who"].forEach(f => { st.subs[k][f] = st.subs[k][f] || ""; }); });
   st.subChk = st.subChk || [false, false, false];
@@ -741,12 +749,16 @@ function applyOp(st, op){
     case "done": st.done = !!op.done; break;
     case "addLad": if(!lad(op.id) && st.lads.length < 30) st.lads.push({ id:op.id, name:op.name, cand:cut(op.cand, 40), start:cut(op.start, 200), c1:"", c2:"", c3:"", end:"" }); break;
     case "editLad": { const l = lad(op.id); if(l && l.name === op.name && ["start", "c1", "c2", "c3", "end"].includes(op.f)) l[op.f] = cut(op.val, 200); break; }
+    case "gladPick": st.glad = { cand:cut(op.cand, 40), start:cut(op.start, 200), c1:"", c2:"", c3:"", end:"" }; break;
+    case "glad": if(!st.glad.ok && ["start", "c1", "c2", "c3", "end"].includes(op.f)) st.glad[op.f] = cut(op.val, 200); break;
+    case "gladOk": st.glad.ok = !!op.val && st.glad.end.trim().length > 0; break;
+    case "finOk": st.fin.ok = !!op.val && st.fin.text.trim().length > 0; break;
     case "delLad": st.lads = st.lads.filter(l => !(l.id === op.id && l.name === op.name));
       st.fin.from = st.fin.from.filter(f => lad(f)); break;
-    case "fin": if(op.f === "text" || op.f === "reason") st.fin[op.f] = cut(op.val, 300);
+    case "fin": if(st.fin.ok) break; if(op.f === "text" || op.f === "reason") st.fin[op.f] = cut(op.val, 300);
       if(Array.isArray(op.from)) st.fin.from = op.from.filter(f => lad(f)).slice(0, 5); break;
     case "finFrom": if(lad(op.lad) && !st.fin.from.includes(op.lad) && st.fin.from.length < 5) st.fin.from.push(op.lad); break;
-    case "finChk": if(op.i >= 0 && op.i < 4) st.fin.chk[op.i] = !!op.val; break;
+    case "finChk": if(!st.fin.ok && op.i >= 0 && op.i < 4) st.fin.chk[op.i] = !!op.val; break;
     case "sub": if(K3.includes(op.k) && ["q", "check", "src", "who"].includes(op.f)) st.subs[op.k][op.f] = cut(op.val, 200); break;
     case "subChk": if(op.i >= 0 && op.i < 3) st.subChk[op.i] = !!op.val; break;
     case "done2": st.done2 = !!op.done; break;
@@ -776,8 +788,8 @@ const LESSON = {
   5:{ stage:"자기주도 탐구 · 질문 생성하기 · 학습 설계하기", title:"내 진로 분야에서 탐구 계획 세우기", docs:["d6","d9"] },
   6:{ stage:"자기주도 탐구 · 질문에 답 찾기 · 내 말로 종합하기", title:"조사하고 공간 불평등 완화 정책 제안서 쓰기", docs:["d7","d9","d5","d6"] },
 };
-const DOCNAME = { d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드", t51:"탐구 꿀팁", t52:"탐구 꿀팁", t53:"탐구 꿀팁", t62:"탐구 꿀팁", help:"도움 자료" };
-const STEP_DOCS = { "5-1":["t51","d6"], "5-2":["t52","d9"], "5-3":["help"], "6-1":["d8","d7"], "6-2":["t62","d7","d5"] };
+const DOCNAME = { d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드", t51:"탐구 꿀팁", t52:"탐구 꿀팁", t53:"탐구 꿀팁", t62:"탐구 꿀팁", help:"도움 자료", d10:"우리 모둠 질문" };
+const STEP_DOCS = { "5-1":["t51","d6"], "5-2":["t52","d9"], "5-3":["help"], "2-3":["d10","d2","d1"], "6-1":["d8","d7"], "6-2":["t62","d7","d5"] };
 const STEPS = {
   "1-1":{ label:"질문 쏟아내기", who:"개인", q:"자료 (1)을 읽으며 떠오른 질문을 자유롭게 적어 보자." },
   "1-2":{ label:"비슷한 것끼리 묶기", who:"모둠", q:"모둠원의 질문을 모두 펼쳐 놓고, 비슷한 질문끼리 묶어 보자." },
@@ -933,7 +945,7 @@ function drawDash(){
       const filled = keys.filter(k => st.res[k].data.trim()).length;
       return `<div class="dcard${empty ? " empty" : ""}"><div class="dhead"><b>${m}모둠</b><span class="hint">${mem.length ? `${mem.length}명 · ${esc(mem.join(", "))}` : "아직 아무도 들어오지 않음"}</span></div>
         ${empty ? "" : `<div class="dpills">${pill("질문", st.cards.length + "개", st.cards.length)}${pill("묶음", `${named}/${st.groups.length}`, st.groups.length && named === st.groups.length)}
-          ${pill("후보", st.done ? "✓" : st.cands.length + "개", st.done)}${pill("사다리", st.lads.length + "개", st.lads.length)}${pill("계획", st.done2 ? "✓" : "-", st.done2)}
+          ${pill("후보", st.done ? "✓" : st.cands.length + "개", st.done)}${pill("사다리", st.glad.ok ? "✓" : st.glad.cand || st.glad.start ? "진행 중" : "-", st.glad.ok)}${pill("계획", st.done2 ? "✓" : "-", st.done2)}
           ${pill("조사", `${filled}/${keys.length}`, filled === keys.length)}${pill("결론", st.done3 ? "✓" : "-", st.done3)}${pill("받은 댓글", st.cmts.length, st.cmts.length)}</div>
         <p class="ro"><b>탐구 질문</b> ${esc(st.fin.text) || "-"}</p>`}
         <div class="acts"><button class="ghost" data-act="tGo" data-id="${m}">이 모둠 활동 보기</button>${empty ? "" : `<button class="ghost" data-act="tRep" data-id="${m}">연수용 결과물</button>`}</div></div>`; }).join("")}</div>`;
@@ -960,7 +972,7 @@ function drawReport(){
       ${sec("1", "1차시 · 질문 쏟아내기와 묶기", (st.groups.map(g => `<div class="rgroup"><b>${esc(g.name || "이름 없는 묶음")}</b><ul>${st.cards.filter(c => c.g === g.id).map(qline).join("")}</ul></div>`).join("") +
         (rest.length ? `<div class="rgroup"><b>묶지 않은 질문</b><ul>${rest.map(qline).join("")}</ul></div>` : "")) || '<p class="empty">-</p>')}
       ${sec("2", "1차시 · 후보 탐구 질문", st.cands.map((k, i) => `<div class="rgroup"><b>${NUM[i]} ${esc(k.text)}</b>${k.from.length ? `<p class="ro"><b>바탕 질문</b> ${k.from.map(f => esc(textOf(f))).filter(Boolean).join(" / ")}</p>` : ""}</div>`).join("") || '<p class="empty">-</p>')}
-      ${sec("3", "2차시 · 질문 사다리 (정교화)", st.lads.map(l => `<div class="rgroup"><b>${esc(al(l.name))}</b>${[["start","출발"],["c1","① 개념"],["c2","② 범위·대상"],["c3","③ 탐구형"],["end","도착"]].filter(([f]) => l[f]).map(([f, n]) => `<p class="ro"><b>${n}</b> ${esc(l[f])}</p>`).join("")}</div>`).join("") || '<p class="empty">-</p>')}
+      ${sec("3", "2차시 · 질문 사다리 (정교화)", (ladBest(st.glad) ? [{ ...st.glad, name:"우리 모둠" }] : []).concat(st.lads).map(l => `<div class="rgroup"><b>${l.name === "우리 모둠" ? "우리 모둠 사다리" : esc(al(l.name))}</b>${[["start","출발"],["c1","① 개념"],["c2","② 범위·대상"],["c3","③ 탐구형"],["end","도착"]].filter(([f]) => l[f]).map(([f, n]) => `<p class="ro"><b>${n}</b> ${esc(l[f])}</p>`).join("")}</div>`).join("") || '<p class="empty">-</p>')}
       ${sec("4", "2차시 · 최종 탐구 질문", `<p class="rq">${esc(st.fin.text) || "-"}</p><p class="ro"><b>고른 이유</b> ${esc(st.fin.reason) || "-"}</p>${st.fin.from.length ? `<p class="ro"><b>바탕 질문</b> ${st.fin.from.map(f => esc(ladOf(f))).filter(Boolean).join(" / ")}</p>` : ""}`)}
       ${sec("5", "2차시 · 하위 질문과 조사 계획", keys.map(([k, n]) => { const v = st.subs[k]; return `<div class="rgroup"><b>${n} ${esc(v.q) || "-"}</b><p class="ro"><b>확인할 것</b> ${esc(v.check) || "-"} · <b style="min-width:0">자료</b> ${esc(v.src) || "-"} · <b style="min-width:0">담당</b> ${esc(who(v.who))}</p></div>`; }).join(""))}
       ${sec("6", "3차시 · 조사, 보완 의견, 수정", keys.map(([k, n]) => { const v = st.subs[k], r = st.res[k]; return `<div class="rgroup"><b>${n} ${esc(v.q) || "-"}</b> <small>${esc(who(v.who))}</small>
@@ -1255,16 +1267,18 @@ const ladBest = l => [l.end, l.c3, l.c2, l.c1, l.start].find(v => v && v.trim())
 const candLabel = id => { const i = S.cands.findIndex(k => k.id === id); return i >= 0 ? `후보 ${NUM[i]}` : "직접 쓴 질문"; };
 const members = () => [...new Set([...S.cards.map(c => c.name), ...S.lads.map(l => l.name)].filter(n => n && n !== "선생님").map(dn))];
 const takers = id => S.lads.filter(l => l.cand === id).map(l => dn(l.name));
+const gBest = () => ladBest(S.glad);
 
 VIEWS["2-1"] = () => {
-  const mineL = S.lads.filter(l => l.name === me.uid), others = S.lads.filter(l => l.name !== me.uid), D = S.done2;
-  const candList = S.cands.length ? S.cands.map((k, i) => `<div class="pickq"><span>${NUM[i]} ${esc(k.text) || "(비어 있음)"} ${takers(k.id).length ? `<small class="hint">${esc(takers(k.id).join(", "))} 맡음</small>` : ""}</span>${me.teacher ? "" : `<button class="ghost" data-act="takeCand" data-id="${k.id}">이 질문 맡기</button>`}</div>`).join("")
+  const G = S.glad, D = S.done2 || G.ok, started = !!(G.cand || G.start);
+  const candList = S.cands.length ? S.cands.map((k, i) => `<div class="pickq"><span>${NUM[i]} ${esc(k.text) || "(비어 있음)"}</span>${D ? "" : `<button class="ghost" data-act="gPick" data-id="${k.id}">이 질문으로 하기</button>`}</div>`).join("")
     : '<p class="empty">1차시 후보 질문이 아직 없어요. 직접 써서 시작하기</p>';
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>자료 (2)를 모둠원과 함께 읽으며 중요한 내용에 표시하기</li><li>1차시 후보 질문을 모둠원끼리 <b>하나씩 나누어 맡기</b></li><li>맡은 질문을 <b>사다리</b>로 다듬기 — 바꿀 수 있는 요소만 고치고 도착 칸에서 종합하기</li></ol></div>
+      <ol><li>자료 (2)를 모둠원과 함께 읽으며 중요한 내용에 표시하기</li><li>모둠원과 의논해 <b>함께 다듬을 후보 질문 1개</b> 고르기</li><li><b>우리 모둠 사다리</b>를 함께 오르며 다듬기 — 바꿀 수 있는 요소만 고치고 도착 칸에서 종합하기</li></ol>
+      <small>사다리는 모둠원 모두의 화면에 같이 보이고 누구나 고칠 수 있어요. 한 사람이 쓰고 나머지는 함께 의논하면 편해요.</small></div>
     ${SLOT}
-    ${!mineL.length ? `<div class="panel"><span class="num">맡을 후보 질문 고르기</span>${candList}${me.teacher ? "" : `<div class="acts"><button class="ghost" data-act="takeOwn">직접 써서 시작하기</button></div>`}</div>
-      ${me.teacher ? "" : '<p class="hint">질문을 맡으면 다듬는 방법과 사다리가 나와요.</p>'}`
+    ${!started ? `<div class="panel"><span class="num">함께 다듬을 후보 질문 고르기</span>${candList}${D ? "" : `<div class="acts"><button class="ghost" data-act="gPick" data-id="">직접 써서 시작하기</button></div>`}</div>
+      <p class="hint">질문을 고르면 다듬는 방법과 우리 모둠 사다리가 나와요.</p>`
     : `<div class="box"><span class="tag">다듬는 세 가지 방법</span>
       <ol><li><b>개념 연결하기</b>: 일상적인 표현을 자료 (2)의 개념(공간 불평등, 필수 서비스 접근 기회, 지역의 구조적 조건 등)과 연결 지어 질문의 깊이 더하기</li>
       <li><b>범위와 대상 구체화하기</b>: ‘시골’, ‘사람들’, ‘불편하다’처럼 막연한 표현을 ‘비수도권 군 지역의 중증 응급환자’와 같이 조사할 수 있는 대상으로 좁히기</li>
@@ -1277,27 +1291,25 @@ VIEWS["2-1"] = () => {
       <p class="ro"><b>③ 탐구형</b> 응급 진료를 받기 어려운 데에는 <u>어떤 지역의 구조적 조건</u>이 영향을 미칠까?</p>
       <p class="ro"><b>도착</b> 비수도권 군 지역의 중증 응급환자가 필수 서비스인 응급의료를 이용할 기회가 적은 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?</p>
       <small>예시는 방법을 보여 줄 뿐 — 그대로 옮기지 말고 우리 모둠의 질문으로 해 보기</small></details>
-    ${mineL.map(l => `<div class="ladder"><div class="lhead"><b>${esc(me.name)}의 사다리</b><span class="hint">${candLabel(l.cand)}</span>${D ? "" : `<button class="ghost" data-act="delLad" data-id="${l.id}">다시 고르기</button>`}</div>
-      ${LF.map(x => { const fid = `lad-${l.id}-${x.f}`, ends = x.f === "start" || x.f === "end";
-        return `<div class="rung${ends ? " ends" : ""}"><label for="${fid}">${x.t}</label><p class="hint">${x.h}</p>
-          <textarea id="${fid}" maxlength="200" data-k="${fid}" data-lid="${l.id}" data-lf="${x.f}" data-qc="${x.f === "end" ? "open" : ""}" ${D ? "disabled" : ""}>${esc(l[x.f])}</textarea>${qc(fid, l[x.f], x.f === "end" ? "open" : "")}
-          ${D || x.f === "start" ? "" : `<div class="tools"><button class="chip" data-act="copyUp" data-id="${l.id}" data-g="${x.f}">위 칸 질문 가져와 고치기</button>
-            ${x.words ? WORDS.map(w => `<button class="chip" data-act="word" data-w="${esc(w)}">+ ${esc(w)}</button>`).join("") : ""}</div>`}</div>`; }).join("")}</div>`).join("")}`}
-    <h2>모둠원 사다리</h2>
-    ${others.map(l => `<div class="ladder other"><div class="lhead"><b>${esc(dn(l.name))}</b><span class="hint">${candLabel(l.cand)}</span></div>
-      ${LF.map(x => l[x.f] ? `<p class="ro"><b>${x.s}</b> ${esc(l[x.f])}</p>` : "").join("") || '<p class="empty">아직 쓰는 중</p>'}</div>`).join("") || '<p class="empty">아직 다른 모둠원의 사다리가 없어요.</p>'}`;
+    <div class="ladder"><div class="lhead"><b>우리 모둠 사다리</b><span class="hint">${candLabel(G.cand)}</span>${D ? "" : `<button class="ghost" data-act="gPick" data-id="__change">다른 질문으로 바꾸기</button>`}</div>
+      ${LF.map(x => { const fid = `glad-${x.f}`, ends = x.f === "start" || x.f === "end";
+        return `<div class="rung${ends ? " ends" : ""}"><label for="${fid}">${x.t.replace("내가 맡은", "함께 고른")}</label><p class="hint">${x.h}</p>
+          <textarea id="${fid}" maxlength="200" data-k="${fid}" data-gf="${x.f}" data-qc="${x.f === "end" ? "open" : ""}" ${D ? "disabled" : ""}>${esc(G[x.f])}</textarea>${qc(fid, G[x.f], x.f === "end" ? "open" : "")}
+          ${D || x.f === "start" ? "" : `<div class="tools"><button class="chip" data-act="gCopyUp" data-g="${x.f}">위 칸 질문 가져와 고치기</button>
+            ${x.words ? WORDS.map(w => `<button class="chip" data-act="word" data-w="${esc(w)}">+ ${esc(w)}</button>`).join("") : ""}</div>`}</div>`; }).join("")}</div>
+    ${G.ok ? `<div class="done"><b>우리 모둠 질문을 확정함</b><p style="margin:6px 0 0;font-weight:700">${esc(G.end)}</p>${S.done2 ? "" : `<div class="acts"><button class="ghost" data-act="gOk" data-id="">확정 취소</button></div>`}</div>`
+      : `<button class="primary" data-act="gOk" data-id="1" ${G.end.trim().length >= 5 ? "" : "disabled"}>우리 모둠 질문 확정하기</button>${G.end.trim().length >= 5 ? "" : '<p class="hint">도착 칸에 종합한 질문을 쓰면 확정할 수 있어요.</p>'}`}`}`;
 };
 const CHK2 = ["너무 추상적이거나 지엽적이지 않은가?","단순 사실 확인을 넘어 의미나 이유를 탐구하게 하는가?","여러 개의 하위 질문으로 나누어 답해 갈 수 있는가?","중요한 사회적 쟁점이나 가치(생명권·건강권 등)와 연결되는가?"];
 VIEWS["2-2"] = () => {
-  const F = S.fin, D = S.done2;
+  const F = S.fin, D = S.done2 || F.ok;
   const ladText = id => { const l = S.lads.find(x => x.id === id); return l ? ladBest(l) : ""; };
   return `<div class="box"><span class="tag">최종 탐구 질문 정하기</span>
-      <ul><li>정교화한 질문 가운데 하나를 고르거나, 서로 연결되는 두 질문을 하나로 묶어 최종 탐구 질문 만들기</li><li>아래 체크리스트로 점검한 뒤 최종 탐구 질문과 고른 이유 쓰기</li></ul></div>
-    <h2>정교화한 질문들</h2>
-    ${S.lads.map(l => { const best = ladBest(l); if(!best) return "";
-      return `<div class="pickq box"><span>${esc(best)} <small class="hint">${esc(dn(l.name))} · ${candLabel(l.cand)}${l.end ? "" : " · 도착 칸 전"}</small></span>
-        ${D ? "" : `<button class="ghost" data-act="toFin" data-id="${l.id}">최종 질문으로</button>${F.text && !F.from.includes(l.id) ? `<button class="ghost" data-act="finFrom" data-id="${l.id}">함께 묶기</button>` : ""}`}</div>`; }).join("")
-      || '<p class="empty">활동 1에서 사다리를 오르면 여기에 정교화한 질문이 모여요.</p>'}
+      <ul><li>우리 모둠 사다리에서 다듬은 질문을 가져와, 아래 체크리스트로 한 번 더 점검하기</li><li>필요하면 고쳐 쓴 뒤 최종 탐구 질문과 고른 이유 쓰기</li></ul></div>
+    <h2>우리 모둠 사다리에서 다듬은 질문</h2>
+    ${gBest() ? `<div class="pickq box"><span>${esc(gBest())} <small class="hint">${candLabel(S.glad.cand)}${S.glad.end ? "" : " · 도착 칸 전"}</small></span>
+        ${D ? "" : `<button class="ghost" data-act="gToFin">최종 질문으로 가져오기</button>`}</div>`
+      : '<p class="empty">활동 1에서 우리 모둠 사다리를 오르면 여기에 다듬은 질문이 나와요.</p>'}
     <h2>우리 모둠 최종 탐구 질문</h2>
     <div class="cand"><label for="fin-t">최종 탐구 질문</label>
       <textarea id="fin-t" maxlength="300" data-k="fin-t" data-fin="text" data-qc="open" placeholder="위에서 [최종 질문으로]를 누르거나 직접 쓰기" ${D ? "disabled" : ""}>${esc(F.text)}</textarea>${qc("fin-t", F.text, "open")}
@@ -1306,7 +1318,9 @@ VIEWS["2-2"] = () => {
       ${CHK2.map((c, i) => `<label class="chk"><input type="checkbox" data-finchk="${i}" ${F.chk[i] ? "checked" : ""} ${D ? "disabled" : ""}> ${c}</label>`).join("")}
       <label for="fin-r">이 질문을 고른 이유</label>
       <textarea id="fin-r" maxlength="300" data-k="fin-r" data-fin="reason" ${D ? "disabled" : ""}>${esc(F.reason)}</textarea>
-      <p class="hint">${F.text.trim() && F.reason.trim() && F.chk.every(Boolean) ? "✓ 준비 완료 — 활동 3 하위 질문·조사 계획으로 넘어가기" : "질문·체크리스트 4개·고른 이유를 모두 채우면 준비 완료"}</p></div>`;
+      </div>
+    ${F.ok ? `<div class="done"><b>최종 탐구 질문을 확정함</b><p style="margin:6px 0 0;font-weight:700">${esc(F.text)}</p>${S.done2 ? "" : `<div class="acts"><button class="ghost" data-act="fOk" data-id="">확정 취소</button></div>`}</div><p class="hint">이제 활동 3 하위 질문·조사 계획으로 넘어가기</p>`
+      : `<button class="primary" data-act="fOk" data-id="1" ${F.text.trim().length >= 5 && F.chk.every(Boolean) ? "" : "disabled"}>최종 탐구 질문 확정하기</button>${F.text.trim().length >= 5 && F.chk.every(Boolean) ? "" : '<p class="hint">최종 탐구 질문을 쓰고 체크리스트 4가지를 모두 확인하면 확정할 수 있어요.</p>'}`}`;
 };
 
 const whoList = w => String(w || "").split(/[,，]/).map(x => x.trim()).filter(Boolean);
@@ -1314,24 +1328,32 @@ const memNames = () => [...new Set((S.mem || []).map(dn).filter(Boolean))];
 const noJob = () => memNames().filter(n => !KS().some(([k]) => whoList(S.subs[k].who).includes(n)));
 VIEWS["2-3"] = () => {
   const F = S.fin, D = S.done2, mem = members(), names = memNames(), idle = noJob();
-  const ready = F.text.trim().length >= 5 && KS().every(([k]) => S.subs[k].q.trim().length >= 5 && whoList(S.subs[k].who).length) && !idle.length;
+  const allQ = KS().every(([k]) => S.subs[k].q.trim().length >= 5), allChk = S.subChk.every(Boolean);
+  const ready = F.text.trim().length >= 5 && allQ && KS().every(([k]) => whoList(S.subs[k].who).length) && !idle.length;
   const SCHK = ["모든 하위 질문이 최종 탐구 질문을 해결하는 데 기여하는가?","하위 질문들이 단계적으로 이어지는가?","우리 수준에서 조사할 수 있는 자료가 있는가?"];
-  return `<div class="box"><span class="tag">하위 질문·조사 계획</span>
-      <ul><li><b>하위 질문 만들기</b>: 최종 탐구 질문에 답하기 위해 알아야 할 내용(실태·구조적 원인·삶에 미치는 영향)을 의논해 질문 형태로 쓰기</li><li><b>조사 계획 세우기</b>: 하위 질문마다 확인할 것, 필요한 자료와 출처, 담당자 정하기</li></ul></div>
+  const id = (k, f) => `sub-${k}-${f}`;
+  const inp = (k, f, lab, extra) => `<label for="${id(k, f)}">${lab}</label><input type="text" id="${id(k, f)}" maxlength="200" data-k="${id(k, f)}" data-sk="${k}" data-sf="${f}" value="${esc(S.subs[k][f])}" ${extra || ""} ${D ? "disabled" : ""}>`;
+  return `<div class="box"><span class="tag">이렇게 해요</span>
+      <ol><li><b>하위 질문과 조사할 것 쓰기</b> — 최종 탐구 질문에 답하려면 무엇을 알아야 할지 의논해 질문으로 쓰고, 확인할 것과 필요한 자료·출처 적기 <small>(자료 칸 ‘우리 모둠 질문’에서 골라 와도 돼요)</small></li>
+      <li><b>체크리스트로 점검하기</b></li><li><b>하위 질문마다 담당자 정하기</b> — 모둠원 모두가 하나씩</li></ol></div>
+    ${SLOT}
     <div class="qbox"><small class="hint">우리 모둠 최종 탐구 질문</small><br><b>${esc(F.text) || '<span class="empty">활동 2에서 먼저 정하기</span>'}</b></div>
-    <datalist id="memList">${mem.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
-    ${KS().map(([k, t]) => { const v = S.subs[k], id = f => `sub-${k}-${f}`;
-      const inp = (f, lab, extra) => `<label for="${id(f)}">${lab}</label><input type="text" id="${id(f)}" maxlength="200" data-k="${id(f)}" data-sk="${k}" data-sf="${f}" value="${esc(v[f])}" ${extra || ""} ${D ? "disabled" : ""}>`;
-      const wl = whoList(v.who);
+    <h2>① 하위 질문과 조사할 것</h2>
+    ${KS().map(([k, t]) => { const v = S.subs[k];
       return `<div class="sub"><span class="num">하위 질문 ${t}</span>
-        <label for="${id("q")}">하위 질문</label>
-        <textarea id="${id("q")}" maxlength="200" data-k="${id("q")}" data-sk="${k}" data-sf="q" data-qc="" ${k === "a" ? 'placeholder="응급의료 취약지는 어느 지역에 얼마나 몰려 있을까?"' : ""} ${D ? "disabled" : ""}>${esc(v.q)}</textarea>${qc(id("q"), v.q, "")}
-        ${inp("check", "확인할 것")}${inp("src", "필요한 자료·출처")}
-        <label>담당자 <small class="hint" style="font-weight:400">— 이름을 누르면 맡기 (1명)</small></label>
-        <div class="whos">${names.map(n => `<button data-act="who" data-id="${k}" data-g="${esc(n)}" aria-pressed="${wl.includes(n)}" ${D ? "disabled" : ""}>${esc(n)}</button>`).join("") || '<span class="hint">모둠원이 로그인하면 이름이 나와요.</span>'}</div>
-        ${inp("who", "직접 입력 (목록에 없는 모둠원)", 'list="memList" placeholder="이름"')}</div>`; }).join("")}
+        <label for="${id(k, "q")}">하위 질문</label>
+        <textarea id="${id(k, "q")}" maxlength="200" data-k="${id(k, "q")}" data-sk="${k}" data-sf="q" data-qc="" ${k === "a" ? 'placeholder="응급의료 취약지는 어느 지역에 얼마나 몰려 있을까?"' : ""} ${D ? "disabled" : ""}>${esc(v.q)}</textarea>${qc(id(k, "q"), v.q, "")}
+        ${inp(k, "check", "확인할 것")}${inp(k, "src", "필요한 자료·출처")}</div>`; }).join("")}
     ${D ? "" : S.subN === 3 ? `<button class="ghost" data-act="subN" data-id="4" style="margin-top:12px">+ 하위 질문 칸 하나 더 (4명 모둠)</button>` : `<button class="ghost" data-act="subN" data-id="3" style="margin-top:12px">④ 칸 빼기</button>`}
-    <div class="box"><span class="tag">하위 질문 체크리스트</span>${SCHK.map((c, i) => `<label class="chk"><input type="checkbox" data-subchk="${i}" ${S.subChk[i] ? "checked" : ""} ${D ? "disabled" : ""}> ${c}</label>`).join("")}</div>
+    <h2>② 체크리스트로 점검하기</h2>
+    <div class="box" style="margin-top:6px">${SCHK.map((c, i) => `<label class="chk"><input type="checkbox" data-subchk="${i}" ${S.subChk[i] ? "checked" : ""} ${D ? "disabled" : ""}> ${c}</label>`).join("")}</div>
+    <h2>③ 하위 질문마다 담당자 정하기</h2>
+    ${!(allQ && allChk) && !D ? '<p class="hint">하위 질문을 모두 쓰고 체크리스트를 확인한 다음 담당자를 정해요.</p>' : ""}
+    <datalist id="memList">${mem.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
+    ${KS().map(([k, t]) => { const v = S.subs[k], wl = whoList(v.who), off = D || !(allQ && allChk);
+      return `<div class="sub"><span class="num">하위 질문 ${t}</span> <span class="hint">${esc(v.q) || "(아직 비어 있음)"}</span>
+        <div class="whos" style="margin-top:8px">${names.map(n => `<button data-act="who" data-id="${k}" data-g="${esc(n)}" aria-pressed="${wl.includes(n)}" ${off ? "disabled" : ""}>${esc(n)}</button>`).join("") || '<span class="hint">모둠원이 로그인하면 이름이 나와요.</span>'}</div>
+        ${inp(k, "who", "직접 입력 (목록에 없는 모둠원)", `list="memList" placeholder="이름" ${off && !D ? "disabled" : ""}`)}</div>`; }).join("")}
     ${D ? `<div class="done"><b>2차시 탐구 계획을 확정함</b><pre>${esc(summary2())}</pre>
       <div class="acts"><button class="ghost" data-act="copy" data-g="2">공유문서용으로 복사</button><button class="ghost" data-act="reopen" data-g="done2">다시 고치기</button></div></div>`
       : `<button class="primary" data-act="finalize" data-g="done2" ${ready ? "" : "disabled"}>2차시 탐구 계획 확정하기</button>${ready ? "" : `<p class="hint">최종 탐구 질문과 하위 질문, 하위 질문마다 담당자 1명 이상을 정해야 확정할 수 있음</p>${idle.length ? `<p class="hint warn">아직 맡은 질문이 없는 모둠원: ${esc(idle.join(", "))}${S.subN === 3 && memNames().length >= 4 ? " — 4명 모둠은 [+ 하위 질문 칸 하나 더]를 눌러 쓰기" : ""}</p>` : ""}`}`}`;
@@ -1372,15 +1394,16 @@ VIEWS["3-2"] = () => {
       <li><b>반영한 의견에 ✓ ‘반영함’</b> 체크하고, <b>‘수정한 점’</b>에 무엇을 고쳤는지 쓰기</li></ol>
       <span class="tag" style="margin-top:6px">검토 기준</span>
       <ul><li><b>질문과 답의 연결</b>: 조사 내용과 해석이 하위 질문에서 물은 것에 정확하게 답하고 있는가?</li><li><b>자료의 적절성</b>: 비교한 지역, 대상, 기준 연도가 적절하며 출처가 믿을 만한가?</li><li><b>설명의 충분성</b>: 개인의 사정이 아니라 ‘지역의 구조적 조건’ 때문임을 드러내는 설명이 충분한가?</li></ul></div>
-    ${mine.length ? `<h2>내 하위 질문 — 받은 의견 보고 고치기</h2>${mine.map(k => `${resPanel(k, D)}</div>`).join("")}` : ""}
-    ${others.length ? `<h2>${mine.length ? "모둠원 하위 질문 — 보완 의견 남기기" : "하위 질문별 조사 내용"}</h2>` : ""}
+    ${others.length ? `<h2>${me.teacher ? "하위 질문별 조사 내용 — 선생님 의견 남기기" : "모둠원 하위 질문 — 보완 의견 남기기"}</h2>` : `<p class="locked">보완 의견을 남길 모둠원 칸이 없어요. 하위 질문을 모두 내가 맡았거나 아직 담당자가 정해지지 않았어요 (2차시 활동 3).</p>`}
     ${others.map(k => { const r = S.res[k];
       return `${resPanel(k, D, true)}
         <label>보완 의견</label><ul class="fbl">${r.fb.map(x => fbItem(x, k)).join("") || '<li class="empty" style="border:0;background:none">아직 없음</li>'}</ul>
         ${r.fix ? `<p class="ro"><b>수정한 점</b> ${esc(r.fix)}</p>` : ""}
-        ${D || me.teacher ? "" : `<div class="fbin"><select data-fbtag="${k}" aria-label="검토 기준"><option value="">기준 고르기</option>${FBTAG.map(t => `<option>${t}</option>`).join("")}</select>
-          <input type="text" maxlength="300" data-k="fb-${k}" data-fbtext="${k}" placeholder="무엇을 더하거나 고치면 좋을지"><button class="ghost" data-act="addFb" data-g="${k}">남기기</button></div>`}
-      </div>`; }).join("")}`;
+        ${D ? "" : `<div class="box" style="border:2px solid var(--ink)"><span class="tag">${me.teacher ? "선생님 의견 남기기" : "보완 의견 남기기"}</span>
+          <div class="fbin" style="margin-top:4px"><select data-fbtag="${k}" aria-label="검토 기준"><option value="">검토 기준 고르기</option>${FBTAG.map(t => `<option>${t}</option>`).join("")}</select>
+          <input type="text" maxlength="300" data-k="fb-${k}" data-fbtext="${k}" placeholder="무엇을 더하거나 고치면 좋을지 구체적으로"><button class="primary" style="width:auto;margin:0;padding:8px 16px;font-size:15px" data-act="addFb" data-g="${k}">남기기</button></div></div>`}
+      </div>`; }).join("")}
+    ${mine.length ? `<h2>내 하위 질문 — 받은 의견 보고 고치기</h2>${mine.map(k => `${resPanel(k, D)}</div>`).join("")}` : ""}`;
 };
 VIEWS["3-3"] = () => {
   const D = S.done3, c = S.concl;
@@ -1505,7 +1528,7 @@ const CAREER0 = [["미디어·방송·문화·예술","영화관도 공연장도
   ["국제·외교·통상","외국인 주민이 많은 지역과 적은 지역에서 통번역·행정 서비스를 이용할 기회는 얼마나 다를까?","행정안전부 「지방자치단체 외국인주민 현황」"],
   ["환경·에너지(추가)","폐기물·발전 시설이나 폭염 쉼터는 어느 지역에 몰려 있고, 그 영향은 누가 받을까?","환경부·기상청 자료, 지역 언론 보도"]];
 function moumRec1(){
-  const cands = S.cands.filter(k => k.text.trim()), lads = S.lads.filter(l => ladBest(l));
+  const cands = S.cands.filter(k => k.text.trim()), lads = (gBest() ? [{ ...S.glad, name:"우리 모둠" }] : []).concat(S.lads.filter(l => ladBest(l)));
   if(!cands.length && !lads.length && !S.fin.text.trim()) return '<p class="empty" style="margin:0">1회 모둠 기록이 없음</p>';
   return `${cands.length ? `<p class="ro" style="margin:2px 0"><b>후보 탐구 질문</b></p>${ul(cands.map((k, i) => `${NUM[i]} ${esc(k.text)}`))}` : ""}
     ${lads.map(l => `<p class="ro" style="margin:6px 0 2px"><b>사다리</b> ${esc(dn(l.name))}</p>${ul([["c1","개념 연결"],["c2","범위·대상"],["c3","탐구형"]].filter(([f]) => l[f]).map(([f, n]) => `${n}: ${esc(l[f])}`)) }`).join("")}
@@ -1619,6 +1642,17 @@ function renderDocs(){
     ["c","삶에 미치는 영향","사례·인터뷰·설문","지역 언론 보도, 설문 조사 결과 (개인 사례는 통계와 짝지어 쓰기)"]];
   $("tipWhere").innerHTML = '<p class="hint" style="margin:0">내 하위 질문이 무엇을 묻는지에 따라 골라 보기</p>' + WHERE.map(([k, n, kind, where]) => `<div class="where"><b>· ${n}</b> → ${kind}<br>→ ${where}</div>`).join("");
   drawHelp();
+  if(step === "2-3" && $("ourQs")){
+    const D = S.done2, keys = KS();
+    const row = t => !t || !t.trim() ? "" : `<div class="pickq" style="margin:4px 0"><span>${esc(t)}</span>${D || me.teacher || me.preview ? "" : `<span class="slots">${keys.map(([k, n]) => `<button class="slot" data-act="toSub" data-g="${k}" data-w="${esc(t)}" title="하위 질문 ${n} 칸에 넣기">${n}</button>`).join("")}</span>`}</div>`;
+    const has = inGroup(), rest = S.cards.filter(c => !has(c)), G = S.glad;
+    $("ourQs").innerHTML = (S.fin.text ? `<section class="src"><h4><span class="lbl">최종</span>최종 탐구 질문</h4><p style="margin:0;font-weight:700">${esc(S.fin.text)}</p></section>` : "")
+      + (gBest() ? `<section class="src"><h4><span class="lbl">사다리</span>우리 모둠 사다리</h4>${["start","c1","c2","c3","end"].map(f => row(G[f])).join("")}</section>` : "")
+      + (S.cands.length ? `<section class="src"><h4><span class="lbl">후보</span>1차시 후보 탐구 질문</h4>${S.cands.map(k => row(k.text)).join("")}</section>` : "")
+      + (S.cards.length ? `<section class="src"><h4><span class="lbl">1차시</span>쏟아낸 질문 (묶음별)</h4>${S.groups.map(g => { const cs = S.cards.filter(c => c.g === g.id); return cs.length ? `<p class="ro" style="margin:8px 0 2px"><b>${esc(g.name || "이름 없는 묶음")}</b></p>${cs.map(c => row(c.text)).join("")}` : ""; }).join("")}
+          ${rest.length ? `<p class="ro" style="margin:8px 0 2px"><b>묶지 않은 질문</b></p>${rest.map(c => row(c.text)).join("")}` : ""}</section>` : "")
+      || '<p class="empty">아직 우리 모둠이 만든 질문이 없어요.</p>';
+  }
   const c = S.concl;
   $("conclDoc").innerHTML = [["Q","탐구 질문",S.fin.text],["답","탐구 질문에 대한 답변",c.answer],["근거","답변을 뒷받침하는 핵심 근거",c.evidence],["+","더 확인하고 싶은 점 / 새로 생긴 질문",c.more]]
     .map(([l, t, v]) => `<section class="src"><h4><span class="lbl">${l}</span>${t}</h4><p style="margin:0">${esc(v) || "-"}</p></section>`).join("");
@@ -1633,7 +1667,7 @@ function renderDocs(){
 
 /* ===== 클릭·입력 처리 ===== */
 let lastLadField = null;
-document.addEventListener("focusin", e => { if(e.target.dataset && e.target.dataset.lf) lastLadField = e.target; });
+document.addEventListener("focusin", e => { if(e.target.dataset && (e.target.dataset.lf || e.target.dataset.gf)) lastLadField = e.target; });
 document.addEventListener("click", async e => {
   if(e.target.id === "qAdd"){ if(me.preview) return toast(PVMSG); addQuestion(); return; }
   const sb = e.target.closest("#srcPick [data-src]");
@@ -1694,11 +1728,39 @@ document.addEventListener("click", async e => {
     setTimeout(() => { const el = document.querySelector(`[data-k="lad-${id}-${g}"]`); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 20);
   }
   if(act === "word"){
-    const el = lastLadField && document.body.contains(lastLadField) ? lastLadField : document.querySelector(`[data-lf="c1"]`);
+    const el = lastLadField && document.body.contains(lastLadField) ? lastLadField : document.querySelector(`[data-gf="c1"],[data-lf="c1"]`);
     if(!el || el.disabled) return;
     const act0 = document.activeElement === el, s = act0 ? el.selectionStart : el.value.length, en = act0 ? el.selectionEnd : el.value.length;
     const pre = s > 0 && !/\s/.test(el.value[s-1]) ? " " : ""; el.setRangeText(pre + b.dataset.w, s, en, "end"); el.focus();
-    send({ t:"editLad", id:el.dataset.lid, name:me.uid, f:el.dataset.lf, val:el.value.trim().slice(0,200) });
+    send(el.dataset.gf ? { t:"glad", f:el.dataset.gf, val:el.value.trim().slice(0,200) } : { t:"editLad", id:el.dataset.lid, name:me.uid, f:el.dataset.lf, val:el.value.trim().slice(0,200) });
+  }
+  if(act === "gPick"){
+    if(id === "__change"){ if(!(await ask("다른 후보 질문으로 바꿀까요? 지금 사다리에 쓴 내용은 지워져요."))) return; send({ t:"gladPick", cand:"", start:"" }); return; }
+    if((S.glad.cand || S.glad.start) && !(await ask("이 질문으로 바꿀까요? 지금 사다리에 쓴 내용은 지워져요."))) return;
+    const k = S.cands.find(x => x.id === id); send({ t:"gladPick", cand:id, start:k ? k.text : "" });
+    if(!id) setTimeout(() => { const el = $("glad-start"); if(el) el.focus(); }, 30);
+    return;
+  }
+  if(act === "gCopyUp"){
+    const order = LF.map(x => x.f), i = order.indexOf(g);
+    const prev = order.slice(0, i).reverse().map(f => S.glad[f]).find(v => v && v.trim());
+    if(!prev) return toast("위 칸에 먼저 질문을 쓰기");
+    send({ t:"glad", f:g, val:prev });
+    setTimeout(() => { const el = $("glad-" + g); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 20);
+    return;
+  }
+  if(act === "toSub"){
+    const v = S.subs[g], t = b.dataset.w; if(!v) return;
+    if(v.q.trim() && v.q.trim() !== t && !(await ask("이 하위 질문 칸에 이미 쓴 내용이 있어요. 이 질문으로 바꿀까요?"))) return;
+    send({ t:"sub", k:g, f:"q", val:t }); toast(`하위 질문 ${(KALL.find(x => x[0] === g) || [0, ""])[1]} 칸에 넣었어요. 고쳐 쓰기`, true);
+    setTimeout(() => { const el = $("sub-" + g + "-q"); if(el){ el.scrollIntoView({ block:"center" }); el.focus(); } }, 50);
+    return;
+  }
+  if(act === "gOk"){ send({ t:"gladOk", val:!!id }); if(id) toast("우리 모둠 질문을 확정했어요", true); return; }
+  if(act === "fOk"){ send({ t:"finOk", val:!!id }); if(id) toast("최종 탐구 질문을 확정했어요", true); return; }
+  if(act === "gToFin"){
+    if(S.fin.text.trim() && !(await ask("지금 쓴 최종 탐구 질문을 우리 모둠 사다리의 질문으로 바꿀까?"))) return;
+    send({ t:"fin", f:"text", val:gBest(), from:[] }); return;
   }
   if(act === "toFin"){
     const l = S.lads.find(x => x.id === id); if(!l) return;
@@ -1757,6 +1819,7 @@ document.addEventListener("change", e => {
   if(d.ctext) send({ t:"editCand", id:d.ctext, text:v.slice(0,200) });
   if(d.creason) send({ t:"editCand", id:d.creason, reason:v.slice(0,300) });
   if(d.lf) send({ t:"editLad", id:d.lid, name:me.uid, f:d.lf, val:v.slice(0,200) });
+  if(d.gf) send({ t:"glad", f:d.gf, val:v.slice(0,200) });
   if(d.fin) send({ t:"fin", f:d.fin, val:v.slice(0,300) });
   if(d.finchk) send({ t:"finChk", i:+d.finchk, val:el.checked });
   if(d.sk) send({ t:"sub", k:d.sk, f:d.sf, val:v.slice(0,200) });
@@ -1794,9 +1857,9 @@ function summary(){
 }
 function summary2(){
   let s = `[${me.moum}모둠] 2차시 질문 정교화와 탐구 계획\n\n① 정교화\n`;
-  S.lads.forEach(l => { s += `· ${dn(l.name)} (${candLabel(l.cand)})\n   출발: ${l.start}\n`;
-    [["c1","개념 연결"],["c2","범위·대상"],["c3","탐구형"]].forEach(([f, n]) => { if(l[f]) s += `   ${n}: ${l[f]}\n`; });
-    s += `   도착: ${l.end}\n`; });
+  const G = S.glad; s += `· 우리 모둠 사다리 (${candLabel(G.cand)})\n   출발: ${G.start}\n`;
+  [["c1","개념 연결"],["c2","범위·대상"],["c3","탐구형"]].forEach(([f, n]) => { if(G[f]) s += `   ${n}: ${G[f]}\n`; });
+  s += `   도착: ${G.end}\n`;
   s += `\n② 최종 탐구 질문\n${S.fin.text}\n   고른 이유: ${S.fin.reason}\n\n③ 조사 계획\n`;
   KS().forEach(([k, n]) => { const v = S.subs[k]; s += `하위 질문 ${n}: ${v.q}\n   확인할 것: ${v.check}\n   필요한 자료·출처: ${v.src}\n   담당자: ${v.who}\n`; });
   return s.trim();
