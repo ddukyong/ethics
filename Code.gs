@@ -208,12 +208,13 @@ function handle_(p){
     }
     case "warmRank": {
       const w = getCls_(code).warm;
-      if(!w) return { ok:true, game:0, round:0, rank:[], total:[] };
+      if(!w) return { ok:true, game:0, round:0, rank:[], total:[], qs:[[], []] };
       const list = cs => Object.keys(cs).map(u => ({ uid:u, name:cs[u].name, moum:cs[u].moum, n:cs[u].n, r1:cs[u].r1, r2:cs[u].r2 })).sort((a, b) => b.n - a.n);
       const per = [1, 2].map(r => warmCounts_(code, w.game, r)), sum = {};
       per.forEach(cs => Object.keys(cs).forEach(u => { const x = sum[u] = sum[u] || { name:cs[u].name, moum:cs[u].moum, n:0, r1:0, r2:0 }; x.n += cs[u].n; }));
       per.forEach((cs, i) => Object.keys(cs).forEach(u => { sum[u]["r" + (i + 1)] = cs[u].n; }));
-      return { ok:true, game:w.game, round:w.round, rank:list(per[w.round - 1]), total:list(sum) };
+      const qs = per.map(cs => Object.keys(cs).reduce((a, u) => a.concat(cs[u].last || []), []));
+      return { ok:true, game:w.game, round:w.round, rank:list(per[w.round - 1]), total:list(sum), qs };
     }
     case "teacher": {
       checkTeacher_(p.key);
