@@ -1095,13 +1095,17 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611111710";
+const APP_VER = "202611111731";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
 document.getElementById("verGo").onclick = () => { const u = new URL(location.href); u.searchParams.set("v", Date.now()); location.replace(u.toString()); };
 const API_URL = "https://script.google.com/macros/s/AKfycbzfHP_EYODLuj0xLqBrmL_kVV-Y16oSoOtVF0DpyMKRLJoc4vdjRqpWnx5KLnPnJ1s/exec";
 const MOUMS = 8;
+/* 수업 코드별 모둠 수 (적지 않은 코드는 8모둠) */
+const MOUM_N = { ethics26:5 };
+const nMoum = code => MOUM_N[String(code || "").trim()] || MOUMS;
+const myCode = () => (me && (me.back || me).code) || "";
 const LS = "qmakers-me2";
 
 /* ===== 공통 규칙 시작 — Code.gs와 글자 하나까지 같아야 함 ===== */
@@ -1325,7 +1329,8 @@ $("tLive").onchange = e => setCls(e.target.checked ? { live:true, step } : { liv
 $("tLock").onchange = e => setCls({ lock:e.target.checked });
 $("tOpen").onchange = e => setCls({ open56:e.target.checked });
 $("tPush").onclick = () => { setCls({ step, push:true }); toast(`학생 모두를 ‘${lessonOf(step)}차시 ${STEPS[step].label}’로 보냈어요`, true); };
-$("tMoum").innerHTML = '<option value="">모둠 활동 보기</option>' + Array.from({length:MOUMS}, (_, i) => `<option value="${i+1}">${i+1}모둠 활동 보기</option>`).join("");
+function fillTMoum(){ const v = $("tMoum").value; $("tMoum").innerHTML = '<option value="">모둠 활동 보기</option>' + Array.from({length:nMoum(myCode())}, (_, i) => `<option value="${i+1}">${i+1}모둠 활동 보기</option>`).join(""); $("tMoum").value = v; }
+fillTMoum();
 $("tMoum").onchange = e => { if(e.target.value) openMoum(e.target.value); };
 async function openMoum(m){
   if(me.preview){ me = me.back; P = { v:0, f:{}, notes:{ marks:[], memos:{} } }; loadNotes(); }
@@ -1345,7 +1350,7 @@ function setTMode(m){
   if(m !== "moum") loadAll();
 }
 async function loadAll(){
-  try{ const d = await api({ action:"all" }); ALL = d.states.map(norm); }catch(err){ toast(err.message); return; }
+  try{ const d = await api({ action:"all" }); ALL = d.states.slice(0, nMoum(myCode())).map(norm); }catch(err){ toast(err.message); return; }
   drawDash(); drawReport();
 }
 setInterval(() => { if(me && me.teacher && tmode === "dash" && !document.hidden) loadAll(); }, 10000);
@@ -1419,9 +1424,12 @@ $("tLeaves").onclick = async () => {
 };
 
 /* ===== 들어가기 ===== */
-$("jmoum").innerHTML += Array.from({length:MOUMS}, (_, i) => `<option value="${i+1}">${i+1}모둠</option>`).join("");
+function fillJMoum(){ const v = $("jmoum").value, n = nMoum($("jcode").value);
+  $("jmoum").innerHTML = '<option value="">처음 들어올 때만 고르기</option>' + Array.from({length:n}, (_, i) => `<option value="${i+1}">${i+1}모둠</option>`).join("");
+  $("jmoum").value = +v <= n ? v : ""; }
+fillJMoum(); $("jcode").addEventListener("input", fillJMoum);
 let asTeacher = false;
-try{ const c0 = new URLSearchParams(location.search).get("c"); if(c0) $("jcode").value = c0.slice(0, 20); }catch(e){}
+try{ const c0 = new URLSearchParams(location.search).get("c"); if(c0){ $("jcode").value = c0.slice(0, 20); fillJMoum(); } }catch(e){}
 function joinValid(){ $("joinBtn").disabled = !($("jcode").value.trim() && (asTeacher ? $("jkey").value.trim() : $("jsid").value.trim() && $("jname").value.trim())); }
 ["jcode","jsid","jname","jkey"].forEach(id => $(id).addEventListener("input", joinValid)); $("jmoum").addEventListener("change", joinValid);
 $("teacherToggle").onclick = () => {
@@ -1453,6 +1461,7 @@ $("leave").onclick = async () => {
   me = null; S = null; P = null; CLS = null; $("app").hidden = true; $("join").hidden = false; $("lockOv").hidden = true; hideMarkBar(); slideOn = false; drawSlides(); drawDock(); $("qrBig").hidden = true; $("fsGate").hidden = true; fsWas = false;
 };
 function show(cls){
+  fillTMoum();
   $("join").hidden = true; $("app").hidden = false;
   $("whoText").textContent = whoText();
   $("tbar").hidden = !me.teacher;
@@ -2237,7 +2246,7 @@ VIEWS["4-2"] = () => {
   const target = BOARD && boardSel ? BOARD.find(b => String(b.moum) === boardSel) : null;
   return `<div class="box"><span class="tag">댓글 남기기</span> 발표 모둠에 <b>댓글 하나 이상</b> — 바로 전달돼요</div>
     <label>발표 모둠 고르기</label>
-    <div class="srcpick">${Array.from({ length:MOUMS }, (_, i) => String(i + 1)).filter(m => me.teacher || m !== String(me.moum)).map(m => `<button data-act="boardSel" data-id="${m}" aria-pressed="${m === boardSel}">${m}모둠</button>`).join("")}
+    <div class="srcpick">${Array.from({ length:nMoum(myCode()) }, (_, i) => String(i + 1)).filter(m => me.teacher || m !== String(me.moum)).map(m => `<button data-act="boardSel" data-id="${m}" aria-pressed="${m === boardSel}">${m}모둠</button>`).join("")}
       <button class="ghost" data-act="boardRefresh" style="margin-left:auto">새로 고침</button></div>
     ${!BOARD ? '<p class="empty">불러오는 중…</p>' : !target ? '<p class="empty">발표하는 모둠을 골라 주세요.</p>' : `
       <div class="qbox"><small class="hint">${target.moum}모둠 탐구 질문</small><br><b>${esc(target.q) || "아직 정하지 않음"}</b>
