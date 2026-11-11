@@ -664,6 +664,23 @@ body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color
 #qwall .qwempty{font-size:2.4vh;color:#5F5C54}
 @keyframes qwIn{from{opacity:0;transform:translateY(8px) rotate(var(--rot))}to{opacity:1;transform:rotate(var(--rot))}}
 @media (prefers-reduced-motion: reduce){ #qwall .qw{animation:none} }
+/* 이렇게 해요: 큰 번호 원으로 단계가 한눈에 */
+.box.how{background:var(--paper);border:2.5px solid var(--acc);border-left-width:2.5px;padding:14px 18px 12px}
+.box.how > .tag{font-size:13px;padding:3px 12px}
+.box.how > ol{list-style:none;counter-reset:st;padding:0;margin:8px 0 4px;display:grid;gap:10px}
+.box.how > ol > li{counter-increment:st;position:relative;padding-left:44px;min-height:32px;font-size:16px;line-height:1.55;margin:0}
+.box.how > ol > li::before{content:counter(st);position:absolute;left:0;top:-1px;width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;font-family:"Black Han Sans",sans-serif;font-size:18px;display:grid;place-items:center}
+.box.how > small{display:block;margin-top:6px;font-size:13px}
+/* 접힌 안내 칸 */
+details.box.tip{padding:0;background:var(--acc-t);border-left:6px solid color-mix(in srgb, var(--acc) 55%, transparent)}
+details.box.tip > summary{list-style:none;cursor:pointer;padding:10px 16px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px}
+details.box.tip > summary::-webkit-details-marker{display:none}
+details.box.tip > summary small{margin-left:auto;font-weight:400;color:var(--muted);font-size:12px}
+details.box.tip > summary::after{content:"▾";color:var(--muted);transition:transform .15s}
+details.box.tip[open] > summary::after{transform:rotate(180deg)}
+details.box.tip[open] > summary small{display:none}
+details.box.tip .tipbody{padding:0 16px 12px}
+details.box.tip + details.box.tip{margin-top:8px}
 </style>
 </head>
 <body>
@@ -1464,16 +1481,36 @@ const pchk = (f, text, dis) => `<label class="chk"><input type="checkbox" data-p
 const teacherNote = '<p class="locked">학생 개인 활동이에요. 선생님 화면에서는 쓸 수 없고, 학생이 제출한 내용은 스프레드시트에서 볼 수 있어요.</p>';
 
 /* ===== 화면 그리기 — 입력 중인 칸은 지키면서 다시 그림 ===== */
+/* 처음 보는 사람도 한눈에: 활동마다 ‘이렇게 해요’ 하나만 펼치고, 나머지 안내 칸은 💡 한 줄로 접어 둠 */
+const tipOpen = new Set();
+function simplifyBoxes(){
+  const boxes = [...document.querySelectorAll("#work > section > .box")].filter(b => b.querySelector(":scope > .tag"));
+  const hasHow = boxes.some(b => b.querySelector(":scope > .tag").textContent.trim() === "이렇게 해요");
+  boxes.forEach((b, i) => {
+    const tag = b.querySelector(":scope > .tag");
+    const t = tag.textContent.trim();
+    if(t === "이렇게 해요"){ b.classList.add("how"); return; }
+    if(!hasHow && i === 0) return;
+    if(b.querySelector("input, textarea, select")) return;
+    const d = document.createElement("details"), key = step + "|" + t;
+    d.className = "box tip"; d.dataset.key = key; d.open = tipOpen.has(key);
+    d.innerHTML = `<summary><span class="ti">💡</span> ${esc(t)} <small>눌러서 보기</small></summary>`;
+    tag.remove(); const body = document.createElement("div"); body.className = "tipbody"; body.append(...b.childNodes); d.append(body);
+    b.replaceWith(d);
+  });
+}
+document.addEventListener("toggle", e => { const d = e.target; if(d && d.classList && d.classList.contains("tip") && d.dataset.key){ d.open ? tipOpen.add(d.dataset.key) : tipOpen.delete(d.dataset.key); } }, true);
 function render(){
   if(!S || !me || !P) return;
   const a = document.activeElement;
   const keep = a && a.dataset && a.dataset.k ? { k:a.dataset.k, val:a.value, s:a.selectionStart, e:a.selectionEnd } : null;
   const qinVal = $("qin") ? $("qin").value : "";
-  const openD = [...document.querySelectorAll("#work details[open] > summary")].map(x => x.textContent);
+  const openD = [...document.querySelectorAll("#work details[open]:not(.tip) > summary")].map(x => x.textContent);
   const fn = VIEWS[step], shut = closed56(step);
   parkDoc();
   $("docPane").hidden = shut || (step === "0-1" && !me.teacher);
   $("work").innerHTML = `<section>${head(step)}${shut ? '<p class="locked">🔒 자기주도 탐구(5·6차시)는 특강이 끝난 뒤 선생님이 열면 시작할 수 있어요. 오늘 모둠과 함께 익힌 과정을 이제 혼자서 해 보게 돼요.</p>' : fn ? fn() : ""}</section>`;
+  simplifyBoxes();
   if(step === "4-2" && !BOARD && !boardBusy) loadBoard();
   if($("qin") && qinVal) $("qin").value = qinVal;
   document.querySelectorAll("#work details > summary").forEach(x => { if(openD.includes(x.textContent)) x.parentElement.open = true; });
