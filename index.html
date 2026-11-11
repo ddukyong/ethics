@@ -715,6 +715,13 @@ body.has-dock{padding-bottom:0}
 #verBar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;padding:8px 10px 8px 18px;border-radius:999px;background:#16150F;color:#fff;font-weight:700;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 #verBar[hidden]{display:none}
 #verBar button{border:0;border-radius:999px;background:#FFD02B;color:#16150F;padding:6px 16px;font-size:15px}
+
+/* 아이폰: 16px보다 작은 입력 칸을 누르면 화면이 확대돼 튀어나가므로, 터치 기기에서는 입력 글자를 16px로 */
+input,textarea,select{max-width:100%}
+.fbin input,.fbin select,.fbin textarea{min-width:0}
+@media (hover:none) and (pointer:coarse), (max-width:820px){
+  input[type=text],input[type=password],input:not([type]),textarea,select{font-size:16px!important}
+}
 </style>
 </head>
 <body>
@@ -1088,7 +1095,7 @@ body.has-dock{padding-bottom:0}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611111423";
+const APP_VER = "202611111425";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
