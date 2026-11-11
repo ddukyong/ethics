@@ -570,6 +570,54 @@ input[type=text],input[type=password],textarea,select{border-radius:12px}
 .dpill.ok{background:var(--acc-t);border-color:var(--acc)}
 #toast{border-radius:999px}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+
+/* 첫 화면: 소개를 위에 크게, 들어가기는 그 아래 가운데 */
+.landing{grid-template-columns:1fr;gap:36px;max-width:1100px;padding:56px 24px 64px;justify-items:center;text-align:center}
+.landing > div:first-child{width:100%}
+.landing .brand{justify-content:center}
+.landing .brand .mark{width:64px;height:64px;font-size:42px;border-radius:16px;transform:rotate(-6deg);box-shadow:3px 3px 0 #16150F}
+.landing .brand b{font-size:30px}
+.landing h1{font-size:clamp(40px,6.4vw,76px);line-height:1.15;margin:26px 0 16px}
+.landing .lede{font-size:clamp(17px,2vw,22px);max-width:34em;margin:0 auto 34px}
+.landing .flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;border:0;text-align:left}
+.landing .flow li{display:flex;flex-direction:column;gap:6px;padding:18px 16px;border:2.5px solid #16150F;border-radius:18px;background:var(--paper);box-shadow:5px 5px 0 var(--c,#FFD02B);transition:transform .12s}
+.landing .flow li:hover{transform:translateY(-3px)}
+.landing .flow li:nth-child(1){--c:#E8590C} .landing .flow li:nth-child(2){--c:#1971C2} .landing .flow li:nth-child(3){--c:#099268} .landing .flow li:nth-child(4){--c:#7048E8} .landing .flow li:nth-child(5){--c:#FFD02B;border-style:dashed}
+.landing .flow .no{font-size:34px;line-height:1;color:var(--c)!important}
+.landing .flow li:nth-child(5) .no{color:#C2410C!important}
+.landing .flow b{font-size:18px;line-height:1.35}
+.landing .flow span:not(.no){font-size:14.5px;line-height:1.5}
+.landing .card-login{width:100%;max-width:520px;text-align:left}
+@media (max-width:960px){ .landing .flow{grid-template-columns:repeat(2,minmax(0,1fr))} .landing .flow li:nth-child(5){grid-column:1 / -1} }
+@media (max-width:480px){ .landing{padding:28px 14px 44px;gap:26px} .landing .flow{gap:10px} .landing .flow li{padding:12px;border-radius:14px;box-shadow:4px 4px 0 var(--c)} .landing .flow .no{font-size:26px} .landing .flow b{font-size:15.5px} .landing .flow span:not(.no){font-size:13px} }
+.landing .flow li:nth-child(5) .no{font-family:"Noto Sans KR",sans-serif;font-weight:700}
+
+/* 왼쪽 자료와 오른쪽 활동의 색 톤 맞추기 — 둘 다 같은 차시 색을 옅게 */
+:root{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color-mix(in srgb, var(--acc) 9%, #F2EFE7); }
+body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color-mix(in srgb, var(--acc) 9%, #F2EFE7); }
+@media (prefers-color-scheme: dark){ :root,body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 20%, #1A1A18); --acc-d:color-mix(in srgb, var(--acc) 12%, #24231F); } }
+#docPane{background:var(--acc-d);border:2px solid color-mix(in srgb, var(--acc) 30%, transparent)}
+.dochead{background:var(--acc-d)}
+#docPane .pane-label{background:var(--acc);color:#fff}
+.doctabs button[aria-selected=true]{background:var(--paper);color:var(--acc);box-shadow:0 0 0 2px var(--acc) inset}
+.src{border-color:color-mix(in srgb, var(--acc) 22%, var(--hair));border-radius:var(--r)}
+.src h4 .lbl{background:var(--acc);color:#fff;border-radius:999px;padding:0 9px}
+.voice{border-left-color:var(--acc)}
+.box{border-left-color:var(--acc)}
+
+/* 안쪽 화면에도 첫 화면 같은 색 원 배경 · 머리 막대는 흰 바탕 + 무지개 띠 (노랑은 Q 로고에만) */
+#app{position:relative;isolation:isolate}
+#app::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 4% 18%, #FFE8CC 0 140px, transparent 141px),radial-gradient(circle at 97% 30%, #C3FAE8 0 110px, transparent 111px),
+  radial-gradient(circle at 92% 92%, #D0EBFF 0 190px, transparent 191px),radial-gradient(circle at 10% 88%, #E5DBFF 0 120px, transparent 121px),radial-gradient(circle at 55% 104%, #FFDEEB 0 90px, transparent 91px)}
+@media (prefers-color-scheme: dark){ #app::before{opacity:.12} }
+.top{background:color-mix(in srgb, var(--paper) 88%, transparent);color:var(--ink);box-shadow:none;position:relative;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:5px;background:linear-gradient(90deg,#E03131,#E8590C,#FFD02B,#099268,#1971C2,#7048E8,#D6336C)}
+.top .mark{background:#FFD02B;color:#16150F;box-shadow:2px 2px 0 #16150F}
+.top .ttl small{color:var(--acc);opacity:1}
+.top button{background:var(--paper);color:var(--ink);border-color:var(--ink)}
+.top .focusflag{background:var(--acc);color:#fff}
+.shell{position:relative}
 </style>
 </head>
 <body>
@@ -582,11 +630,11 @@ input[type=text],input[type=password],textarea,select{border-radius:12px}
       <h1>질문 하나로 시작하는<br><em>나의 탐구</em></h1>
       <p class="lede">막연한 호기심을 탐구할 수 있는 질문으로 다듬고, 자료로 답을 찾아, 내 말로 정리해 봐요.</p>
       <ol class="flow">
-        <li><span class="no">01</span><div><b>질문 생성하기</b><span>자료를 보며 질문을 쏟아내고, 묶고, 추리기</span></div><span class="when">1·5차시</span></li>
-        <li><span class="no">02</span><div><b>질문으로 학습 설계하기</b><span>질문을 다듬고 하위 질문과 조사 계획 세우기</span></div><span class="when">2차시</span></li>
-        <li><span class="no">03</span><div><b>질문에 답 찾기</b><span>자료를 조사해 근거로 답하기</span></div><span class="when">3·5차시</span></li>
-        <li><span class="no">04</span><div><b>내 말로 학습 종합하기</b><span>발표하고, 배운 것을 내 말로 정리하기</span></div><span class="when">4·6차시</span></li>
-        <li class="ref"><span class="no">↻</span><div><b>성찰하기</b><span>모든 단계에서 늘 함께</span></div><span class="when">상시</span></li>
+        <li><span class="no">01</span><div><b>질문 생성하기</b><span>자료를 보며 질문을 쏟아내고, 묶고, 추리기</span></div></li>
+        <li><span class="no">02</span><div><b>질문으로 학습 설계하기</b><span>질문을 다듬고 하위 질문과 조사 계획 세우기</span></div></li>
+        <li><span class="no">03</span><div><b>질문에 답 찾기</b><span>자료를 조사해 근거로 답하기</span></div></li>
+        <li><span class="no">04</span><div><b>내 말로 학습 종합하기</b><span>발표하고, 배운 것을 내 말로 정리하기</span></div></li>
+        <li class="ref"><span class="no">🔁</span><div><b>성찰하기</b><span>모든 단계에서 늘 함께</span></div></li>
       </ol>
     </div>
     <div class="card-login">
