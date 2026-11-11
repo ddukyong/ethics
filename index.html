@@ -1275,7 +1275,8 @@ function drawPresent(){
   const ws = warmState(), w = ws.w, R1 = w && w.round && w.start ? w.round : 0, rk = WR && w && WR.game === w.game ? WR : null, last = R1 === 2 && ws.phase === "end";
   const imgs = ["warm1.jpg", "warm3.jpg"], timer = warmTimer(ws);
   const busyNow = ws.phase === "run" || ws.phase === "ready", nextR = Math.min(2, (ws.phase === "end" ? R1 + 1 : R1) || 1);
-  ov.innerHTML = `<div class="pv">${R1 ? `<img src="${imgs[R1 - 1]}" alt="라운드 ${R1} 사진">` : "<p>라운드를 시작하면<br>사진이 나와요</p>"}</div>
+  const showPic = R1 && (ws.phase === "ready" || ws.phase === "run");
+  ov.innerHTML = `<div class="pv">${showPic ? `<img src="${imgs[R1 - 1]}" alt="라운드 ${R1} 사진">` : `<p>${ws.phase === "end" ? "이번 라운드 끝!<br>다음 라운드를 시작하면<br>새 사진이 나와요" : "라운드를 시작하면<br>사진이 나와요"}</p>`}</div>
     <div class="pr">
       <div class="pg"><b>질문 쏟아내기 연습</b><ol><li>사진을 보고 떠오르는 것은 <b>무엇이든</b> 질문으로</li><li>한 줄 쓰고 <b>Enter</b>, 바로 다음 질문!</li><li>라운드 1 <b>5분</b> · 라운드 2 <b>2분</b> — <b>총합</b> 1등에게 상품 🎁</li></ol></div>
       <div class="pt"><span class="wround">${R1 ? `라운드 ${R1} / 2` : "라운드 1부터"}</span><div class="num ${ws.phase}${ws.phase === "run" && ws.left <= 10 ? " hurry" : ""}" id="pNum">${timer}</div>
@@ -1888,7 +1889,7 @@ function renderDocs(){
   $("tipWhere").innerHTML = '<p class="hint" style="margin:0">내 하위 질문이 무엇을 묻는지에 따라 골라 보기</p>' + WHERE.map(([k, n, kind, where]) => `<div class="where"><b>· ${n}</b> → ${kind}<br>→ ${where}</div>`).join("");
   drawHelp();
   { const w = CLS && CLS.warm, r = w && w.game && w.round ? w.round : 0;
-    const on = w && w.game && w.start ? r : 0;
+    const ph = warmState().phase, on = w && w.game && w.start && (ph === "ready" || ph === "run") ? r : 0;
     document.querySelectorAll('[data-doc="w0"] .src').forEach((x, i) => { x.hidden = i !== on - 1; });
     if($("warmWait")) $("warmWait").hidden = !!on; }
   if(step === "2-3" && $("ourQs")){
