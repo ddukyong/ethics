@@ -139,6 +139,17 @@ function handle_(p){
       for(let m = 1; m <= MOUMS; m++) states.push(load_(code, String(m)));
       return { ok:true, states };
     }
+    case "reflect": {
+      checkTeacher_(p.key);
+      const sh = book_().getSheetByName("개인상태");
+      const rows = !sh || sh.getLastRow() < 2 ? [] : sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues()
+        .filter(r => String(r[0]) === code)
+        .map(r => { let pp = {}; try{ pp = JSON.parse(r[2] || "{}") || {}; }catch(e){} const f = pp.f || {};
+          return { uid:String(r[1]), moum:String(pp.moum || ""), learn:String(f.s4learn || ""), hard:String(f.s4hard || ""), sub:String(f.s4sub || "") }; })
+        .filter(x => x.learn.trim() || x.hard.trim())
+        .sort((a, b) => a.moum.localeCompare(b.moum) || a.uid.localeCompare(b.uid));
+      return { ok:true, rows };
+    }
     case "board": {
       const board = [];
       for(let m = 1; m <= MOUMS; m++){
