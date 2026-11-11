@@ -681,6 +681,21 @@ details.box.tip[open] > summary::after{transform:rotate(180deg)}
 details.box.tip[open] > summary small{display:none}
 details.box.tip .tipbody{padding:0 16px 12px}
 details.box.tip + details.box.tip{margin-top:8px}
+
+/* 진짜 사다리처럼: 양옆 기둥 + 칸 사이 가로대, 단계 칸은 발판 */
+.ladder{--rail:color-mix(in srgb, var(--acc) 72%, #16150F);position:relative;border:0;background:transparent;padding:6px 46px 34px}
+.ladder::before,.ladder::after{content:"";position:absolute;top:52px;bottom:4px;width:12px;border-radius:8px;background:var(--rail);box-shadow:inset -3px 0 0 rgba(0,0,0,.18)}
+.ladder::before{left:14px} .ladder::after{right:14px}
+.ladder .lhead{position:relative;z-index:2;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:6px 14px;margin:0 -30px 6px}
+.ladder .rung{position:relative;z-index:1;margin-top:34px;padding:10px 14px 12px;background:var(--paper);border:2px solid var(--ink);border-left-width:2px;border-radius:14px;box-shadow:0 4px 0 var(--rail)}
+.ladder .rung::before{content:"";position:absolute;left:-34px;right:-34px;top:-22px;height:10px;border-radius:6px;background:var(--rail);z-index:-1}
+.ladder .rung::after{content:"▼";position:absolute;left:50%;top:-29px;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;background:var(--paper);border:2px solid var(--rail);color:var(--rail);font-size:11px;display:grid;place-items:center;line-height:1}
+.ladder .lhead + .rung::after{content:"출발";width:auto;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700}
+.ladder .rung.ends{background:var(--acc-t);border-color:var(--acc)}
+.ladder .rung.ends:last-of-type{box-shadow:0 4px 0 var(--acc)}
+.ladder .rung.ends:last-of-type::after{content:"▼ 도착";width:auto;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:var(--acc);color:#fff;border-color:var(--acc)}
+.ladder.other::before,.ladder.other::after{opacity:.5}
+@media (max-width:600px){ .ladder{padding:6px 32px 30px} .ladder::before{left:8px} .ladder::after{right:8px} .ladder .rung::before{left:-26px;right:-26px} .ladder .lhead{margin:0 -22px 6px;border-radius:16px} }
 </style>
 </head>
 <body>
