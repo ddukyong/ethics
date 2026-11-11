@@ -675,10 +675,10 @@ body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color
   <div class="shell">
     <div class="tbar" id="tbar" hidden>
       <b>교사</b>
-      <label class="sw"><input type="checkbox" id="tLive"> 학생 화면 함께 이동</label>
+      <label class="sw" hidden><input type="checkbox" id="tLive"> 학생 화면 함께 이동</label>
       <label class="sw"><input type="checkbox" id="tLock"> 집중 모드(이탈 시간 기록)</label>
       <label class="sw"><input type="checkbox" id="tOpen"> 5·6차시 자기주도 탐구 열기</label>
-      <button id="tPush">지금 이 활동으로 학생 모두 보내기</button>
+      <button id="tPush" hidden>지금 이 활동으로 학생 모두 보내기</button>
       <button id="tSlide">📽 수업 화면 (단계 안내)</button>
       <button id="tWarm">🖥 도입 활동 전체 화면</button>
       <button id="tDash">현황판</button>
@@ -1189,13 +1189,9 @@ function applyCls(c, initial){
   if(prev && !!prev.open56 !== !!c.open56) later();
   if(!initial && !me.teacher && c.lock && !(prev && prev.lock)) toast("집중 모드가 켜졌어요. 다른 화면으로 가면 벗어난 시간이 기록돼요.", true);
   if(me.teacher || me.preview){ drawTeacher(); return; }
-  const go = c.step && STEPS[c.step];
-  if(initial){ clsSeen = c.seq; if(go) setStep(c.step); }
-  else if(c.seq !== clsSeen){
-    clsSeen = c.seq;
-    if(go && (c.live || c.push) && step !== c.step){ setStep(c.step); toast(`선생님이 ‘${lessonOf(c.step)}차시 ${STEPS[c.step].label}’로 옮겼어요`, true); }
-  }
-  $("follow").hidden = !c.live;
+  /* 학생 화면은 선생님 화면을 따라가지 않음 — 늘 처음(연습)에서 시작해 스스로 넘겨요 */
+  clsSeen = c.seq;
+  $("follow").hidden = true;
   $("follow").textContent = "지금은 선생님 화면을 따라가는 중이에요. 다른 활동을 눌러 볼 수는 있지만, 선생님이 활동을 바꾸면 함께 넘어가요.";
   focusCheck(); drawNav();
 }
@@ -1203,8 +1199,7 @@ function drawTeacher(){
   const c = CLS || {};
   $("tLive").checked = !!c.live; $("tLock").checked = !!c.lock; $("tOpen").checked = !!c.open56;
   const at = c.step && STEPS[c.step] ? `‘${lessonOf(c.step)}차시 ${STEPS[c.step].label}’` : "정해지지 않음";
-  $("tStatus").textContent = (c.live ? `화면 연동 켜짐 — 선생님이 누르는 활동으로 학생 화면이 함께 넘어가요. 지금 학생 활동: ${at}` :
-    `화면 연동 꺼짐 — 선생님은 자유롭게 둘러볼 수 있어요. 새로 들어온 학생은 ${at}에서 시작해요.`) +
+  $("tStatus").textContent = "학생 화면은 선생님을 따라가지 않아요 — 학생은 처음(연습)에서 시작해 안내에 맞춰 스스로 차시·활동을 눌러 넘겨요." +
     (c.lock ? " · 집중 모드 켜짐 — 학생이 다른 화면으로 가면 앱 화면이 가려지고, 벗어난 시간이 기록돼요." : "") +
     (c.open56 ? " · 5·6차시 자기주도 탐구가 학생에게 열려 있어요." : " · 5·6차시는 학생에게 잠겨 있어요.");
   $("focusFlag").hidden = !c.lock;
@@ -1242,7 +1237,7 @@ async function loadAll(){
   drawDash(); drawReport();
 }
 setInterval(() => { if(me && me.teacher && tmode === "dash" && !document.hidden) loadAll(); }, 10000);
-$("tSlide").onclick = () => openSlides(tmode === "moum" ? step : (CLS && CLS.step && STEPS[CLS.step] && CLS.step !== "0-1" ? CLS.step : "x:cover"));
+$("tSlide").onclick = () => openSlides(tmode === "moum" ? step : "x:cover");
 $("tWarm").onclick = async () => {
   presentFrom = tmode === "moum" ? "" : tmode;
   if(!me.moum || tmode !== "moum"){ if(!me.moum) await openMoum("1"); else setTMode("moum"); }
@@ -1348,6 +1343,7 @@ function show(cls){
   $("join").hidden = true; $("app").hidden = false;
   $("whoText").textContent = whoText();
   $("tbar").hidden = !me.teacher;
+  if(!me.teacher) step = "0-1";
   loadNotes(); setStep(step);
   if(cls) applyCls(cls, true);
   render();
@@ -1365,14 +1361,13 @@ function setStep(s, byUser){
   const L = LESSON[lessonOf(s)];
   $("hsub").textContent = `${lessonOf(s)}차시 · ${L.stage}`; $("htitle").textContent = L.title;
   drawDocTabs(); drawNav(); render();
-  if(byUser && me && me.teacher && CLS && CLS.live && CLS.step !== s) setCls({ step:s });
   if(byUser) window.scrollTo({ top: Math.min(window.scrollY, $("split").offsetTop - 10) });
 }
 function drawNav(){
   const l = lessonOf(step);
-  $("lessonNav").innerHTML = [0,1,2,3,4,5,6].map(n => `<button role="tab" data-l="${n}" aria-selected="${n === l}">${closed56(n + "-1") ? "🔒 " : ""}${n ? n + "차시" : "연습"}${CLS && CLS.step && lessonOf(CLS.step) === n ? '<span class="badge">선생님</span>' : ""}<small>${LESSON[n].stage.split(" · ")[0]}</small></button>`).join("");
+  $("lessonNav").innerHTML = [0,1,2,3,4,5,6].map(n => `<button role="tab" data-l="${n}" aria-selected="${n === l}">${closed56(n + "-1") ? "🔒 " : ""}${n ? n + "차시" : "연습"}<small>${LESSON[n].stage.split(" · ")[0]}</small></button>`).join("");
   $("stepNav").innerHTML = Object.entries(STEPS).filter(([k]) => lessonOf(k) === l).map(([k, v]) =>
-    `<button role="tab" data-go="${k}" aria-selected="${k === step}">활동 ${k.split("-")[1]}${CLS && CLS.step === k ? '<span class="badge">선생님</span>' : ""}<small>${v.label}</small></button>`).join("");
+    `<button role="tab" data-go="${k}" aria-selected="${k === step}">활동 ${k.split("-")[1]}<small>${v.label}</small></button>`).join("");
 }
 function drawDocTabs(){
   const key = STEP_DOCS[step] ? step : lessonOf(step), docs = STEP_DOCS[step] || LESSON[lessonOf(step)].docs, cur = docs.includes(docSel[key]) ? docSel[key] : docs[0];
@@ -1508,6 +1503,7 @@ let presentOn = false, presentFrom = "";
 /* ===== 수업 화면: PPT 대신 띄우는 단계별 안내 슬라이드 (선생님만) ===== */
 let slideOn = false, slideFrom = "";
 const STEP_KEYS = Object.keys(STEPS);
+const L0 = k => `${lessonOf(k) ? lessonOf(k) + "차시" : "연습"} › 활동 ${k.split("-")[1]} 탭을 눌러요`;
 function slideGuide(st){
   /* 학생 화면의 ‘이렇게 해요’ 안내를 그대로 가져와 크게 보여 줌 (학생 화면과 늘 같은 내용) */
   try{
@@ -1549,7 +1545,7 @@ function extraSlide(k){
       </div></div><p class="smeta">블룸의 교육목표분류(Bloom’s Taxonomy, 2001 개정판) — 질문의 수준이 생각의 수준을 정해요</p>` },
     flow: { kick:"여는 활동", title:"오늘의 흐름", body:`<table class="sflow"><tr><th>시간</th><th>단계</th><th>하는 일</th><th>탐구 기술</th></tr>${FLOW.map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</table><p class="smeta">성찰하기는 모든 단계에서 늘 함께 — 오늘은 공통 사례로 01~04를 한 바퀴, 05·06은 한 달 동안 내 진로 분야에서</p>` },
     login: { kick:"여는 활동", title:"웹앱 들어가기", body:`<div class="srow">${card("① 주소", `<p class="sbig">${url}</p><p>또는 오른쪽 QR 찍기</p>`)}${card("② 수업 코드", `<p class="sbig">${code}</p><p>QR로 들어오면 자동으로 들어가요</p>`)}${card("③ 학번 · 이름 · 모둠", `<p>모둠 번호는 처음 한 번만 고르기</p>`)}</div>
-      <div class="snote"><p><b>학번과 이름은 정확히</b> — 다르게 쓰면 기록이 따로 쌓여요</p><p><b>자동 저장</b> — 쓰는 내용은 바로 저장되고, 다시 들어와도 이어서 할 수 있어요</p><p><b>화면 함께 이동</b> — 선생님이 활동을 넘기면 내 화면도 함께 넘어가요</p><p><b>튕겼다면</b> — QR을 다시 찍고 같은 학번·이름으로 들어오기</p></div>` },
+      <div class="snote"><p><b>학번과 이름은 정확히</b> — 다르게 쓰면 기록이 따로 쌓여요</p><p><b>자동 저장</b> — 쓰는 내용은 바로 저장되고, 다시 들어와도 이어서 할 수 있어요</p><p><b>처음 화면에서 시작</b> — 선생님 안내에 맞춰 위의 차시·활동 탭을 눌러 넘어가요</p><p><b>튕겼다면</b> — QR을 다시 찍고 같은 학번·이름으로 들어오기</p></div>` },
     tools: { kick:"여는 활동", title:"자료를 읽을 때 쓰는 도구", sub:"자료의 글자를 길게 누르거나 드래그하면 표시 도구가 나와요", body:`<div class="srow">${card("형광펜", "<p>눈에 띄는 부분 표시</p>")}${card("의아해요 ?", "<p>이상하거나 궁금한 부분</p>")}${card("이 표시 지우기", "<p>표시를 누르면 지울 수 있어요</p>")}</div>
       <div class="snote y"><h3>이 부분으로 질문 쓰기</h3><p>고른 문장을 보고 바로 질문을 쓸 수 있어요 — 질문이 막힐 때 먼저 써 보기</p></div>` },
     open1: { kick:"2차시 · 질문 다듬기 도움", title:"닫힌 질문을 열린 질문으로 바꾸는 네 가지 방법", body:`<table class="sflow"><tr><th>방법</th><th>닫힌 질문</th><th>열린 질문</th></tr>
@@ -1586,9 +1582,9 @@ function drawSlides(){
       <span class="snum">${slideAt + 1} / ${SEQ.length}</span><button class="ghost" data-act="slideOff">닫기 ✕</button></div>`;
   const side = `<div class="sside">${isStep ? `<span class="swho">${STEPS[k].who} 활동${STIME[k] ? " · " + STIME[k] : ""}</span>` : ""}
       <button class="pqr" data-act="qrBig" title="누르면 크게">${qrSvg(joinUrl())}<b>학생 접속</b><span>코드 ${esc((me.back || me).code)}</span></button>
-      ${isStep ? `<p class="snow">${CLS && CLS.step === k ? "✓ 학생들이 이 활동 화면에 있어요" : CLS && CLS.step && STEPS[CLS.step] ? esc(`지금 학생 화면: ${lessonOf(CLS.step)}차시 ${STEPS[CLS.step].label}`) : "학생 화면: 아직 보내지 않음"}</p>` : ""}</div>`;
+      ${isStep ? `<p class="snow">학생 화면: ${L0(k)}</p>` : ""}</div>`;
   const bar = `<div class="sbar"><button class="ghost" data-act="slideStep" data-id="-1" ${canPrev ? "" : "disabled"}>◀ 이전</button>
-      ${isStep ? `<button class="primary y go" data-act="slideStart">▶ 학생 활동 시작${k === "0-1" ? " (타이머 화면)" : ""}</button><button class="ghost" data-act="slideView">활동 화면만 보기</button>` : ""}
+      ${isStep ? `<button class="primary y go" data-act="slideStart">▶ 활동 화면으로${k === "0-1" ? " (타이머 화면)" : ""}</button><button class="ghost" data-act="slideView">활동 화면만 보기</button>` : ""}
       <button class="${isStep ? "ghost" : "primary y go"}" data-act="slideStep" data-id="1" ${canNext ? "" : "disabled"}>다음 ▶</button></div>`;
   if(isStep){
     const L = lessonOf(k);
@@ -2328,8 +2324,7 @@ document.addEventListener("click", async e => {
   if(act === "slideOff"){ closeSlides(false); return; }
   if(act === "slideView"){ closeSlides(true); return; }
   if(act === "slideStart"){
-    const st = step; await setCls(CLS && CLS.live ? { live:true, step:st } : { step:st, push:true });
-    toast(`학생 모두를 ‘${lessonOf(st)}차시 ${STEPS[st].label}’로 보냈어요`, true);
+    const st = step;
     closeSlides(true);
     if(st === "0-1"){ presentFrom = ""; presentOn = true; drawPresent(); acx(); }
     return; }
