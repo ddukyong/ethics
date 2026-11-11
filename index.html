@@ -255,13 +255,21 @@ details.box summary{cursor:pointer;font-weight:700}
 .steps2 div b{display:block;font-size:15px}
 .steps2 div.on{border-color:var(--ink);background:var(--soft)}
 
-.cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;min-height:10px}
-.card{display:block;text-align:left;max-width:100%;padding:8px 12px;border:1.5px solid var(--field);border-radius:8px;background:var(--paper);font-weight:500;font-size:15px;line-height:1.45}
+.cards{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;min-height:10px}
+.card{display:block;text-align:left;width:170px;max-width:100%;min-height:96px;padding:14px 12px 10px;font-weight:500}
 .card small,.mine small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
-.card.sel{border-color:var(--ink);background:var(--soft);box-shadow:0 0 0 3px var(--yellow)}
-.mine{list-style:none;margin:0;padding:0;display:flex;flex-direction:column-reverse;gap:6px}
-.mine li{display:flex;justify-content:space-between;gap:8px;padding:9px 12px;border:1px solid var(--hair);border-radius:8px;background:var(--bg);font-size:15px}
-.mine li button{border:0;background:none;color:var(--muted);font-size:13px;font-weight:400;padding:0;align-self:flex-start}
+.card.sel{transform:translateY(-3px) rotate(0deg) !important;outline:3px solid var(--ink);outline-offset:2px;box-shadow:0 8px 16px rgba(0,0,0,.25)}
+/* 포스트잇 */
+.mine{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.mine li,.card{position:relative;background:#FFF3A3;color:#16150F;border:0;border-radius:2px;box-shadow:0 3px 8px rgba(0,0,0,.18);font-size:15px;line-height:1.45}
+.mine li{display:flex;flex-direction:column;justify-content:space-between;gap:8px;min-height:120px;padding:14px 12px 10px}
+.mine li::before,.card::before{content:"";position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:44px;height:12px;background:rgba(255,255,255,.55);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.mine li:nth-child(3n+1),.card.p0{transform:rotate(-1.2deg)}
+.mine li:nth-child(3n+2),.card.p1{transform:rotate(.8deg);background:#FFD6E0}
+.mine li:nth-child(3n),.card.p2{transform:rotate(-.4deg);background:#D6F5E3}
+.card.p3{transform:rotate(1.1deg);background:#D7E9FF}
+.mine li small,.card small{color:#5F5C54}
+.mine li button{border:0;background:none;color:#5F5C54;font-size:13px;font-weight:400;padding:0;align-self:flex-end}
 .srcpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:14px;align-items:center}
 .srcpick button{padding:3px 12px;border:1.5px solid var(--field);background:var(--paper);font-size:14px;border-radius:20px}
 .srcpick button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -452,15 +460,24 @@ details.box summary{cursor:pointer;font-weight:700}
 
           <div class="doc" data-doc="d1">
             <p class="doc-title">자료 (1) 위급한 순간, 갈 수 있는 병원</p>
+            <section class="src" data-sec="1다">
+              <h4><span class="lbl">(가)</span>같은 밤, 서로 다른 세 사람의 독백<small>가상 인터뷰</small></h4>
+              <div class="src-body voices" data-sec="1다">
+                <div class="voice"><b>지역 주민 A 씨 (68세)</b>“얼마 전 밤 11시에 옆집 영감이 갑자기 가슴을 부여잡고 쓰러졌어요. 119를 불렀는데 우리 군에는 밤에 수술할 수 있는 응급실이 없다고 1시간 넘게 걸리는 외지 큰 병원으로 달리더군요. 가는 길에 잘못될까봐 피가 말랐습니다.”</div>
+                <div class="voice"><b>지역 의료원장 B 씨 (58세)</b>“응급실은 환자가 오든 안 오든 24시간 내내 의사, 간호사, 의료 장비를 대기시켜야 하는 곳입니다. 우리 지역은 인구가 줄다 보니 밤에 찾아오는 응급 환자가 하루 몇 명 안 됩니다. 결국 24시간 응급실을 열어두는 것만으로도 병원은 매년 수억 원씩 적자가 쌓입니다. 병원 자체 수익만으로는 도저히 버틸 수가 없습니다.”</div>
+                <div class="voice"><b>전 지역 응급의학과 전문의 C 씨 (42세)</b>“동료 의사가 안 구해지니 365일 중 절반을 혼자 밤샘 당직을 서야 했습니다. 가족 얼굴 보기도 힘들고 제 건강이 먼저 무너지더군요. 게다가 어렵게 중증 응급 환자를 살려놔도, 이어서 최종 수술을 맡아줄 외과나 신경외과 의사가 병원에 없습니다. 환자를 끝까지 살릴 수 없는 환경에서 의사 혼자 남는 건 너무 막막한 일입니다.”</div>
+              </div>
+            </section>
             <section class="src" data-sec="1가">
-              <h4><span class="lbl">(가)</span>2025년 기준 전국 의료취약지<small>지도</small></h4>
+              <h4><span class="lbl">(나)</span>2025년 기준 전국 의료취약지와 치료 가능 사망률<small>지도·통계</small></h4>
               <img class="map" src="map.png" alt="2025년 기준 전국 의료취약지 지도" title="누르면 크게 보기" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
-              <p class="mapnote" hidden>지도는 종이 학습지 1-2쪽 (가)에서 함께 보기</p>
+              <p class="mapnote" hidden>지도는 종이 학습지 자료 (1)의 지도에서 함께 보기</p>
               <p class="hint maphint">🔍 지도를 누르면 크게 볼 수 있어요</p>
               <div class="src-body" data-sec="1가"><p><b>의료취약지 기준</b>: 종합병원까지 60분 안에 갈 수 없는 주민 비율과 60분 안에 종합병원을 이용한 비율을 함께 따져 의료취약도가 50점 이상인 시·군·구 (전국 250개 시·군·구 중 98곳, 비수도권 군 지역에 집중)</p></div>
+              <div class="src-body" data-sec="1가A"><p><b>치료 가능 사망률 격차</b> (보건복지부·KOSIS): 제때 치료했다면 살릴 수 있었던 사망자 수(인구 10만 명당)가 서울은 <b>38.6명</b>인 반면 충북 <b>50.1명</b>, 전남 <b>49.6명</b>, 강원 <b>49.4명</b> 등 비수도권은 11명 이상 높음. 일부 군 지역은 중증 응급 사망 위험이 대도시의 <b>약 1.8배</b>에 달함.</p></div>
             </section>
             <section class="src" data-sec="1나">
-              <h4><span class="lbl">(나)</span>“연봉 4억 2,000만 원, 일당 480만 원 내걸어도… 지원자 0명”<small>뉴스·통계</small></h4>
+              <h4><span class="lbl">(다)</span>“연봉 4억 2,000만 원, 일당 480만 원 내걸어도… 지원자 0명”<small>뉴스·통계</small></h4>
               <div class="src-body" data-sec="1나">
                 <p>강원도 속초의료원은 응급의학과 전문의 5명 중 3명이 잇달아 사직하자, 결원을 채우기 위해 연봉 상한선을 국내 공공병원 최고 수준인 4억 2,000만 원으로 대폭 인상해 채용 공고를 냈다. 그러나 두 차례의 재공고에도 마감일까지 지원자는 단 한 명도 없었다. 경남 산청군 보건의료원 역시 내과 전문의 채용을 위해 연봉 3억 6,000만 원을 내걸고 4차례 공고를 냈으나 지원자를 찾지 못했고, 또 다른 지역 종합병원은 응급실 공백을 막기 위해 당직 전문의 조건으로 ‘일급 480만 원’을 제시했으나 채용에 실패했다.</p>
                 <p><b>시도별 활동 의사 분포 및 인구 1,000명당 의사 수</b> (보건복지부·KOSIS)</p>
@@ -469,14 +486,6 @@ details.box summary{cursor:pointer;font-weight:700}
                   <tr><td>수도권 (서울·경기·인천)</td><td>54.6%</td><td>서울 3.47명 (전국 1위)</td><td>전체 의사의 절반 이상 집중</td></tr>
                   <tr><td>비수도권 (14개 시·도)</td><td>45.4%</td><td>경북 1.39명 / 충남 1.53명</td><td>OECD 평균(3.7명)의 절반 미만</td></tr>
                 </table>
-              </div>
-            </section>
-            <section class="src" data-sec="1다">
-              <h4><span class="lbl">(다)</span>같은 밤, 서로 다른 세 사람의 독백<small>가상 인터뷰</small></h4>
-              <div class="src-body voices" data-sec="1다">
-                <div class="voice"><b>지역 주민 A 씨 (68세)</b>“얼마 전 밤 11시에 옆집 영감이 갑자기 가슴을 부여잡고 쓰러졌어요. 119를 불렀는데 우리 군에는 밤에 수술할 수 있는 응급실이 없다고 1시간 넘게 걸리는 외지 큰 병원으로 달리더군요. 가는 길에 잘못될까봐 피가 말랐습니다.”</div>
-                <div class="voice"><b>지역 의료원장 B 씨 (58세)</b>“응급실은 환자가 오든 안 오든 24시간 내내 의사, 간호사, 의료 장비를 대기시켜야 하는 곳입니다. 우리 지역은 인구가 줄다 보니 밤에 찾아오는 응급 환자가 하루 몇 명 안 됩니다. 결국 24시간 응급실을 열어두는 것만으로도 병원은 매년 수억 원씩 적자가 쌓입니다. 병원 자체 수익만으로는 도저히 버틸 수가 없습니다.”</div>
-                <div class="voice"><b>전 지역 응급의학과 전문의 C 씨 (42세)</b>“동료 의사가 안 구해지니 365일 중 절반을 혼자 밤샘 당직을 서야 했습니다. 가족 얼굴 보기도 힘들고 제 건강이 먼저 무너지더군요. 게다가 어렵게 중증 응급 환자를 살려놔도, 이어서 최종 수술을 맡아줄 외과나 신경외과 의사가 병원에 없습니다. 환자를 끝까지 살릴 수 없는 환경에서 의사 혼자 남는 건 너무 막막한 일입니다.”</div>
               </div>
             </section>
             <section class="src" data-sec="1라">
@@ -490,7 +499,7 @@ details.box summary{cursor:pointer;font-weight:700}
                 <p>· <b>운항 제약 조건</b>: ① 야간 운항 불가 — 안전 규정상 일출~일몰(주간)에만 출동 가능 ② 기상 제약 — 강풍, 폭우, 폭설, 짙은 안개 시 이륙 불가 ③ 착륙장 제약 — 지정된 인계점(착륙장)까지 구급차로 먼저 이동해야 탑승 가능</p>
               </div>
             </section>
-            <p class="cite">출처: (가) 국립중앙의료원, 「2025년 의료취약지 모니터링 연구보고서」(뉴스1, 2026.8.18. 그래픽) 및 통계청 SGIS 「노령화 지수」(2024) 재구성 / (나) 연합뉴스·동아일보 등 지역 병원 구인난 보도 재구성, 보건복지부 「보건복지통계연보」·국가통계포털(KOSIS)·OECD 통계 재구성 / (다) 국립중앙의료원 현지 조사 사례 및 언론 인터뷰를 바탕으로 재구성한 가상 인터뷰 / (라) 보건복지부·국립중앙의료원 중앙응급의료센터, 「응급의료 전용헬기(닥터헬기) 운용 현황」 및 국회예산정책처 자료 재구성</p>
+            <p class="cite">출처: (가) 국립중앙의료원 현지 조사 사례 및 언론 인터뷰를 바탕으로 재구성한 가상 인터뷰 / (나) 국립중앙의료원, 「2025년 의료취약지 모니터링 연구보고서」(뉴스1, 2026.8.18. 그래픽) 및 통계청 SGIS 「노령화 지수」(2024) 재구성, 보건복지부·KOSIS 치료 가능 사망률 / (다) 연합뉴스·동아일보 등 지역 병원 구인난 보도 재구성, 보건복지부 「보건복지통계연보」·국가통계포털(KOSIS)·OECD 통계 재구성 / (라) 보건복지부·국립중앙의료원 중앙응급의료센터, 「응급의료 전용헬기(닥터헬기) 운용 현황」 및 국회예산정책처 자료 재구성</p>
           </div>
 
           <div class="doc" data-doc="d2">
@@ -514,16 +523,13 @@ details.box summary{cursor:pointer;font-weight:700}
 
           <div class="doc" data-doc="d3">
             <p class="doc-title">보조 자료와 공공 데이터</p>
-            <section class="src" data-sec="3A">
-              <h4><span class="lbl">A</span>치료 가능 사망률 격차<small>보건복지부·KOSIS</small></h4>
-              <div class="src-body" data-sec="3A"><p>제때 치료했다면 살릴 수 있었던 사망자 수(인구 10만 명당)가 서울은 <b>38.6명</b>인 반면 충북 <b>50.1명</b>, 전남 <b>49.6명</b>, 강원 <b>49.4명</b> 등 비수도권은 11명 이상 높음. 일부 군 지역은 중증 응급 사망 위험이 대도시의 <b>약 1.8배</b>에 달함.</p></div>
-            </section>
+            <p class="doctip">치료 가능 사망률 격차 자료는 자료 (1)의 (나)로 옮겼어요.</p>
             <section class="src" data-sec="3B">
-              <h4><span class="lbl">B</span>지방 응급실 운영이 어려운 까닭<small>한국보건사회연구원</small></h4>
+              <h4><span class="lbl">A</span>지방 응급실 운영이 어려운 까닭<small>한국보건사회연구원</small></h4>
               <div class="src-body" data-sec="3B"><p>24시간 당직 인력·장비를 유지하는 데 고정 비용이 많이 들지만, 인구 5만 명 이하 군 지역 민간 병원은 해마다 수억~수십억 원의 적자가 남. 전체 활동 의사의 54.6%(자료 (1) (나)와 같은 보건복지부·KOSIS 통계)가 수도권에 모여 있고, 지방은 배후 진료과가 없고 당직 부담이 커서 전문의를 채용하기 어려움.</p></div>
             </section>
             <section class="src" data-sec="3C">
-              <h4><span class="lbl">C</span>정주 여건과 지역 유출<small>국토연구원 설문</small></h4>
+              <h4><span class="lbl">B</span>정주 여건과 지역 유출<small>국토연구원 설문</small></h4>
               <div class="src-body" data-sec="3C"><p>농어촌 주민이 대도시로 옮기고 싶은 핵심 이유로 일자리 다음으로 <b>‘응급 상황 및 중증 질환 때 이용할 병원 부족’(34.2%)</b>을 꼽음.</p></div>
             </section>
             <section class="src" data-sec="3D">
@@ -676,10 +682,8 @@ details.box summary{cursor:pointer;font-weight:700}
   <span id="markMsg"></span>
   <button class="hlb" data-mk="hl">형광펜</button>
   <button data-mk="qq">의아해요 ?</button>
-  <button data-mk="ck">중요해요 ✓</button>
   <button data-mk="ask" id="mkAsk">이 부분으로 질문 쓰기</button>
   <button data-mk="del" id="mkDel">이 표시 지우기</button>
-  <button class="off" data-mk="close">닫기</button>
 </div>
 <div id="modal" hidden><div><p id="modalMsg"></p><div class="acts"><button class="ghost" id="modalNo">아니요</button><button class="ghost" id="modalYes" style="background:var(--ink);color:var(--paper);border-color:var(--ink)">네</button></div></div></div>
 <div id="zoomOv" hidden role="dialog" aria-label="지도 크게 보기">
@@ -813,7 +817,7 @@ const lessonOf = s => +s.split("-")[0];
 const DEADLINE = new Date("2026-12-20T23:59:59+09:00");
 const pastDL = () => new Date() > DEADLINE;
 const closed56 = s => lessonOf(s) >= 5 && me && !me.teacher && !(CLS && CLS.open56);
-const SRC1 = [["1가","(가)"],["1나","(나)"],["1다","(다)"],["1라","(라)"]];
+const SRC1 = [["1다","(가)"],["1가","(나)"],["1나","(다)"],["1라","(라)"]];
 const srcName = k => String(k || "").split(",").filter(Boolean).map(x => (SRC1.find(s => s[0] === x) || [0, x])[1]).join("·");
 const NUM = "①②③";
 const KALL = [["a","①"],["b","②"],["c","③"],["d","④"]];
@@ -1171,7 +1175,7 @@ VIEWS["1-1"] = () => {
     <button class="primary" id="qAdd" disabled>질문 올리기</button>
     <h2>내가 올린 질문 (${mine.length})</h2>
     <p class="hint">우리 모둠 전체 ${S.cards.length}개</p>
-    <ul class="mine">${mine.map(c => `<li><span>${esc(c.text)}${tagOf(c) ? `<small>${esc(tagOf(c))}</small>` : ""}</span><button data-act="delMine" data-id="${c.id}">지우기</button></li>`).join("")}</ul>`;
+    <ul class="mine">${mine.slice().reverse().map(c => `<li><span>${esc(c.text)}${tagOf(c) ? `<small>${esc(tagOf(c))}</small>` : ""}</span><button data-act="delMine" data-id="${c.id}">지우기</button></li>`).join("")}</ul>`;
 };
 function drawPend(){
   const pick = $("srcPick"); if(!pick) return;
@@ -1204,7 +1208,8 @@ const inGroup = () => { const ids = new Set(S.groups.map(g => g.id)); return c =
 VIEWS["1-2"] = () => {
   const has = inGroup(), pool = S.cards.filter(c => !has(c)), inG = g => S.cards.filter(c => c.g === g);
   const named = S.groups.filter(g => g.name.trim()).length;
-  const cardBtn = c => `<button class="card${selected.has(c.id) ? " sel" : ""}" data-act="sel" data-id="${c.id}" aria-pressed="${selected.has(c.id)}">${esc(c.text)}<small>${esc(dn(c.name))}${c.src ? " · " + esc(srcName(c.src)) : ""}</small></button>`;
+  const pal = [...new Set(S.cards.map(x => x.name))];
+  const cardBtn = c => `<button class="card p${pal.indexOf(c.name) % 4}${selected.has(c.id) ? " sel" : ""}" data-act="sel" data-id="${c.id}" aria-pressed="${selected.has(c.id)}">${esc(c.text)}<small>${esc(dn(c.name))}${c.src ? " · " + esc(srcName(c.src)) : ""}</small></button>`;
   const moveBtn = g => selected.size ? `<button class="moveto" data-act="moveTo" data-g="${g}">고른 질문 여기에 넣기</button>` : "";
   return `<div class="box"><span class="tag">이렇게 해요</span>
       <ol><li>비슷하다고 생각하는 질문 카드를 <b>눌러서 고르기</b> (여러 개 고를 수 있어요)</li>
@@ -1940,7 +1945,7 @@ document.addEventListener("click", e => {
 });
 function showMarkBar(mode){
   const bar = $("markBar"); bar.hidden = false;
-  bar.querySelectorAll("[data-mk=hl],[data-mk=qq],[data-mk=ck]").forEach(x => x.hidden = mode !== "sel");
+  bar.querySelectorAll("[data-mk=hl],[data-mk=qq]").forEach(x => x.hidden = mode !== "sel");
   $("mkAsk").hidden = !(mode === "sel" && selInfo && selInfo.sec[0] === "1" && lessonOf(step) === 1);
   $("mkDel").hidden = mode !== "del";
   $("markMsg").textContent = mode === "del" ? "이 표시를" : `“${selInfo.text.slice(0, 18)}${selInfo.text.length > 18 ? "…" : ""}”`;
@@ -1951,7 +1956,7 @@ function markAct(k){
   if(k === "del"){ NOTES.marks = NOTES.marks.filter(m => m.id !== delId); saveNotes(); paintMarks(); hideMarkBar(); return; }
   if(!selInfo) return;
   if(k === "ask"){
-    const sec = selInfo.sec; pendQuote = selInfo.text.slice(0, 60);
+    const sec = selInfo.sec.replace(/A$/, ""); pendQuote = selInfo.text.slice(0, 60);
     if(!pendSrc.includes(sec)){ if(pendSrc.length >= 2) pendSrc.pop(); pendSrc.push(sec); }
     NOTES.marks.push({ id:uid(), sec, s:selInfo.s, e:selInfo.e, k:"hl" }); saveNotes(); paintMarks();
     getSelection().removeAllRanges(); hideMarkBar();
