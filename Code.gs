@@ -417,7 +417,7 @@ function logSubmit_(cls, moum, sid, name, f, pp){
       .appendRow(base.concat([v("s4learn"), v("s4hard"), memo]));
   }
   if(f === "s4lsub"){
-    sheet_("질문사다리후기", ["시각", "반", "모둠", "학번", "이름", "질문사다리로 질문을 다듬어 본 소감"]).appendRow(base.concat([v("s4ladder")]));
+    sheet_("수업후기", ["시각", "반", "모둠", "학번", "이름", "수업 전체 후기"]).appendRow(base.concat([v("s4ladder")]));
   }
   if(f === "s5sub"){
     sheet_("탐구계획서", ["제출 시각", "반", "모둠", "학번", "이름", "진로 분야", "이유", "사례 제목", "출처", "핵심 사실", "쏟아낸 질문", "출발 질문", "① 개념", "② 범위·대상", "③ 탐구형",
