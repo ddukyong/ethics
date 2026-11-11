@@ -624,6 +624,15 @@ body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color
 .duebar small{flex-basis:100%;color:var(--muted)}
 .duebar small b{font-family:inherit;font-size:inherit;font-weight:700;color:var(--ink)}
 .duebar.late{border-color:var(--warn);background:color-mix(in srgb, var(--warn) 8%, var(--paper))} .duebar.late .dl{background:var(--warn)}
+.rub{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;min-width:620px}
+.rub th{background:var(--ink);color:#FFD02B;text-align:left;padding:6px 8px;white-space:nowrap}
+.rub td{padding:6px 8px;border-bottom:1px solid var(--hair);vertical-align:top}
+.rub tr.first td{border-top:2px solid var(--ink)}
+.rub td[rowspan]{background:var(--acc-t,#FFF6CF);width:22%}
+.rub .lv{display:inline-block;min-width:44px;font-weight:700;color:var(--acc,#16150F)}
+.lvb{padding:3px 12px;border:1.5px solid var(--field);background:var(--paper);border-radius:999px;font-size:13px;white-space:nowrap}
+.lvb.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#slides .rub{font-size:clamp(11px,2.05vh,24px);min-width:0;line-height:1.4;margin:0} #slides .rub td,#slides .rub th{padding:.6vh .7vw}
 </style>
 </head>
 <body>
@@ -1524,12 +1533,12 @@ const QLV = [
   ["HOTS","창안","설계하다, 재구성하다, 제안하다","이 문제를 해결할 새로운 제도·원칙을 설계한다면? / ~조건이 바뀐다면 어떤 대안이 가능한가?","청소년이 충분히 잘 수 있도록 학교 일과를 다시 설계한다면?","새로운 해결책·대안 만들기"],
 ];
 const qlvTable = (big) => `<table class="qlv${big ? " big" : ""}"><tr><th>구분</th><th>단계</th><th>질문 틀</th><th>다른 주제 예시 <small style="color:inherit;font-weight:400">(청소년 수면)</small></th></tr>${QLV.map((r, i) => `${i === 2 ? '<tr class="wline"><td colspan="4">〰 수면선 〰 &nbsp;위: 단편적 지식 확인 · 아래: 깊이 있는 탐구와 성찰</td></tr>' : ""}<tr class="${r[0] === "HOTS" ? "hots" : "lots"}"><td>${r[0] === "HOTS" ? "고등 사고<br><small>HOTS</small>" : "하위 사고<br><small>LOTS</small>"}</td><td><b>${r[1]}</b>${big ? "" : `<br><small>${r[2]}</small>`}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join("")}</table>`;
-const SEQ = ["x:cover","x:video","x:bloom","x:flow","x:login","x:tools","0-1","1-1","1-2","1-3","2-1","x:open1","x:open2","x:iceberg","2-2","2-3","x:brk","3-1","x:tips","3-2","3-3","4-1","x:ptips","4-2","4-3","x:next","5-1","5-2","5-3","6-1","6-2"];
+const SEQ = ["x:cover","x:video","x:bloom","x:flow","x:login","x:tools","0-1","1-1","1-2","1-3","2-1","x:open1","x:open2","x:iceberg","2-2","2-3","x:brk","3-1","x:tips","3-2","3-3","4-1","x:ptips","4-2","4-3","x:next","5-1","5-2","5-3","6-1","6-2","x:aieval","x:rubric","x:rubric2","x:aiflow"];
 const STIME = { "0-1":"라운드 1 5분 · 라운드 2 2분", "1-1":"7분", "1-2":"13분", "1-3":"15분", "2-1":"12분", "2-2":"8분", "2-3":"15분", "3-1":"18분", "3-2":"10분", "3-3":"12분", "4-1":"5분", "4-2":"20분", "4-3":"10분" };
 const FLOW = [["16:00","여는 활동","웹앱 들어가기 · 질문 쏟아내기 연습","",0],["16:10","1차시 질문 생성하기","질문 쏟아내기 → 묶기 → 후보 탐구 질문","01 질문 만드는 법",1],["16:45","2차시 질문으로 학습 설계하기","질문 다듬기 → 최종 탐구 질문 → 하위 질문","02 주제 좁히는 법",2],["17:20","휴식","10분","","brk"],["17:30","3차시 질문에 답 찾기","자료 조사 → 보완 의견 → 모둠 답변","03 자료로 답 찾는 법",3],["18:10","4차시 내 말로 학습 종합하기","발표 → 피드백 → 배움 정리","04 정리하고 발표하는 법",4],["18:45","다음 단계","나의 탐구 계획서 안내","05·06 내 분야로","next"]];
 let slideAt = 0;
 const slideKey = () => SEQ[slideAt] || SEQ[0];
-const flowPos = k => k === "x:brk" ? "brk" : k === "x:next" ? "next" : /^x:(cover|video|bloom|flow|login|tools)$/.test(k) ? 0 : (k.startsWith("x:") ? lessonOf(stepBefore(SEQ.indexOf(k))) : lessonOf(k));
+const flowPos = k => k === "x:brk" ? "brk" : k === "x:next" ? "next" : /^x:(aieval|rubric|rubric2|aiflow)$/.test(k) ? 6 : /^x:(cover|video|bloom|flow|login|tools)$/.test(k) ? 0 : (k.startsWith("x:") ? lessonOf(stepBefore(SEQ.indexOf(k))) : lessonOf(k));
 function stepBefore(i){ for(let j = i; j >= 0; j--) if(!SEQ[j].startsWith("x:")) return SEQ[j]; return "0-1"; }
 const card = (t, body, cls) => `<div class="scard${cls ? " " + cls : ""}"><h3>${t}</h3>${body}</div>`;
 function extraSlide(k){
@@ -1555,6 +1564,21 @@ function extraSlide(k){
       <tr><td><b>④ 가정하거나 다른 입장에서</b></td><td>닥터헬기는 효과가 있는가?</td><td>닥터헬기가 밤에 뜰 수 없다면, 군 지역 주민의 입장에서 가장 큰 공백은 무엇인가?</td></tr></table>` },
     open2: { kick:"2차시 · 질문 다듬기 도움", title:"다듬은 질문, 이렇게 점검하기", body:`<div class="srow">${card("첫 단어 점검", "<p>‘몇’, ‘있는가’, ‘~인가’로 끝나면 닫힌 질문이 되기 쉬움</p><p><b>→ ‘왜’, ‘어떻게’, ‘어떤’으로 시작해 보기</b></p>")}${card("답을 정해 둔 질문 피하기", "<p>“국가가 지원해야 하지 않을까?”</p><p><b>→ “국가 지원의 기대 효과와 한계는 무엇인가?”</b></p>")}${card("너무 열어 두지 않기", "<p>답을 찾을 수 없을 만큼 넓으면 탐구가 안 됨</p><p><b>→ 지역·대상·연도로 범위 좁히기</b></p>", "dash")}</div>` },
     iceberg: { kick:"2차시 · 질문 다듬기 도움", title:"내 질문은 수면 위일까, 수면 아래일까?", body:`<p class="smeta" style="color:var(--ink);font-weight:700">사다리 도착 질문은 수면 아래(분석·평가·창안)를 목표로!</p>` + `${qlvTable(true)}<p class="smeta">예시는 다른 주제예요 — 질문 틀만 빌려 우리 모둠 질문에 맞게 바꿔 보기 · 수면 위 질문도 버리지 말고 활동 3의 <b>하위 질문</b>으로</p>` },
+    aieval: { kick:"5·6차시 · AI 활용 서·논술형 평가", title:"AI는 열어 두고, 생각은 학생 몫으로", body:`<div class="sgrid3">
+      ${card("① 허용 범위를 나누기", "<p><b>열어 둠</b> 검색어 만들기, 기관·통계 찾기, 용어 풀기</p><p><b>학생 몫</b> 해석, 판단, 제안의 논증</p>")}
+      ${card("② 과정을 남기기", "<p>출처마다 <b>AI 활용 표시</b> — 어디에, 무엇을 물었는지</p><p>AI가 준 수치는 원출처에서 확인</p>")}
+      ${card("③ 루브릭에 정직성 넣기", "<p>내용 요소와 함께 <b>정직한 자료 활용</b>(출처·AI 표시·스스로 쓴 해석)을 채점 요소로</p>")}
+      ${card("④ 스스로 점검 후 제출", "<p>학생이 채점 기준표로 자기 점검 → 고친 점 기록 → 제출</p>")}
+      ${card("⑤ 피드백과 다시 쓰기", "<p>계획서 구역별 피드백 → 반영해 재제출 → 최종 제안서</p>")}
+      ${card("⑥ 결과보다 생각의 흔적", "<p>질문 → 조사 → 해석 → 제안으로 이어지는 <b>과정 기록</b>이 곧 평가 근거</p>", "dash")}</div>` },
+    rubric: { kick:"5·6차시 · 정책 제안서 · 분석적 채점 — 학생도 제출 전 같은 기준표로 스스로 점검", title:"서·논술형 채점 기준표 ① 내용", body:`${rubricTable(false, false, 1)}` },
+    rubric2: { kick:"5·6차시 · 정책 제안서 · 분석적 채점", title:"서·논술형 채점 기준표 ② 실천·성찰·정직성", body:`${rubricTable(false, false, 2)}<p class="smeta">‘정직한 자료 활용’ 요소가 AI 활용 서·논술형 평가의 핵심 — 출처·AI 활용 표시·스스로 쓴 해석</p>` },
+    aiflow: { kick:"5·6차시 · AI 활용 서·논술형 평가", title:"한 학생의 탐구 흐름으로 보면", body:`<table class="sflow"><tr><th>단계</th><th>학생이 하는 일</th><th>AI</th><th>평가 근거</th></tr>
+      <tr><td><b>질문 만들기</b></td><td>진로 키워드로 질문 쏟아내기, 사다리로 다듬기</td><td>쓰지 않음</td><td>탐구 계획서 구역 1~3</td></tr>
+      <tr><td><b>계획 세우기</b></td><td>하위 질문, 찾을 자료, 일정</td><td>찾을 기관 묻기 가능</td><td>계획서 + 선생님 구역별 피드백</td></tr>
+      <tr><td><b>자료 조사</b></td><td>수치·사실과 출처 기록</td><td><b>가능</b> + AI 활용 표시</td><td>출처 · AI 활용 표시</td></tr>
+      <tr><td><b>해석하기</b></td><td>사실이 하위 질문에 말하는 것</td><td><b>스스로</b></td><td>해석 칸 · 자기 확인 체크</td></tr>
+      <tr><td><b>제안서 쓰기</b></td><td>진단 → 제도 방안 → 시민 실천 → 진로 연결</td><td>스스로</td><td>채점 기준표 6요소 · 자기 점검</td></tr></table>` },
     brk: { big:true, yellow:true, title:"10분 쉬기", sub:"17:30, 3차시 ‘질문에 답 찾기’로 돌아와요", body:`<p class="smeta">쉬는 동안 내가 맡은 하위 질문을 한 번 더 읽어 두기</p>` },
     tips: { kick:"3차시 · 조사 꿀팁", title:"AI는 답이 아니라 길잡이", body:`<div class="aiflow big"><span>① 검색어 만들기</span><i>→</i><span>② 찾을 곳 묻기</span><i>→</i><span>③ 원래 출처에서 확인</span><i>→</i><span>④ 내 말로 해석, 점검받기</span></div>
       <div class="srow">${card("검색어 만들기", "<p>· 핵심 개념어 2~3개 + 비슷한 말<br>· 연도 붙이기: 2025, 최근 5년<br>· 공공기관 자료만: 검색어 뒤에 site:go.kr</p>")}${card("수치 확인하기", "<p>· 기준 연도, 단위, 비교 대상 함께<br>· 지역 비교는 ‘인구 10만 명당’ 같은 비율로<br>· 기사 속 수치는 원래 출처까지</p>")}${card("지킬 것", "<p>· AI가 말한 수치는 원출처 확인, 안 되면 쓰지 않기<br>· 해석은 내가 쓰고 AI에게는 점검만<br>· AI를 썼다면 ‘AI 활용 표시’에 한 줄</p>", "dash")}</div>
@@ -2203,6 +2227,19 @@ function zoneBody(z, D){
   if(z === 7) return [1,2,3,4].map(i => `<div class="sched"><input type="text" id="pf-s5d${i}" data-k="pf-s5d${i}" data-pf="s5d${i}" maxlength="20" value="${esc(pv("s5d" + i))}" placeholder="날짜" ${D ? "disabled" : ""}><input type="text" id="pf-s5t${i}" data-k="pf-s5t${i}" data-pf="s5t${i}" maxlength="200" value="${esc(pv("s5t" + i))}" placeholder="할 일" ${D ? "disabled" : ""}></div>`).join("");
   return pf("s5ask", "선생님께 묻고 싶은 점", { dis:D });
 }
+/* 정책 제안서 서·논술형 채점 기준표 — [키, 평가 요소, 배점, [[점수, 수준, 기준], ...]] */
+const RUBRIC = [
+  ["s6k1","문제 진단 — 사례와 근거",4,[[4,"상","분만·응급의료 외의 사례를 구체적 수치와 믿을 만한 출처(기관·연도)로 제시함"],[2,"중","사례와 수치는 있으나 출처가 불분명하거나 근거가 일부만 제시됨"],[1,"하","사례가 막연하거나 수치·출처 없이 주장만 함"]]],
+  ["s6k2","개념 적용 — 공간 불평등 판단",4,[[4,"상","단순한 지역 차이와 구별하여 생활의 필요, 기회·부담의 차이, 구조적 원인을 모두 들어 공간 불평등임을 설명함"],[2,"중","세 요소 중 일부만 들어 설명하거나 지역 차이와 구별이 분명하지 않음"],[1,"하","공간 불평등에 해당하는 이유를 설명하지 못함"]]],
+  ["s6k3","제도적 방안 — 원인과의 연결",4,[[4,"상","진단한 구조적 원인과 직접 이어지는 제도를 주체·대상·방법까지 구체적으로 제안하고 필요한 이유를 근거로 씀"],[2,"중","제도는 제안했으나 원인과의 연결이나 구체성이 부족함"],[1,"하","막연한 구호 수준(‘지원을 늘린다’)에 그침"]]],
+  ["s6k4","시민 실천 방안",3,[[3,"상","내가(우리가) 실제로 할 수 있는 실천을 구체적으로 제안하고 필요한 이유를 근거로 씀"],[2,"중","실천은 제안했으나 구체성이나 이유가 부족함"],[1,"하","실천 방안이 막연하거나 빠짐"]]],
+  ["s6k5","진로 연결과 성찰",2,[[2,"상","탐구 과정과 제안을 내 진로(관심) 분야의 지식·역할과 구체적으로 연결함"],[1,"중·하","진로와의 연결이 형식적이거나 빠짐"]]],
+  ["s6k6","정직한 자료 활용 — 출처·AI 활용 표시·스스로 쓴 해석",3,[[3,"상","모든 자료의 출처를 밝히고, AI를 쓴 곳을 표시했으며, 해석과 논증을 스스로 씀"],[2,"중","출처나 AI 활용 표시가 일부 빠짐"],[1,"하","출처 없이 옮겨 쓰거나 AI가 쓴 문장을 그대로 사용함"]]],
+];
+const RUB_TOTAL = RUBRIC.reduce((a, r) => a + r[2], 0);
+const rubricTable = (self, D, part) => `<table class="rub"><tr><th>평가 요소</th><th>배점</th><th>채점 기준</th>${self ? "<th>스스로 점검</th>" : ""}</tr>${(part === 1 ? RUBRIC.slice(0, 3) : part === 2 ? RUBRIC.slice(3) : RUBRIC).map(([k, name, pt, lv]) =>
+  lv.map(([sc, l, txt], j) => `<tr class="${j ? "" : "first"}">${j ? "" : `<td rowspan="${lv.length}"><b>${name}</b></td><td rowspan="${lv.length}">${pt}점</td>`}<td><span class="lv">${l} ${sc}</span> ${txt}</td>${self ? `<td><button class="lvb${pv(k) === String(sc) ? " on" : ""}" data-act="rubSet" data-g="${k}" data-id="${sc}" ${D ? "disabled" : ""}>${pv(k) === String(sc) ? "✓ " : ""}${l}</button></td>` : ""}</tr>`).join("")).join("")}
+  ${part === 1 ? "" : `<tr class="first"><td><b>합계</b></td><td>${RUB_TOTAL}점</td><td colspan="${self ? 2 : 1}">${self ? `내가 점검한 점수: <b>${RUBRIC.reduce((a, r) => a + (+pv(r[0]) || 0), 0)}</b> / ${RUB_TOTAL}점` : "서·논술형 분석적 채점"}</td></tr>`}</table>`;
 /* 탐구 계획서 제출 기한: 11. 20.(금) 23:59, 피드백 반영 재제출 11. 27.(금) */
 const PLAN_DUE = new Date("2026-11-20T23:59:59+09:00").getTime(), PLAN_RE = "11. 27.(금)";
 const planDue = sub => { const now = typeof srvNow === "function" ? srvNow() : Date.now(), left = Math.ceil((PLAN_DUE - now) / 86400000);
@@ -2236,9 +2273,16 @@ VIEWS["6-1"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56();
   return `${dlNote()}<div class="qbox"><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">5차시에서 먼저 정하기</span>'}</b></div>
-    <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로</div>${SLOT}
+    <div class="box"><span class="tag">AI 활용 약속</span>
+      <ul><li><b>자료 조사</b>에는 AI를 써도 돼요 — 검색어 만들기, 찾을 기관·통계 묻기, 어려운 용어 풀기</li>
+      <li>AI가 알려 준 수치·사실은 <b>원래 출처에서 직접 확인</b>하고, 출처 아래 <b>‘AI 활용 표시’</b>에 어디에 썼는지 적기</li>
+      <li><b>해석은 AI 도움 없이 스스로</b> — 그 사실이 내 하위 질문에 무엇을 말하는지 내 생각을 내 말로 쓰기</li></ul>
+      <small><b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로</small></div>${SLOT}
     ${H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span><p class="ro"><b>하위 질문</b> ${esc(pv("s5h" + i)) || "-"}</p>
-      ${pf("s6r" + i + "d", "조사 내용 (수치·사실)", { dis:D })}${pf("s6r" + i + "s", "출처 (기관·매체, 연도, 제목)", { line:true, dis:D })}${pf("s6r" + i + "i", "해석 (하위 질문에 대한 답)", { dis:D })}</div>`).join("")}
+      ${pf("s6r" + i + "d", "조사 내용 (수치·사실)", { dis:D })}${pf("s6r" + i + "s", "출처 (기관·매체, 연도, 제목)", { line:true, dis:D })}
+      ${pf("s6r" + i + "a", "AI 활용 표시 (쓴 경우만)", { line:true, dis:D, hint:"예) 검색어 추천받음 · ○○ 통계가 어느 기관에 있는지 물어봄 · 용어 뜻을 물어봄 — AI 이름도 함께" })}
+      ${pf("s6r" + i + "i", "해석 (하위 질문에 대한 답) — AI 도움 없이 스스로", { dis:D, hint:"AI에게 묻지 말고 내 생각을 내 말로 쓰기" })}
+      ${pchk("s6r" + i + "o", "해석은 AI 도움 없이 내가 직접 썼어요", D)}</div>`).join("")}
     <div class="panel">${pf("s6more", "조사하며 새로 생긴 질문", { dis:D })}</div>`;
 };
 VIEWS["6-2"] = () => {
@@ -2254,8 +2298,12 @@ VIEWS["6-2"] = () => {
     <div class="panel"><span class="num">2 해결 방안 제안 ①</span>${pf("s6a2", "제도적(국가·지방 자치 단체) 방안과 필요한 이유", { dis:D, rows:7, cnt:true, max:3000 })}</div>
     <div class="panel"><span class="num">3 해결 방안 제안 ②</span>${pf("s6a3", "시민으로서의 실천 방안과 필요한 이유", { dis:D, rows:7, cnt:true, max:3000 })}</div>
     <div class="panel"><span class="num">4 진로와의 연결</span>${pf("s6a4", "이 탐구와 제안이 내 진로(관심) 분야와 어떻게 이어지는가?", { dis:D, rows:5, cnt:true, max:2000 })}</div>
+    <h2>5 제출 전 스스로 점검하기 — 서·논술형 채점 기준표</h2>
+    <p class="hint">선생님도 이 기준으로 채점해요. 평가 요소마다 내 글이 어느 수준인지 고르고, 부족한 칸은 고친 뒤 제출하기</p>
+    <div style="overflow-x:auto">${rubricTable(true, D)}</div>
+    ${pf("s6kfix", "점검하고 고친 점 (한두 문장)", { dis:D, rows:3, hint:"예) 출처에 기준 연도를 더했다 · 제도 방안을 구조적 원인과 이어지게 고쳤다" })}
     ${sub ? `<div class="done"><b>정책 제안서를 제출함</b> <small>${esc(sub)}</small><br>12. 20. 마감 전까지 고친 뒤 다시 제출할 수 있어요.${D ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s6sub" data-id="1">고친 내용으로 다시 제출하기</button></div>`}</div>`
-      : D ? "" : `<button class="primary y" data-act="psub" data-g="s6sub" data-id="1">정책 제안서 제출하기</button>`}`;
+      : D ? "" : `<button class="primary y" data-act="psub" data-g="s6sub" data-id="1" ${RUBRIC.every(r => pv(r[0])) ? "" : "disabled"}>정책 제안서 제출하기</button>${RUBRIC.every(r => pv(r[0])) ? "" : `<p class="hint">채점 기준표의 ${RUBRIC.length}개 평가 요소를 모두 스스로 점검하면 제출할 수 있어요.</p>`}`}`;
 };
 
 /* ===== 자료 칸 안의 동적 내용 ===== */
@@ -2439,6 +2487,7 @@ document.addEventListener("click", async e => {
     inp.value = ""; send({ t:"addFb", k:g, id:uid(), name:me.uid, tag:tag.value, text });
   }
   if(act === "delFb"){ send({ t:"delFb", k:g, id, name:me.uid }); }
+  if(act === "rubSet"){ psend(g, pv(g) === String(id) ? "" : String(id)); return; }
   if(act === "psub"){ flushP(); psend(g, id); if(id) toast(g === "s5qsub" ? "나의 탐구 질문을 확정했어요" : "제출했어요", true); }
   if(act === "boardSel"){ boardSel = id; render(); }
   if(act === "boardRefresh"){ BOARD = null; render(); }
