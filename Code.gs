@@ -413,8 +413,8 @@ function logSubmit_(cls, moum, sid, name, f, pp){
   const base = [new Date(), cls.name, moum, sid, name];
   if(f === "s4sub"){
     const memo = [1, 2, 3, 4, 5].map(i => v("s4c" + i + "t") ? "(" + v("s4c" + i + "m") + "모둠) " + v("s4c" + i + "t") : "").filter(String).join(" / ");
-    sheet_("4차시배움정리", ["시각", "반", "모둠", "학번", "이름", "처음 떠올렸던 질문", "깊어진 생각", "새롭게 떠오른 질문", "종합 질문 답변", "댓글 메모"])
-      .appendRow(base.concat([v("s4first"), v("s4deep"), v("s4new"), v("s4synth"), memo]));
+    sheet_("4차시배움정리", ["시각", "반", "모둠", "학번", "이름", "질문 만들기에서 배운 점·새롭게 떠오른 질문", "어려웠던 점(발전시키고 싶은 점)", "댓글 메모"])
+      .appendRow(base.concat([v("s4learn"), v("s4hard"), memo]));
   }
   if(f === "s5sub"){
     sheet_("탐구계획서", ["제출 시각", "반", "모둠", "학번", "이름", "진로 분야", "이유", "사례 제목", "출처", "핵심 사실", "쏟아낸 질문", "출발 질문", "① 개념", "② 범위·대상", "③ 탐구형",
