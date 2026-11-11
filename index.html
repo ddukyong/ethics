@@ -1328,7 +1328,7 @@ setInterval(() => {
   const ws = warmState(), tm = $("wTimer"), ph = ws.phase + (ws.w ? ws.w.game + "-" + ws.w.round : "");
   if(ph !== wLastPhase){ const prev = wLastPhase; wLastPhase = ph; render();
     if(ws.phase === "run"){ if($("wIn")) $("wIn").focus(); if(me.teacher) startMusic(ws.w); }
-    if(ws.phase === "end"){ stopMusic(); if(prev) setTimeout(warmRank, 1500); }
+    if(ws.phase === "end"){ stopMusic(); setTimeout(warmRank, prev ? 1500 : 0); }
     if(ws.phase === "wait") stopMusic();
     return; }
   if(tm){ tm.textContent = ws.phase === "ready" ? `${ws.left}…` : ws.phase === "run" ? mmss2(ws.left) : tm.textContent; tm.classList.toggle("hurry", ws.phase === "run" && ws.left <= 10); }
