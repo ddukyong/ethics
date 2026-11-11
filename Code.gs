@@ -467,7 +467,7 @@ function norm(st){
   st.res = st.res || {};
   ["a", "b", "c"].forEach(k => { const r = st.res[k] = st.res[k] || {}; ["data", "src", "interp", "fix", "ai"].forEach(f => { r[f] = r[f] || ""; }); r.fb = r.fb || []; });
   st.concl = st.concl || {}; ["answer", "evidence", "more"].forEach(f => { st.concl[f] = st.concl[f] || ""; });
-  st.pres = st.pres || {}; ["p1", "p2", "p3"].forEach(f => { st.pres[f] = st.pres[f] || ""; });
+  st.pres = st.pres || {}; ["p1", "p2", "p3", "w1", "w2", "w3"].forEach(f => { st.pres[f] = st.pres[f] || ""; });
   st.done3 = !!st.done3;
   st.subN = st.subN === 4 ? 4 : 3;
   st.subs.d = st.subs.d || {}; ["q", "check", "src", "who"].forEach(f => { st.subs.d[f] = st.subs.d[f] || ""; });
@@ -525,7 +525,8 @@ function applyOp(st, op){
     case "delFb": if(K3.includes(op.k)) st.res[op.k].fb = st.res[op.k].fb.filter(x => !(x.id === op.id && x.name === op.name)); break;
     case "fbDone": if(K3.includes(op.k)){ const x = st.res[op.k].fb.find(f => f.id === op.id); if(x) x.done = !!op.val; } break;
     case "concl": if(["answer", "evidence", "more"].includes(op.f)) st.concl[op.f] = cut(op.val, 1000); break;
-    case "pres": if(["p1", "p2", "p3"].includes(op.f)) st.pres[op.f] = cut(op.val, 300); break;
+    case "pres": if(["p1", "p2", "p3"].includes(op.f)) st.pres[op.f] = cut(op.val, 300);
+      if(["w1", "w2", "w3"].includes(op.f)) st.pres[op.f] = cut(op.val, 40); break;
     case "done3": st.done3 = !!op.done; break;
     case "subN": st.subN = op.n === 4 ? 4 : 3; break;
     case "addCmt": if(st.cmts.length < 300 && !st.cmts.find(x => x.id === op.id))
