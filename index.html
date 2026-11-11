@@ -488,6 +488,9 @@ details.box summary{cursor:pointer;font-weight:700}
 .qbox b{font-size:16px}
 
 /* 집중 모드 */
+#fsGate{position:fixed;inset:0;z-index:51;background:#16150F;color:#FFF;display:grid;place-items:center;padding:24px;text-align:center}
+#fsGate > div{max-width:480px} #fsGate .t{display:block;font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:26px;color:var(--yellow);margin-bottom:10px} #fsGate p{margin:6px 0;font-size:15px;color:#DDD}
+#fsGate button{margin-top:18px;padding:14px 26px;border:0;background:var(--yellow);color:#16150F;font-size:18px;border-radius:999px}
 #lockOv{position:fixed;inset:0;z-index:50;background:#16150F;color:#FFF;display:grid;place-items:center;padding:24px;text-align:center}
 #lockOv > div{max-width:460px}
 #lockOv .t{display:block;font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:26px;color:var(--yellow);margin-bottom:10px}
@@ -995,6 +998,11 @@ body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color
 
 <footer class="credit">© 2026 제작: 김수경 · 수도여자고등학교 (<a href="mailto:26su92@gmail.com">26su92@gmail.com</a>)</footer>
 
+<div id="fsGate" hidden><div>
+  <span class="t">⛶ 집중 모드 — 전체 화면으로 활동해요</span>
+  <p id="fsMsg">집중 모드에서는 화면을 나누거나 다른 앱을 쓰지 않도록 전체 화면으로만 활동해요.</p>
+  <button id="fsGo">전체 화면으로 시작하기</button>
+</div></div>
 <div id="lockOv" hidden><div>
   <span class="t">화면을 벗어났어요</span>
   <p id="lockMsg"></p>
@@ -1238,7 +1246,7 @@ function drawTeacher(){
   $("tLive").checked = !!c.live; $("tLock").checked = !!c.lock; $("tOpen").checked = !!c.open56;
   const at = c.step && STEPS[c.step] ? `‘${lessonOf(c.step)}차시 ${STEPS[c.step].label}’` : "정해지지 않음";
   $("tStatus").textContent = "학생 화면은 선생님을 따라가지 않아요 — 학생은 처음(연습)에서 시작해 안내에 맞춰 스스로 차시·활동을 눌러 넘겨요." +
-    (c.lock ? " · 집중 모드 켜짐 — 학생이 다른 화면으로 가면 앱 화면이 가려지고, 벗어난 시간이 기록돼요." : "") +
+    (c.lock ? " · 집중 모드 켜짐 — 학생 화면은 전체 화면으로만 쓰여요. 전체 화면을 나가거나 다른 화면으로 가면 앱이 가려지고, 벗어난 시간이 기록돼요." : "") +
     (c.open56 ? " · 5·6차시 자기주도 탐구가 학생에게 열려 있어요." : " · 5·6차시는 학생에게 잠겨 있어요.");
   $("focusFlag").hidden = !c.lock;
   drawNav(); if(slideOn) drawSlides();
@@ -1360,6 +1368,7 @@ $("teacherToggle").onclick = () => {
 function saveMe(){ try{ localStorage.setItem(LS, JSON.stringify(me)); }catch(e){} }
 const whoText = () => me.teacher ? (tmode === "moum" ? `선생님 · ${me.moum}모둠 보는 중` : "선생님") : `${me.moum}모둠 ${me.sid} ${me.name}`;
 $("joinBtn").onclick = async () => {
+  if(!asTeacher && typeof fsOk !== "undefined" && fsOk && !fsEl()){ fsAuto = true; fsEnter(); }
   me = asTeacher ? { code:$("jcode").value.trim(), moum:"1", sid:"", name:"선생님", teacher:true, key:$("jkey").value.trim() }
                  : { code:$("jcode").value.trim(), moum:$("jmoum").value, sid:$("jsid").value.trim(), name:$("jname").value.trim() };
   $("joinBtn").disabled = true; $("joinMsg").textContent = "들어가는 중…";
@@ -1375,7 +1384,7 @@ $("leave").onclick = async () => {
   if(me && me.preview){ endPreview(); return; }
   if(!(await ask("이 기기에서 로그아웃할까요? 학번과 이름으로 다시 들어오면 이어서 할 수 있어요."))) return;
   endAway(); try{ localStorage.removeItem(LS); }catch(e){}
-  me = null; S = null; P = null; CLS = null; $("app").hidden = true; $("join").hidden = false; $("lockOv").hidden = true; hideMarkBar(); slideOn = false; drawSlides(); drawDock(); $("qrBig").hidden = true;
+  me = null; S = null; P = null; CLS = null; $("app").hidden = true; $("join").hidden = false; $("lockOv").hidden = true; hideMarkBar(); slideOn = false; drawSlides(); drawDock(); $("qrBig").hidden = true; $("fsGate").hidden = true; fsWas = false;
 };
 function show(cls){
   $("join").hidden = true; $("app").hidden = false;
@@ -2760,11 +2769,32 @@ const mmss = sec => `${Math.floor(sec / 60)}분 ${sec % 60}초`;
 function focusCheck(){
   $("focusFlag").hidden = !lockOn();
   if(!lockOn()){ away = null; $("lockOv").hidden = true; }
+  fsGate();
 }
-function startAway(){
+/* 집중 모드의 학생 화면은 전체 화면으로만 — 전체 화면을 나가면 가리고, 나가 있던 시간을 기록 */
+let fsWas = false, fsAuto = false;
+const fsNeed = () => lockOn() && typeof fsOk !== "undefined" && fsOk;
+function fsGate(){
+  const g = $("fsGate"); if(!g) return;
+  if(!fsNeed()){ g.hidden = true;
+    if(fsAuto && me && !me.teacher && fsEl()){ fsAuto = false; try{ (document.exitFullscreen || document.webkitExitFullscreen).call(document); }catch(e){} }
+    return; }
+  const on = !!fsEl(); g.hidden = on;
+  if(on){ fsWas = true; return; }
+  $("fsMsg").textContent = fsWas ? "전체 화면을 나가서 화면이 가려졌어요. 나가 있는 시간은 선생님께 기록돼요." : "집중 모드에서는 화면을 나누거나 다른 앱을 쓰지 않도록 전체 화면으로만 활동해요.";
+  $("fsGo").textContent = fsWas ? "전체 화면으로 돌아가기" : "전체 화면으로 시작하기";
+}
+function fsEnter(){ try{ const d = document.documentElement; const r = (d.requestFullscreen || d.webkitRequestFullscreen).call(d); if(r && r.catch) r.catch(() => {}); }catch(e){} }
+$("fsGo").onclick = fsEnter;
+function fsChanged(){
+  if(fsNeed()){ if(fsEl()) endAway(); else if(fsWas) startAway(true); }
+  fsGate();
+}
+document.addEventListener("fullscreenchange", fsChanged); document.addEventListener("webkitfullscreenchange", fsChanged);
+function startAway(byFs){
   if(!lockOn() || away) return;
   away = { start:new Date() };
-  $("lockOv").hidden = false; $("lockGo").hidden = true;
+  $("lockOv").hidden = !!byFs; $("lockGo").hidden = true;
   $("lockMsg").textContent = "집중 모드에서는 다른 화면으로 가면 이 화면이 가려지고, 벗어난 시간이 기록돼요.";
 }
 function endAway(){
@@ -2782,10 +2812,10 @@ const leaveRetry = [];
 setInterval(() => { if(!leaveRetry.length || !me) return; const r = leaveRetry.shift(); api(r).catch(() => leaveRetry.push(r)); }, 15000);
 document.addEventListener("visibilitychange", () => {
   if(document.hidden) startAway();
-  else { poll(); if(document.hasFocus()) endAway(); }
+  else { poll(); if(document.hasFocus() && !(fsNeed() && fsWas && !fsEl())) endAway(); }
 });
 window.addEventListener("blur", () => { if($("modal").hidden) startAway(); });
-window.addEventListener("focus", () => { if(!document.hidden) endAway(); });
+window.addEventListener("focus", () => { if(!document.hidden && !(fsNeed() && fsWas && !fsEl())) endAway(); });
 window.addEventListener("pagehide", () => {
   if(!away || !me) return;
   const end = new Date(), sec = Math.round((end - away.start) / 1000);
