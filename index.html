@@ -1095,7 +1095,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611111731";
+const APP_VER = "202611111757";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -2132,10 +2132,10 @@ VIEWS["2-3"] = () => {
     <p class="hint">위에 쓴 하위 질문을 하나씩 비추어 보고, 맞으면 체크해요.</p>
     <div class="box" style="margin-top:6px">${SCHK.map((c, i) => `<label class="chk"><input type="checkbox" data-subchk="${i}" ${S.subChk[i] ? "checked" : ""} ${D ? "disabled" : ""}> ${c}</label>`).join("")}</div>
     <h2>③ 하위 질문마다 담당자 정하기</h2>
-    ${!(allQ && allChk) && !D ? '<p class="hint">하위 질문을 모두 쓰고 체크리스트를 확인한 다음 담당자를 정해요.</p>' : ""}
+    ${!(allQ && allChk) && !D ? '<p class="hint">담당자는 언제든 정할 수 있어요 — 하위 질문과 체크리스트를 먼저 하면 더 좋아요</p>' : ""}
     <datalist id="memList">${mem.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
     <table class="whot"><tr><th>하위 질문</th><th>담당자</th></tr>
-    ${KS().map(([k, t]) => { const v = S.subs[k], wl = whoList(v.who), off = D || !(allQ && allChk);
+    ${KS().map(([k, t]) => { const v = S.subs[k], wl = whoList(v.who), off = D;
       return `<tr><td><b>${t}</b> <small class="hint">${esc(v.q.length > 34 ? v.q.slice(0, 34) + "…" : v.q) || "(비어 있음)"}</small></td>
         <td><div class="whos">${names.map(n => `<button data-act="who" data-id="${k}" data-g="${esc(n)}" aria-pressed="${wl.includes(n)}" ${off ? "disabled" : ""}>${esc(n)}</button>`).join("")}
         <input type="text" id="${id(k, "who")}" maxlength="200" data-k="${id(k, "who")}" data-sk="${k}" data-sf="who" value="${esc(v.who)}" list="memList" placeholder="이름" aria-label="하위 질문 ${t} 담당자" ${off ? "disabled" : ""}></div></td></tr>`; }).join("")}
