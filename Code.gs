@@ -172,8 +172,9 @@ function handle_(p){
       }
       return { ok:true, cmts:st.cmts };
     }
-    /* ===== 질문 쏟아내기 연습: 1분 타이머와 순위 ===== */
+    /* ===== 질문 쏟아내기 연습: 라운드 1은 5분, 라운드 2는 2분 · 순위 ===== */
     case "warmStart": {
+      const WARM_SEC = { 1:300, 2:120 };
       checkTeacher_(p.key);
       const lock = LockService.getScriptLock();
       lock.waitLock(20000);
@@ -181,7 +182,7 @@ function handle_(p){
         const c = getCls_(code), w = c.warm || { game:0 };
         const r = Math.min(2, Math.max(1, +p.round || 1));
         const game = p.newGame || !w.game ? (w.game || 0) + 1 : w.game;
-        c.warm = { game, round:r, start:p.reset ? 0 : Date.now() + 3000, sec:60 };
+        c.warm = { game, round:r, start:p.reset ? 0 : Date.now() + 3000, sec:WARM_SEC[r] };
         putCls_(code, c);
         return { ok:true, cls:c, now:Date.now() };
       } finally { lock.releaseLock(); }
@@ -208,9 +209,10 @@ function handle_(p){
     case "warmRank": {
       const w = getCls_(code).warm;
       if(!w) return { ok:true, game:0, round:0, rank:[], total:[] };
-      const list = cs => Object.keys(cs).map(u => ({ uid:u, name:cs[u].name, moum:cs[u].moum, n:cs[u].n })).sort((a, b) => b.n - a.n);
+      const list = cs => Object.keys(cs).map(u => ({ uid:u, name:cs[u].name, moum:cs[u].moum, n:cs[u].n, r1:cs[u].r1, r2:cs[u].r2 })).sort((a, b) => b.n - a.n);
       const per = [1, 2].map(r => warmCounts_(code, w.game, r)), sum = {};
-      per.forEach(cs => Object.keys(cs).forEach(u => { const x = sum[u] = sum[u] || { name:cs[u].name, moum:cs[u].moum, n:0 }; x.n += cs[u].n; }));
+      per.forEach(cs => Object.keys(cs).forEach(u => { const x = sum[u] = sum[u] || { name:cs[u].name, moum:cs[u].moum, n:0, r1:0, r2:0 }; x.n += cs[u].n; }));
+      per.forEach((cs, i) => Object.keys(cs).forEach(u => { sum[u]["r" + (i + 1)] = cs[u].n; }));
       return { ok:true, game:w.game, round:w.round, rank:list(per[w.round - 1]), total:list(sum) };
     }
     case "teacher": {
