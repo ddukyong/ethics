@@ -1095,7 +1095,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611112128";
+const APP_VER = "202611120808";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER && typeof me !== "undefined" && me && (me.teacher || (me.back && me.back.teacher))) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -2262,12 +2262,16 @@ VIEWS["4-3"] = () => {
   if(me.teacher) return teacherNote;
   const D = !!pv("s4sub");
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>받은 <b>댓글</b>을 읽고 오늘을 돌아보기</li><li><b>두 칸</b>을 쓰고 [배움 정리 제출하기]</li></ol></div>
+      <ol><li>받은 <b>댓글</b>을 읽고 오늘을 돌아보기</li><li><b>두 칸</b>을 쓰고 [배움 정리 제출하기]</li><li><b>질문사다리 돌아보기</b>도 쓰고 [제출하기]</li></ol></div>
     ${gotCmts()}<div class="panel"><span class="num">배움 정리</span>
       ${pf("s4learn", "① 질문 만들기 과정에서 배운 점, 탐구 후 새롭게 떠오른 질문", { dis:D, rows:5 })}
       ${pf("s4hard", "② 탐구 과정에서 특히 어려웠던 점 (발전시키고 싶은 점)", { dis:D, rows:5 })}</div>
     ${D ? `<div class="done"><b>배움 정리를 제출함</b> <small>${esc(pv("s4sub"))}</small><div class="acts"><button class="ghost" data-act="psub" data-g="s4sub" data-id="">제출 취소하고 고치기</button></div></div>`
       : `<button class="primary" data-act="psub" data-g="s4sub" data-id="1">배움 정리 제출하기</button>`}
+    ${(() => { const L = !!pv("s4lsub"); return `<div class="panel"><span class="num">질문사다리 돌아보기</span>
+      ${pf("s4ladder", "질문사다리로 질문을 다듬어 보니 어땠나요? (도움이 된 점, 처음 질문과 달라진 점, 아쉬운 점)", { dis:L, rows:4 })}</div>
+    ${L ? `<div class="done"><b>질문사다리 돌아보기를 제출함</b> <small>${esc(pv("s4lsub"))}</small><div class="acts"><button class="ghost" data-act="psub" data-g="s4lsub" data-id="">제출 취소하고 고치기</button></div></div>`
+      : `<button class="primary" data-act="psub" data-g="s4lsub" data-id="1">질문사다리 돌아보기 제출하기</button>`}`; })()}
     <div class="box"><span class="tag">다음 — 자기주도 탐구</span> 오늘 배운 과정으로 <b>내 진로 분야의 새 사례</b>를 혼자 탐구해요<br><small>정책 제안서까지 · 12. 20.까지</small></div>`;
 };
 
