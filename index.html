@@ -604,6 +604,20 @@ body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color
 .src h4 .lbl{background:var(--acc);color:#fff;border-radius:999px;padding:0 9px}
 .voice{border-left-color:var(--acc)}
 .box{border-left-color:var(--acc)}
+
+/* 안쪽 화면에도 첫 화면 같은 색 원 배경 · 머리 막대는 흰 바탕 + 무지개 띠 (노랑은 Q 로고에만) */
+#app{position:relative;isolation:isolate}
+#app::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 4% 18%, #FFE8CC 0 140px, transparent 141px),radial-gradient(circle at 97% 30%, #C3FAE8 0 110px, transparent 111px),
+  radial-gradient(circle at 92% 92%, #D0EBFF 0 190px, transparent 191px),radial-gradient(circle at 10% 88%, #E5DBFF 0 120px, transparent 121px),radial-gradient(circle at 55% 104%, #FFDEEB 0 90px, transparent 91px)}
+@media (prefers-color-scheme: dark){ #app::before{opacity:.12} }
+.top{background:color-mix(in srgb, var(--paper) 88%, transparent);color:var(--ink);box-shadow:none;position:relative;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:5px;background:linear-gradient(90deg,#E03131,#E8590C,#FFD02B,#099268,#1971C2,#7048E8,#D6336C)}
+.top .mark{background:#FFD02B;color:#16150F;box-shadow:2px 2px 0 #16150F}
+.top .ttl small{color:var(--acc);opacity:1}
+.top button{background:var(--paper);color:var(--ink);border-color:var(--ink)}
+.top .focusflag{background:var(--acc);color:#fff}
+.shell{position:relative}
 </style>
 </head>
 <body>
