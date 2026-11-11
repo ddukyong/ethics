@@ -681,6 +681,30 @@ details.box.tip[open] > summary::after{transform:rotate(180deg)}
 details.box.tip[open] > summary small{display:none}
 details.box.tip .tipbody{padding:0 16px 12px}
 details.box.tip + details.box.tip{margin-top:8px}
+
+/* 진짜 사다리처럼: 양옆 기둥 + 칸 사이 가로대, 단계 칸은 발판 */
+.ladder{--rail:color-mix(in srgb, var(--acc) 72%, #16150F);position:relative;border:0;background:transparent;padding:6px 46px 34px}
+.ladder::before,.ladder::after{content:"";position:absolute;top:52px;bottom:4px;width:12px;border-radius:8px;background:var(--rail);box-shadow:inset -3px 0 0 rgba(0,0,0,.18)}
+.ladder::before{left:14px} .ladder::after{right:14px}
+.ladder .lhead{position:relative;z-index:2;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:6px 14px;margin:0 -30px 6px}
+.ladder .rung{position:relative;z-index:1;margin-top:34px;padding:10px 14px 12px;background:var(--paper);border:2px solid var(--ink);border-left-width:2px;border-radius:14px;box-shadow:0 4px 0 var(--rail)}
+.ladder .rung::before{content:"";position:absolute;left:-34px;right:-34px;top:-22px;height:10px;border-radius:6px;background:var(--rail);z-index:-1}
+.ladder .rung::after{content:"▼";position:absolute;left:50%;top:-29px;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;background:var(--paper);border:2px solid var(--rail);color:var(--rail);font-size:11px;display:grid;place-items:center;line-height:1}
+.ladder .lhead + .rung::after{content:"출발";width:auto;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700}
+.ladder .rung.ends{background:var(--acc-t);border-color:var(--acc)}
+.ladder .rung.ends:last-of-type{box-shadow:0 4px 0 var(--acc)}
+.ladder .rung.ends:last-of-type::after{content:"▼ 도착";width:auto;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:var(--acc);color:#fff;border-color:var(--acc)}
+.ladder.other::before,.ladder.other::after{opacity:.5}
+@media (max-width:600px){ .ladder{padding:6px 32px 30px} .ladder::before{left:8px} .ladder::after{right:8px} .ladder .rung::before{left:-26px;right:-26px} .ladder .lhead{margin:0 -22px 6px;border-radius:16px} }
+details.src.tipsec{padding:0;overflow:hidden}
+details.src.tipsec > summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:center;padding:11px 14px;font-weight:700;font-size:16px;line-height:1.4}
+details.src.tipsec > summary::-webkit-details-marker{display:none}
+details.src.tipsec > summary .lbl{flex:none;font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:15px;min-width:32px;padding:0 9px;background:var(--acc,#FFD02B);color:#fff;border-radius:999px;text-align:center}
+details.src.tipsec > summary::after{content:"▾";margin-left:auto;color:var(--muted);transition:transform .15s}
+details.src.tipsec[open] > summary::after{transform:rotate(180deg)}
+details.src.tipsec[open] > summary{border-bottom:1px dashed var(--hair)}
+details.src.tipsec .tipsec-in{padding:10px 16px 14px}
+.foldnote{margin:2px 0 8px;font-size:13px}
 </style>
 </head>
 <body>
@@ -1160,24 +1184,24 @@ const LESSON = {
 const DOCNAME = { w0:"연습 사진", d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드", t51:"탐구 꿀팁", t52:"탐구 꿀팁", t53:"탐구 꿀팁", t62:"탐구 꿀팁", help:"도움 자료", d10:"우리 모둠 질문" };
 const STEP_DOCS = { "4-1":["d4"], "5-1":["t51","d6"], "5-2":["t52","d9"], "5-3":["help"], "2-3":["d10","d2","d1"], "6-1":["d8","d7"], "6-2":["t62","d7","d5"] };
 const STEPS = {
-  "0-1":{ label:"질문 쏟아내기 연습", who:"개인", q:"사진을 보고 정해진 시간 동안 쉴 새 없이 질문을 쏟아내 보자." },
-  "1-1":{ label:"질문 쏟아내기", who:"개인", q:"자료 (1)을 읽으며 떠오른 질문을 자유롭게 적어 보자." },
-  "1-2":{ label:"비슷한 것끼리 묶기", who:"모둠", q:"모둠원의 질문을 모두 펼쳐 놓고, 비슷한 질문끼리 묶어 보자." },
-  "1-3":{ label:"후보 탐구 질문 추리기", who:"모둠", q:"우리 모둠이 가장 답을 찾아보고 싶은 후보 탐구 질문을 2~3개로 추려 보자." },
-  "2-1":{ label:"후보 질문 정교화하기", who:"모둠", q:"자료 (2)를 읽으며 후보 질문을 더 정교하게 다듬어 보자." },
-  "2-2":{ label:"최종 탐구 질문 정하기", who:"모둠", q:"체크리스트에 비추어 최종 탐구 질문 1개를 정해 보자." },
-  "2-3":{ label:"하위 질문·조사 계획", who:"모둠", q:"하위 질문을 만들고 하위 질문별 조사 계획을 세워 보자." },
-  "3-1":{ label:"하위 질문 자료 조사", who:"개인", q:"내가 맡은 하위 질문의 답을 찾을 자료를 조사해 보자." },
-  "3-2":{ label:"조사 내용 공유·보완", who:"모둠", q:"모둠원의 조사 내용을 함께 읽고 보완 의견을 남겨 보자." },
-  "3-3":{ label:"답변 작성", who:"모둠", q:"하위 질문의 답을 하나로 엮어 모둠의 탐구 질문에 답해 보자." },
-  "4-1":{ label:"발표 준비", who:"모둠", q:"결론 표를 보며 발표할 역할과 순서를 정해 보자." },
-  "4-2":{ label:"발표와 댓글", who:"전체", q:"다른 모둠의 발표를 들으며 댓글을 남겨 보자." },
-  "4-3":{ label:"배움 정리", who:"개인", q:"1~4차시 동안 질문하고 답을 찾은 과정을 돌아보며 나의 배움을 정리해 보자." },
-  "5-1":{ label:"새 사례 찾고 질문 쏟아내기", who:"개인", q:"내 진로 분야에서 새로운 공간 불평등 사례를 찾고, 떠오르는 질문을 쏟아내 보자." },
-  "5-2":{ label:"나의 탐구 질문 정하기", who:"개인", q:"쏟아낸 질문 가운데 하나를 골라 정교하게 다듬어 나의 탐구 질문을 정해 보자." },
-  "5-3":{ label:"하위 질문·탐구 계획", who:"개인", q:"하위 질문, 찾을 자료, 탐구 일정을 정해 탐구 계획서를 완성해 보자." },
-  "6-1":{ label:"자료 조사 기록", who:"개인", q:"하위 질문마다 자료를 조사하고 출처와 해석을 기록해 보자." },
-  "6-2":{ label:"정책 제안서", who:"개인", q:"조사한 내용을 바탕으로 『공간 불평등 완화를 위한 제도 및 시민 실천 제안서』를 써 보자." },
+  "0-1":{ label:"질문 쏟아내기 연습", who:"개인", q:"사진을 보고 질문을 쏟아내 보자." },
+  "1-1":{ label:"질문 쏟아내기", who:"개인", q:"자료 (1)을 읽고 떠오른 질문을 적어 보자." },
+  "1-2":{ label:"비슷한 것끼리 묶기", who:"모둠", q:"비슷한 질문끼리 묶어 보자." },
+  "1-3":{ label:"후보 탐구 질문 추리기", who:"모둠", q:"탐구하고 싶은 후보 질문을 2~3개로 추려 보자." },
+  "2-1":{ label:"후보 질문 정교화하기", who:"모둠", q:"자료 (2)를 읽고 후보 질문을 다듬어 보자." },
+  "2-2":{ label:"최종 탐구 질문 정하기", who:"모둠", q:"최종 탐구 질문 1개를 정해 보자." },
+  "2-3":{ label:"하위 질문·조사 계획", who:"모둠", q:"하위 질문과 조사 계획을 세워 보자." },
+  "3-1":{ label:"하위 질문 자료 조사", who:"개인", q:"내가 맡은 하위 질문의 자료를 찾아보자." },
+  "3-2":{ label:"조사 내용 공유·보완", who:"모둠", q:"서로의 조사를 읽고 보완 의견을 남겨 보자." },
+  "3-3":{ label:"답변 작성", who:"모둠", q:"하위 질문의 답을 엮어 탐구 질문에 답해 보자." },
+  "4-1":{ label:"발표 준비", who:"모둠", q:"발표 역할과 순서를 정해 보자." },
+  "4-2":{ label:"발표와 댓글", who:"전체", q:"발표를 듣고 댓글을 남겨 보자." },
+  "4-3":{ label:"배움 정리", who:"개인", q:"질문하고 답을 찾은 과정을 돌아보자." },
+  "5-1":{ label:"새 사례 찾고 질문 쏟아내기", who:"개인", q:"내 진로 분야의 새 사례로 질문을 쏟아내 보자." },
+  "5-2":{ label:"나의 탐구 질문 정하기", who:"개인", q:"질문 하나를 골라 나의 탐구 질문으로 다듬자." },
+  "5-3":{ label:"하위 질문·탐구 계획", who:"개인", q:"하위 질문과 일정을 정해 계획서를 완성하자." },
+  "6-1":{ label:"자료 조사 기록", who:"개인", q:"하위 질문마다 자료·출처·해석을 기록하자." },
+  "6-2":{ label:"정책 제안서", who:"개인", q:"조사를 바탕으로 정책 제안서를 써 보자." },
 };
 const lessonOf = s => +s.split("-")[0];
 const DEADLINE = new Date("2026-12-20T23:59:59+09:00");
@@ -1570,7 +1594,7 @@ VIEWS["0-1"] = () => {
   const R1 = w && w.round ? w.round : 0, rk = WR && w && WR.game === w.game ? WR : null, last = R1 === 2 && ws.phase === "end";
   const myTotal = rk ? (rk.total.find(x => x.uid === me.uid) || { n:0 }).n : 0;
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>라운드마다 <b>앞 화면의 사진 한 장</b>을 보고 떠오르는 것은 무엇이든 질문으로 쓰기 — 바보 같은 질문은 없어요</li><li>한 줄 쓰고 <b>Enter</b>, 바로 다음 질문! 맞춤법·좋은 질문인지는 신경 쓰지 않기</li><li>라운드 1은 <b>5분</b>, 라운드 2는 <b>2분</b> — 두 라운드 <b>총합</b>이 가장 많은 사람에게 상품! 🎁</li></ol></div>
+      <ol><li>앞 화면의 <b>사진</b>을 보고 떠오르는 질문 쓰기</li><li>한 줄 쓰고 <b>Enter</b> — 맞춤법은 신경 쓰지 않기</li><li>라운드 1 <b>5분</b> · 라운드 2 <b>2분</b> — 총합 1등에게 상품 🎁</li></ol></div>
     ${SLOT}
     <div class="warm"><div class="wround">${R1 && w.start ? `라운드 ${R1} / 2` : "라운드 1부터"}</div>
       ${me.teacher ? `<div class="wtimer big ${ws.phase}" id="wTimer">${timer}</div>` : `<div class="wstate ${ws.phase}">${ws.phase === "wait" ? "준비" : ws.phase === "ready" ? "곧 시작!" : ws.phase === "run" ? "지금 쏟아내기!" : "끝!"}</div>`}
@@ -1835,7 +1859,7 @@ VIEWS["1-1"] = () => {
   const mine = S.cards.filter(c => c.name === me.uid);
   const tagOf = c => [c.src ? srcName(c.src) : "", c.q ? `“${c.q}”` : ""].filter(Boolean).join(" ");
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>자료 (1)을 읽으며 눈에 띄거나 의아한 부분에 표시하기 <small>(글자를 길게 누르면 표시 도구가 나와요)</small></li><li>떠오른 질문을 아래 칸에 <b>하나씩</b> 올리기</li></ol></div>
+      <ol><li>자료 (1)을 읽고 눈에 띄는 부분에 <b>표시</b>하기</li><li>떠오른 질문을 <b>하나씩</b> 올리기</li></ol></div>
     ${SLOT}
     <div class="box"><span class="tag">질문 쏟아내기 약속</span>
       <ul><li>한 번에 질문 하나씩 올리기</li><li>되도록 많이 쓰기 — 좋은 질문인지는 나중에 따지기</li><li>떠오른 그대로 쓰기 — 답을 달거나 고치지 않기</li><li>생각이 문장으로 떠오르면 물음표로 바꾸어 쓰기 <small>예) 군 지역은 응급실이 멀다 → 군 지역은 왜 응급실이 멀까?</small></li></ul></div>
@@ -1886,12 +1910,10 @@ VIEWS["1-2"] = () => {
   const cardBtn = c => `<button class="card p${pal.indexOf(c.name) % 4}${selected.has(c.id) ? " sel" : ""}" data-act="sel" data-id="${c.id}" aria-pressed="${selected.has(c.id)}">${esc(c.text)}<small>${esc(dn(c.name))}${c.src ? " · " + esc(srcName(c.src)) : ""}</small></button>`;
   const moveBtn = g => selected.size ? `<button class="moveto" data-act="moveTo" data-g="${g}">${g ? `여기로 옮기기 (${selected.size})` : `묶음에서 빼기 (${selected.size})`}</button>` : "";
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li><b>[✨ 비슷한 질문 자동으로 묶기]</b>를 눌러 묶음 초안 만들기 <small>(질문 속 낱말이 겹치는 정도로 묶은 초안이라 꼭 고쳐야 해요)</small></li>
-      <li>초안을 함께 읽으며, 다른 묶음에 어울리는 카드는 <b>눌러서 고른 뒤</b> 옮길 묶음의 <b>[여기로 옮기기]</b></li>
-      <li>묶음마다 맨 위 칸의 <b>묶음 이름</b>을 우리 말로 고쳐 쓰기</li></ol>
-      <small>새 묶음이 필요하면 카드를 고르고 화면 아래 [새 묶음 만들기]. 직접 처음부터 묶어도 돼요.</small></div>
+      <ol><li><b>✨ 자동으로 묶기</b>를 눌러 초안 만들기</li><li>어울리지 않는 카드는 골라서 <b>[여기로 옮기기]</b></li><li>묶음마다 <b>이름</b> 고쳐 쓰기</li></ol>
+      <small>새 묶음: 카드를 고르고 아래 [새 묶음 만들기]</small></div>
     <div class="bucket pool"><div class="bhead"><span class="title">아직 묶지 않은 질문</span><span class="n">${pool.length}개</span>${moveBtn("")}</div>
-      ${me.teacher || pool.length < 3 ? "" : `<button class="primary" data-act="autoGroup" style="margin:4px 0 10px">✨ 비슷한 질문 자동으로 묶기 (초안)</button>`}
+      ${me.teacher || pool.length < 3 ? "" : `<button class="primary" data-act="autoGroup" style="margin:4px 0 10px">✨ 자동으로 묶기 (초안)</button>`}
       ${me.teacher ? "" : `<div class="fbin"><input type="text" id="qin2" data-k="qin2" maxlength="200" placeholder="질문이 더 떠오르면 여기에 바로 올리기"><button class="ghost" data-act="addQ2">올리기</button></div>`}
       <div class="cards">${pool.map(cardBtn).join("") || '<p class="empty">모든 질문을 묶었어요. 묶음마다 이름이 있는지 확인하기</p>'}</div></div>
     ${S.groups.map((g, i) => { const cs = inG(g.id);
@@ -1953,10 +1975,8 @@ VIEWS["1-3"] = () => {
         <div class="ex-pair"><span>지방 병원은 의사 연봉이 높을까?</span><i>→</i><span>높은 연봉에도 의사가 오지 않으면 지역 응급실은 <b>어떻게</b> 운영될까?</span></div>
         <div class="ex-pair"><span>닥터헬기는 밤에 못 뜰까?</span><i>→</i><span>닥터헬기가 밤에 뜨지 못하는 것은 군 지역 주민에게 <b>어떤 영향을 미칠까?</b></span></div></li></ul></div>
     <div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li><b>👍 좋아요 투표</b> — 아래 모둠 질문을 읽고, 탐구하고 싶은 질문에 <b>한 사람 3개씩</b> 👍 누르기 <small>(다시 누르면 취소)</small></li>
-      <li><b>후보로 보내기</b> — 좋아요가 많은 질문(🏅)을 참고해 의논하고, 질문 옆 <b>①②③</b>을 눌러 후보 칸에 보내기</li>
-      <li><b>다듬고 확정하기</b> — 맨 아래 후보 칸에서 위 도움말처럼 열린 질문으로 다듬고 [확정하기]</li></ol>
-      <small>누르기 전에 생각하기: 자료로 답을 찾을 수 있을까? ‘왜·어떻게’를 묻는가? — 좋아요는 참고일 뿐, 후보는 모둠이 의논해 정해요.</small></div>
+      <ol><li><b>👍 투표</b> — 탐구하고 싶은 질문에 한 사람 3개</li><li><b>후보 보내기</b> — 🏅 참고해 의논하고 ①②③ 누르기</li><li><b>다듬고 확정</b> — 맨 아래 후보 칸에서 다듬기</li></ol>
+      <small>💭 자료로 답을 찾을 수 있을까? ‘왜·어떻게’를 묻는가?</small></div>
     <h2>① 👍 좋아요 투표 → ② 후보로 보내기</h2>
     <div class="likebar">${me.teacher || me.preview ? `<span>모둠 투표 참여 <b>${voters}</b>${mem ? ` / ${mem}` : ""}명 · 좋아요 합계 <b>${S.cards.reduce((a, c) => a + nL(c), 0)}</b>개</span>`
       : `<span>내 좋아요 <b>${3 - myL}</b>개 남음</span>${[0,1,2].map(i => `<i class="${i < myL ? "on" : ""}">👍</i>`).join("")}<span class="hint">· 투표 참여 ${voters}${mem ? ` / ${mem}` : ""}명</span>`}</div>
@@ -2001,8 +2021,8 @@ VIEWS["2-1"] = () => {
   const candList = S.cands.length ? S.cands.map((k, i) => `<div class="pickq"><span>${NUM[i]} ${esc(k.text) || "(비어 있음)"}</span>${D ? "" : `<button class="ghost" data-act="gPick" data-id="${k.id}">이 질문으로 하기</button>`}</div>`).join("")
     : '<p class="empty">1차시 후보 질문이 아직 없어요. 직접 써서 시작하기</p>';
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>자료 (2)를 모둠원과 함께 읽으며 중요한 내용에 표시하기</li><li>모둠원과 의논해 <b>함께 다듬을 후보 질문 1개</b> 고르기</li><li><b>우리 모둠 사다리</b>를 위에서부터 한 칸씩 내려가며 다듬기 — 바꿀 수 있는 요소만 고치고 맨 아래 도착 칸에서 종합하기</li></ol>
-      <small>사다리는 모둠원 모두의 화면에 같이 보이고 누구나 고칠 수 있어요. 한 사람이 쓰고 나머지는 함께 의논하면 편해요.</small></div>
+      <ol><li>자료 (2)를 함께 읽으며 <b>표시</b>하기</li><li>다듬을 <b>후보 질문 1개</b> 고르기</li><li><b>사다리</b>를 한 칸씩 내려가며 다듬기</li></ol>
+      <small>사다리는 모둠원 모두에게 같이 보여요</small></div>
     ${SLOT}
     ${!started ? `<div class="panel"><span class="num">함께 다듬을 후보 질문 고르기</span>${candList}${D ? "" : `<div class="acts"><button class="ghost" data-act="gPick" data-id="">직접 써서 시작하기</button></div>`}</div>
       ${S.done2 ? '<p class="locked">2차시 탐구 계획이 확정되어 있어 질문을 고를 수 없어요. 활동 3에서 [다시 고치기]를 누르면 다시 고를 수 있어요.</p>' : '<p class="hint">질문을 고르면 다듬는 방법과 우리 모둠 사다리가 나와요.</p>'}`
@@ -2012,8 +2032,8 @@ VIEWS["2-1"] = () => {
       <li><b>탐구형으로 넓히기</b>: 단답형 사실 확인 질문(몇 곳인가?)을 원인, 영향, 지역 조건의 관계를 묻는 질문(왜? 어떻게?)으로 바꾸기</li></ol>
       <small>고칠 것이 없는 칸은 비워 두어도 돼요.</small></div>
     <details class="box"><summary>질문 수준 대조표 — 내 질문은 수면 위? 수면 아래?</summary>
-      <p class="hint" style="margin:6px 0">사다리 <b>③ 탐구형</b>과 <b>도착</b> 칸은 수면 아래(분석·평가·창안) 질문을 목표로 해요. 수면 위 질문은 활동 3의 하위 질문으로 쓰면 좋아요.</p>
-      <div style="overflow-x:auto">${qlvTable(false)}</div><small>예시는 다른 주제(청소년 수면)예요 — 질문 틀만 빌려 우리 모둠 질문에 맞게 바꿔 쓰기 · 블룸의 교육목표분류(Bloom’s Taxonomy)를 바탕으로 정리</small></details>
+      <p class="hint" style="margin:6px 0"><b>③ 탐구형·도착</b>은 수면 아래 질문으로 · 수면 위 질문은 하위 질문으로</p>
+      <div style="overflow-x:auto">${qlvTable(false)}</div><small>예시는 다른 주제예요 — 질문 틀만 빌려 쓰기</small></details>
     <details class="box"><summary>예시로 보는 사다리</summary>
       <p class="ro"><b>출발</b> 시골은 왜 응급실이 멀까?</p>
       <p class="ro"><b>① 개념</b> 시골 주민이 <u>필수 서비스</u>인 응급의료를 <u>이용할 기회</u>는 왜 도시보다 적을까?</p>
@@ -2035,8 +2055,7 @@ VIEWS["2-2"] = () => {
   const F = S.fin, D = S.done2 || F.ok;
   const ladText = id => { const l = S.lads.find(x => x.id === id); return l ? ladBest(l) : ""; };
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>우리 모둠 사다리에서 <b>다듬은 질문</b>을 함께 읽기</li><li><b>탐구 질문 체크리스트</b>로 다듬은 질문을 점검하고, 맞는 것에 체크하기</li>
-      <li>다듬은 질문을 <b>[가져오기]</b>로 불러와, 체크리스트에서 부족했던 점을 반영해 <b>최종 탐구 질문</b>으로 고쳐 쓰고 이유 쓰기</li></ol></div>
+      <ol><li><b>다듬은 질문</b> 함께 읽기</li><li><b>체크리스트</b>로 점검하기</li><li><b>[가져오기]</b> 후 고쳐 쓰고 이유 쓰기</li></ol></div>
     <h2>① 우리 모둠 사다리에서 다듬은 질문</h2>
     ${gBest() ? `<div class="qbox"><b>${esc(gBest())}</b><br><small class="hint">${candLabel(S.glad.cand)}${S.glad.end ? "" : " · 도착 칸 전"}</small></div>`
       : '<p class="empty">활동 1에서 우리 모둠 사다리로 질문을 다듬으면 여기에 나와요.</p>'}
@@ -2066,10 +2085,7 @@ VIEWS["2-3"] = () => {
   const id = (k, f) => `sub-${k}-${f}`;
   const inp = (k, f, lab, extra) => `<label for="${id(k, f)}">${lab}</label><input type="text" id="${id(k, f)}" maxlength="200" data-k="${id(k, f)}" data-sk="${k}" data-sf="${f}" value="${esc(S.subs[k][f])}" ${extra || ""} ${D ? "disabled" : ""}>`;
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li><b>하위 질문과 조사할 것 쓰기</b> — 최종 탐구 질문에 답하려면 무엇을 알아야 할지 의논해 질문으로 쓰고, 확인할 것과 필요한 자료·출처 적기 <small>(자료 칸 ‘우리 모둠 질문’에서 골라 와도 돼요)</small></li>
-      <li><b>체크리스트로 점검하기</b> — 하위 질문을 정할 때 이 세 가지에 맞추기
-        <ul style="margin:4px 0 0"><li><b>기여</b>: 모든 하위 질문이 최종 탐구 질문을 해결하는 데 도움이 되는가?</li><li><b>단계</b>: 하위 질문들이 차례대로 이어지는가? <small>(예: 현황 → 원인 → 영향)</small></li><li><b>조사 가능성</b>: 우리 수준에서 찾을 수 있는 자료가 있는가?</li></ul></li>
-      <li><b>하위 질문마다 담당자 정하기</b> — 모둠원 모두가 하나씩</li></ol></div>
+      <ol><li><b>하위 질문</b>과 확인할 것·자료 쓰기</li><li><b>체크리스트</b>에 맞추기<ul style="margin:4px 0 0"><li><b>기여</b>: 최종 질문 해결에 도움이 되나?</li><li><b>단계</b>: 차례대로 이어지나? (현황 → 원인 → 영향)</li><li><b>조사 가능성</b>: 찾을 수 있는 자료가 있나?</li></ul></li><li><b>담당자</b> 정하기 — 모두 하나씩</li></ol></div>
     ${SLOT}
     <div class="qbox"><small class="hint">우리 모둠 최종 탐구 질문</small><br><b>${esc(F.text) || '<span class="empty">활동 2에서 먼저 정하기</span>'}</b></div>
     <h2>① 하위 질문과 조사할 것</h2>
@@ -2102,7 +2118,7 @@ VIEWS["3-1"] = () => {
   const mine = myK(), D = S.done3;
   const showK = me.teacher ? KS().map(([k]) => k) : mine;
   return `<div class="qbox"><small class="hint">우리 모둠 최종 탐구 질문</small><br><b>${esc(S.fin.text) || '<span class="empty">2차시에서 정한 최종 탐구 질문이 여기에 나와요</span>'}</b></div>
-    <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로 풀어 설명<br><small>자료 칸 ‘조사 꿀팁’의 AI 활용법과 검색 방법을 활용하기</small></div>
+    <div class="box"><span class="tag">구분하기</span> <b>조사 내용</b>은 있는 그대로 · <b>해석</b>은 내 말로<br><small>막히면 자료 칸 ‘조사 꿀팁’ 보기</small></div>
     ${SLOT}
     ${!me.teacher && !S.done2 ? '<p class="locked">2차시 활동 3에서 탐구 계획을 확정하면 내가 맡은 하위 질문이 여기에 나타나요.</p>'
       : `${!me.teacher && !mine.length ? '<p class="locked">2차시 조사 계획에 내 이름이 담당자로 적혀 있지 않아요. 2차시 활동 3에서 담당자를 정해 주세요.</p>' : ""}
@@ -2126,11 +2142,9 @@ VIEWS["3-2"] = () => {
   const fbItem = (x, k) => `<li>${x.tag ? `<b>[${esc(x.tag)}]</b> ` : ""}${esc(x.text)} <small>${esc(dn(x.name))}</small>${x.done ? ' <small><b>✓ 반영함</b></small>' : ""}${x.name === me.uid && !D ? `<button data-act="delFb" data-id="${x.id}" data-g="${k}">지우기</button>` : ""}</li>`;
   const others = KS().map(([k]) => k).filter(k => !mine.includes(k));
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li><b>모둠원 칸에 보완 의견 남기기</b> — 아래 검토 기준 하나를 고르고, 무엇을 더하면 좋을지 구체적으로 쓰기 (칸마다 한 가지 이상)</li>
-      <li><b>내 칸에 달린 의견 보고 고치기</b> — 조사 내용·출처·해석을 직접 고치기</li>
-      <li><b>반영한 의견에 ✓ ‘반영함’</b> 체크하고, <b>‘수정한 점’</b>에 무엇을 고쳤는지 쓰기</li></ol>
+      <ol><li>모둠원 칸에 <b>보완 의견</b> 남기기</li><li>내 칸에 달린 의견 보고 <b>고치기</b></li><li><b>✓ 반영함</b> 체크 · 수정한 점 쓰기</li></ol>
       <span class="tag" style="margin-top:6px">검토 기준</span>
-      <ul><li><b>질문과 답의 연결</b>: 조사 내용과 해석이 하위 질문에서 물은 것에 정확하게 답하고 있는가?</li><li><b>자료의 적절성</b>: 비교한 지역, 대상, 기준 연도가 적절하며 출처가 믿을 만한가?</li><li><b>설명의 충분성</b>: 개인의 사정이 아니라 ‘지역의 구조적 조건’ 때문임을 드러내는 설명이 충분한가?</li></ul></div>
+      <ul><li><b>질문과 답의 연결</b>: 물은 것에 정확히 답했나?</li><li><b>자료의 적절성</b>: 비교 기준·출처가 믿을 만한가?</li><li><b>설명의 충분성</b>: 지역의 구조적 조건을 드러냈나?</li></ul></div>
     ${others.length ? `<h2>${me.teacher ? "하위 질문별 조사 내용 — 선생님 의견 남기기" : "모둠원 하위 질문 — 보완 의견 남기기"}</h2>` : `<p class="locked">보완 의견을 남길 모둠원 칸이 없어요. 하위 질문을 모두 내가 맡았거나 아직 담당자가 정해지지 않았어요 (2차시 활동 3).</p>`}
     ${others.map(k => { const r = S.res[k];
       return `${resPanel(k, D, true)}
@@ -2146,7 +2160,7 @@ VIEWS["3-3"] = () => {
   const D = S.done3, c = S.concl;
   const fld = (f, lab, hint) => `<label for="cc-${f}">${lab}</label>${hint ? `<p class="hint" style="margin:-2px 0 6px">${hint}</p>` : ""}<textarea id="cc-${f}" maxlength="1000" data-k="cc-${f}" data-cf="${f}" style="min-height:110px" ${D ? "disabled" : ""}>${esc(c[f])}</textarea>`;
   const ready = c.answer.trim().length >= 10;
-  return `<div class="box"><span class="tag">답변 작성</span> 보완을 마친 하위 질문의 답을 차례대로 이어 보며, 모둠의 최종 탐구 질문에 대한 답변을 3~4문장으로 쓰기</div>
+  return `<div class="box"><span class="tag">답변 작성</span> 하위 질문의 답을 이어 <b>3~4문장</b>으로 답하기</div>
     <div class="panel"><span class="num">우리 모둠의 탐구 질문</span>
       <p class="ro"><b>1차시 후보</b> ${S.cands.map(k => esc(k.text)).filter(Boolean).join(" / ") || "-"}</p>
       <p class="ro"><b>2차시 최종</b> ${esc(S.fin.text) || "-"}</p></div>
@@ -2167,8 +2181,8 @@ VIEWS["4-1"] = () => {
     <label for="pr-w${f.slice(1)}">발표자</label><input type="text" id="pr-w${f.slice(1)}" maxlength="40" list="memList4" data-k="pr-w${f.slice(1)}" data-prf="w${f.slice(1)}" value="${esc(p["w" + f.slice(1)])}" placeholder="이 부분을 말할 사람 이름">
     <label for="pr-${f}">메모 <small class="hint" style="font-weight:400">— 핵심 단어 위주로</small></label><textarea id="pr-${f}" maxlength="300" data-k="pr-${f}" data-prf="${f}">${esc(p[f])}</textarea></div>`;
   return `<div class="box"><span class="tag">이렇게 해요</span>
-      <ol><li>자료 칸 <b>‘모둠 결론’</b>을 보며 1)~3)마다 <b>발표자</b>를 정하고 핵심 단어로 메모하기</li><li>아래 <b>발표 잘하는 방법</b>대로 한 번씩 소리 내어 연습하기</li><li>발표 직전 <b>5분 전 체크리스트</b>로 스스로 점검하기</li></ol>
-      <small>발표는 3분 이내 — 한 사람이 다 말해도 되고, 1)~3)을 나누어 말해도 돼요.</small></div>
+      <ol><li>1)~3)마다 <b>발표자</b> 정하고 메모하기</li><li><b>발표 잘하는 방법</b>대로 연습하기</li><li><b>5분 전 체크리스트</b>로 점검하기</li></ol>
+      <small>발표는 3분 이내</small></div>
     ${SLOT}
     <div class="box"><span class="tag">발표 잘하는 방법</span>
       <ul><li><b>두괄식으로 핵심부터</b>: “우리 모둠의 답은 ○○입니다.”처럼 결론을 첫 문장에 말하고, 근거는 그다음에</li>
@@ -2197,7 +2211,7 @@ const gotCmts = () => `<div class="panel"><span class="num">우리 모둠에 달
   ${S.cmts.length ? KINDS.map(([k, n]) => { const l = S.cmts.filter(x => x.kind === k); return l.length ? cmtList(l) : ""; }).join("") : '<p class="empty">아직 달린 댓글이 없어요.</p>'}</div>`;
 VIEWS["4-2"] = () => {
   const target = BOARD && boardSel ? BOARD.find(b => String(b.moum) === boardSel) : null;
-  return `<div class="box"><span class="tag">댓글 남기기</span> 발표를 들으며 발표하는 모둠에 댓글을 하나 이상 남기기. 남긴 댓글은 <b>발표 모둠 화면에 바로 전달</b>돼요.</div>
+  return `<div class="box"><span class="tag">댓글 남기기</span> 발표 모둠에 <b>댓글 하나 이상</b> — 바로 전달돼요</div>
     <label>발표 모둠 고르기</label>
     <div class="srcpick">${Array.from({ length:MOUMS }, (_, i) => String(i + 1)).filter(m => me.teacher || m !== String(me.moum)).map(m => `<button data-act="boardSel" data-id="${m}" aria-pressed="${m === boardSel}">${m}모둠</button>`).join("")}
       <button class="ghost" data-act="boardRefresh" style="margin-left:auto">새로 고침</button></div>
@@ -2215,14 +2229,14 @@ VIEWS["4-3"] = () => {
   if(me.teacher) return teacherNote;
   const D = !!pv("s4sub");
   return `${gotCmts()}<div class="panel"><span class="num">성찰하기 — 질문 돌아보기</span>
-      <p class="hint">처음 내가 떠올렸던 질문은 무엇이었고, 탐구하며 그 질문에 대한 생각이 어떻게 깊어졌는가? 새롭게 떠오른 질문은 무엇인가?</p>
+      <p class="hint">처음 질문 → 깊어진 생각 → 새로 떠오른 질문</p>
       ${pf("s4first", "처음 떠올렸던 질문 (1차시)", { dis:D })}${pf("s4deep", "탐구 과정을 거치며 깊어진 생각", { dis:D, rows:5 })}${pf("s4new", "탐구 후 새롭게 떠오른 질문 (해결 방안과 연결하여)", { dis:D })}</div>
     <div class="panel"><span class="num">질문의 답을 내 말로 종합하기</span>
       <div class="qbox" style="margin-top:6px"><b>응급의료 취약지 문제는 왜 단순한 지역 간 차이가 아니라 공간 불평등에 해당하는가?</b></div>
       ${pf("s4synth", "", { dis:D, rows:7, cnt:true, max:1500, hint:"우리 학급이 탐구한 내용(구체적인 수치·사실)을 근거로 들어 3~4문장으로" })}</div>
     ${D ? `<div class="done"><b>배움 정리를 제출함</b> <small>${esc(pv("s4sub"))}</small><div class="acts"><button class="ghost" data-act="psub" data-g="s4sub" data-id="">제출 취소하고 고치기</button></div></div>`
       : `<button class="primary" data-act="psub" data-g="s4sub" data-id="1">배움 정리 제출하기</button>`}
-    <div class="box"><span class="tag">다음 — 자기주도 탐구</span> 오늘 익힌 탐구 과정으로, 분만·응급의료 취약지가 아닌 <b>새로운 공간 불평등 사례를 내 진로 분야에서</b> 찾아 혼자 탐구하고, 제도적 해결 방안과 시민 실천 방안을 담은 정책 제안서를 써요. (12. 20.까지)</div>`;
+    <div class="box"><span class="tag">다음 — 자기주도 탐구</span> 오늘 배운 과정으로 <b>내 진로 분야의 새 사례</b>를 혼자 탐구해요<br><small>정책 제안서까지 · 12. 20.까지</small></div>`;
 };
 
 /* ----- 5차시 자기주도 탐구 계획 ----- */
@@ -2231,7 +2245,7 @@ const dlNote = () => pastDL() ? '<p class="locked">마감(12. 20.)이 지나 더
 VIEWS["5-1"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56();
-  return `<div class="box"><span class="tag">자기주도 탐구</span> 1~4차시에 모둠과 함께 했던 과정을 이제 혼자 해 봐요.<br><b>자료 보고 질문 쏟아내기 → 질문 다듬기 → 하위 질문과 계획 세우기 → 조사하기 → 내 말로 제안하기</b><br><small>자료 칸 ‘진로 가이드’에서 내 계열의 질문을 출발점으로 삼아도 좋아요.</small></div>${SLOT}${dlNote()}
+  return `<div class="box"><span class="tag">자기주도 탐구</span> 모둠과 했던 과정을 이제 <b>혼자</b> 해요<br><b>질문 쏟아내기 → 다듬기 → 계획 → 조사 → 제안</b><br><small>막히면 자료 칸 ‘진로 가이드’ 키워드 보기</small></div>${SLOT}${dlNote()}
     <div class="panel"><span class="num">진로 연결</span>${pf("s5career", "내 진로(관심) 분야", { line:true, dis:D })}${pf("s5why", "이 분야에서 공간 불평등 사례를 찾으려는 이유", { dis:D })}</div>
     <div class="panel"><span class="num">새 공간 불평등 사례</span>
       <p class="hint">분만·응급의료 취약지가 아닌 새로운 사례 1가지</p>
@@ -2247,14 +2261,14 @@ VIEWS["5-1"] = () => {
 const myQs = () => pv("s5qs").split(/\n+/).map(x => x.trim()).filter(Boolean);
 const PLEX = { s5start:"시골은 왜 버스가 적을까?", s5c1:"시골 주민이 대중교통을 이용할 기회는 왜 도시보다 적을까?", s5c2:"군 지역 노인이 병원에 갈 때 버스를 이용할 기회는 왜 대도시보다 적을까?",
   s5c3:"군 지역의 버스 배차에는 어떤 지역의 구조적 조건이 영향을 미칠까?", s5myq:"군 지역 노인의 대중교통 이용 기회가 적은 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?" };
-const PL = [["s5start","출발 · 고른 질문",""],["s5c1","① 개념 연결하기","일상 표현을 공간 불평등, 필수 서비스 접근 기회, 지역의 구조적 조건 같은 개념과 연결하기. <b>내 진로·관심 교과의 개념을 연결해도 좋아요.</b> 단, ‘사는 곳에 따라 누릴 기회가 달라지는가’라는 물음은 그대로 두고, 다른 교과 개념은 그 차이를 설명하거나 재는 데 쓰기"],
+const PL = [["s5start","출발 · 고른 질문",""],["s5c1","① 개념 연결하기","일상 표현을 공간 불평등 개념과 잇기 (진로 교과 개념도 좋아요)"],
   ["s5c2","② 범위와 대상 구체화하기","막연한 말을 조사할 수 있는 대상으로 좁히기"],["s5c3","③ 탐구형으로 넓히기","사실 확인을 원인·영향·관계를 묻는 질문(왜? 어떻게?)으로"],["s5myq","도착 · 나의 탐구 질문","고친 요소를 모두 모아 하나의 질문으로"]];
 VIEWS["5-2"] = () => {
   if(me.teacher) return teacherNote;
   const ok = !!pv("s5qsub"), D = locked56() || ok, qs = myQs();
   const ready = pv("s5myq").trim().length >= 8 && [1,2,3,4].every(i => pv("s5k" + i));
   return `${dlNote()}<div class="box"><span class="tag">먼저 알아 두기 — 좋은 탐구 질문 체크리스트</span>
-      <ul>${CHK2.map(c => `<li>${c}</li>`).join("")}</ul><small>사다리를 맨 아래 도착 칸까지 내려온 뒤 아래에서 하나씩 체크하고 확정해요.</small></div>${SLOT}
+      <ul>${CHK2.map(c => `<li>${c}</li>`).join("")}</ul><small>사다리 도착 칸까지 내려온 뒤 체크해요</small></div>${SLOT}
     <div class="panel"><span class="num">쏟아낸 질문 점검하고 고르기</span>
       <ul style="margin:6px 0;padding-left:20px;font-size:14px"><li>비슷한 질문은 <b>합쳐서</b> 한 문장으로</li><li>닫힌 질문은 <b>‘왜·어떻게·어떤 영향’</b>을 넣어 열린 질문으로</li><li>단순한 수치 확인보다 <b>가장 알아보고 싶은</b> 질문 하나 고르기</li></ul>
       ${qs.length ? `<div class="kinds">${qs.map((q, i) => `<button class="chip" data-act="pickQ" data-id="${i}" ${D ? "disabled" : ""}>${esc(q)}</button>`).join("")}</div><p class="hint">누르면 출발 칸에 들어가요. 두 질문을 합치려면 하나를 고른 뒤 출발 칸에서 이어 쓰기</p>` : '<p class="empty">활동 1에서 질문을 먼저 쏟아내 보기</p>'}</div>
@@ -2320,7 +2334,7 @@ function zoneBody(z, D){
   if(z === 3) return `<p class="ro"><b>출발 질문</b> ${esc(pv("s5start")) || "-"}</p>` + (pv("s5qsub") ? `<p class="ro"><b>나의 탐구 질문</b> ${esc(pv("s5myq"))}</p><p class="hint">활동 2에서 확정했어요. 고치려면 활동 2에서 [다시 고치기]</p>`
       : pf("s5myq", "나의 탐구 질문", { dis:D, hint:"활동 2의 사다리에서 다듬어 확정하면 여기에 그대로 들어가요." }));
   if(z === 4) return pf("s5who", "누구를 (대상)", { line:true, dis:D }) + pf("s5where", "어디를 (지역)", { line:true, dis:D }) + pf("s5year", "언제를 (기준 연도)", { line:true, dis:D });
-  if(z === 5) return `<p class="hint">나의 탐구 질문에 답하려면 무엇을 알아야 할지 스스로 정해서 질문으로 쓰기. 내 진로 분야의 원리·이론을 탐구하는 하위 질문도 좋아요.</p>`
+  if(z === 5) return `<p class="hint">답하려면 무엇을 알아야 할지 질문으로 쓰기 (진로 분야 원리도 좋아요)</p>`
     + H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span>${pf("s5h" + i, "하위 질문", { dis:D })}${pf("s5h" + i + "s", "찾을 자료·출처", { line:true, dis:D })}</div>`).join("")
     + `<div class="box"><span class="tag">하위 질문 체크리스트</span>${["모든 하위 질문이 나의 탐구 질문을 해결하는 데 기여하는가?","하위 질문들이 단계적으로 이어지는가?","내가 조사할 수 있는 자료가 있는가?"].map((c, i) => pchk(`s5j${i+1}`, c, D)).join("")}</div>`;
   if(z === 6) return pf("s5q2", "해결 질문 — 제도", { line:true, dis:D }) + pf("s5inst", "떠오르는 제도적(국가·지방 자치 단체) 방안", { dis:D }) + pf("s5q3", "해결 질문 — 시민 실천", { line:true, dis:D }) + pf("s5civic", "떠오르는 시민 실천 방안", { dis:D });
@@ -2349,7 +2363,7 @@ const planDue = sub => { const now = typeof srvNow === "function" ? srvNow() : D
 VIEWS["5-3"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56(), sub = pv("s5sub");
-  return `${dlNote()}${planDue(sub)}<div class="box"><span class="tag">탐구 계획서</span> 구역을 펼쳐 차례로 채우기. 구역을 펼치거나 칸을 누르면 <b>옆 자료 칸에 그 구역의 도움 자료</b>가 나와요. <small>휴대폰에서는 구역 제목 옆 [도움 자료]를 누르기</small></div>
+  return `${dlNote()}${planDue(sub)}<div class="box"><span class="tag">탐구 계획서</span> 구역을 하나씩 펼쳐 채우기<br><small>펼치면 옆 자료 칸에 <b>도움 자료</b>가 나와요 (휴대폰: [도움 자료])</small></div>
     ${ZONES.map(([z, t]) => `<details class="zone" data-zone="${z}" ${openZones.has(z) ? "open" : ""}><summary data-zone="${z}"><span class="zt">구역 ${z} · ${t}</span><button class="zhelp" data-act="zoneHelp" data-id="${z}">도움 자료</button></summary>
       <div class="zin">${inlineHelp.has(z) ? `<div class="zinline">${zoneHelp(z)}</div>` : ""}${zoneBody(z, D)}</div></details>`).join("")}
     ${sub ? `<div class="done"><b>탐구 계획서를 제출함</b> <small>${esc(sub)}</small><br>고친 뒤 다시 제출하면 선생님께 최신 내용이 전달돼요. 피드백 반영 재제출은 <b>${PLAN_RE}</b>까지.${D ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s5sub" data-id="1">고친 내용으로 다시 제출하기</button></div>`}</div>`
@@ -2374,10 +2388,9 @@ VIEWS["6-1"] = () => {
   const D = locked56();
   return `${dlNote()}<div class="qbox"><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">5차시에서 먼저 정하기</span>'}</b></div>
     <div class="box"><span class="tag">AI 활용 약속</span>
-      <ul><li><b>자료 조사</b>에는 AI를 써도 돼요 — 검색어 만들기, 찾을 기관·통계 묻기, 어려운 용어 풀기</li>
-      <li>AI가 알려 준 수치·사실은 <b>원래 출처에서 직접 확인</b>하고, 출처 아래 <b>‘AI 활용 표시’</b>에 어디에 썼는지 적기</li>
-      <li><b>해석은 AI 도움 없이 스스로</b> — 그 사실이 내 하위 질문에 무엇을 말하는지 내 생각을 내 말로 쓰기</li></ul>
-      <small><b>조사 내용</b>은 자료의 수치나 내용을 있는 그대로 / <b>해석</b>은 그 사실이 하위 질문에 대해 무엇을 말하는지 내 말로</small></div>${SLOT}
+      <ul><li><b>자료 조사</b>는 AI를 써도 돼요 (검색어·기관·용어)</li>
+      <li>수치는 <b>원래 출처</b>에서 확인 · <b>AI 활용 표시</b> 쓰기</li>
+      <li><b>해석은 AI 없이 스스로</b> — 내 말로</li></ul></div>${SLOT}
     ${H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span><p class="ro"><b>하위 질문</b> ${esc(pv("s5h" + i)) || "-"}</p>
       ${pf("s6r" + i + "d", "조사 내용 (수치·사실)", { dis:D })}${pf("s6r" + i + "s", "출처 (기관·매체, 연도, 제목)", { line:true, dis:D })}
       ${pf("s6r" + i + "a", "AI 활용 표시 (쓴 경우만)", { line:true, dis:D, hint:"예) 검색어 추천받음 · ○○ 통계가 어느 기관에 있는지 물어봄 · 용어 뜻을 물어봄 — AI 이름도 함께" })}
@@ -2407,6 +2420,22 @@ VIEWS["6-2"] = () => {
 };
 
 /* ===== 자료 칸 안의 동적 내용 ===== */
+/* 왼쪽 꿀팁 자료는 제목만 보이게 접어 두고 필요한 것만 펼쳐 보기 (자료 본문 d1·d2는 그대로) */
+(function foldTips(){
+  ["d8","t51","t52","t53","t62","d9"].forEach(id => {
+    const doc = document.querySelector(`#docPane .doc[data-doc="${id}"]`); if(!doc) return;
+    doc.querySelectorAll(":scope > section.src").forEach((sec, i) => {
+      const h = sec.querySelector(":scope > h4"); if(!h) return;
+      const d = document.createElement("details"); d.className = "src tipsec"; if(i === 0) d.open = true;
+      [...sec.attributes].forEach(a => { if(a.name !== "class") d.setAttribute(a.name, a.value); });
+      const sum = document.createElement("summary"); sum.innerHTML = h.innerHTML; h.remove();
+      const body = document.createElement("div"); body.className = "tipsec-in"; body.append(...sec.childNodes);
+      d.append(sum, body); sec.replaceWith(d);
+    });
+    const tip = document.createElement("p"); tip.className = "hint foldnote"; tip.textContent = "제목을 누르면 펼쳐져요 — 필요한 것만 골라 보기";
+    const title = doc.querySelector(":scope > .doc-title"); if(title) title.after(tip);
+  });
+})();
 function renderDocs(){
   document.querySelectorAll('[data-doc="d1"] .src').forEach(sec => {
     const k = sec.dataset.sec, cs = S.cards.filter(c => String(c.src).split(",").includes(k));
