@@ -705,6 +705,13 @@ details.src.tipsec[open] > summary::after{transform:rotate(180deg)}
 details.src.tipsec[open] > summary{border-bottom:1px dashed var(--hair)}
 details.src.tipsec .tipsec-in{padding:10px 16px 14px}
 .foldnote{margin:2px 0 8px;font-size:13px}
+/* 학생 접속 QR: 위쪽 막대 안의 작은 단추 (아무것도 가리지 않음) */
+.top #qrDock{position:static;box-shadow:none;border:1.5px solid var(--ink);border-radius:999px;padding:3px 12px 3px 4px;gap:6px;background:var(--paper);color:var(--ink)}
+.top #qrDockImg svg{width:30px;height:30px;border-radius:4px}
+.top #qrDock .qt{flex-direction:row;align-items:baseline;gap:6px;font-size:13px;line-height:1.2}
+.top #qrDock .qt small{font-size:12px}
+body.has-dock{padding-bottom:0}
+@media (max-width:600px){ .top #qrDock .qt small{display:none} }
 </style>
 </head>
 <body>
@@ -750,6 +757,7 @@ details.src.tipsec .tipsec-in{padding:10px 16px 14px}
     <div class="ttl"><small id="hsub"></small><b id="htitle"></b></div>
     <span class="who" id="whoText"></span><span class="sync" id="sync"></span>
     <span class="focusflag" id="focusFlag" hidden>집중 모드</span>
+    <button id="qrDock" hidden aria-label="학생 접속 QR 크게 보기" title="누르면 크게"><span id="qrDockImg"></span><span class="qt"><b>학생 접속</b><small id="qrDockCode"></small></span></button>
     <button id="fsBtn" title="전체 화면" hidden>⛶ 전체 화면</button>
     <button id="leave">나가기</button>
   </div></div>
@@ -1062,7 +1070,6 @@ details.src.tipsec .tipsec-in{padding:10px 16px 14px}
 <div id="present" hidden></div>
 <div id="qwall" hidden role="dialog" aria-label="올라온 질문 모아 보기"></div>
 <div id="slides" hidden role="dialog" aria-label="수업 화면"></div>
-<button id="qrDock" hidden aria-label="학생 접속 QR 크게 보기"><span id="qrDockImg"></span><span class="qt"><b>학생 접속</b><small id="qrDockCode"></small><small>누르면 크게</small></span></button>
 <div id="qrBig" hidden role="dialog" aria-label="학생 접속 QR"><div class="qb">
   <b class="bh">학생 접속 QR</b><div id="qrBigImg"></div>
   <p>수업 코드 <b id="qrBigCode"></b></p><p class="hint" id="qrBigUrl"></p>
