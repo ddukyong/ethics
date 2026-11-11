@@ -587,9 +587,9 @@ input[type=text],input[type=password],textarea,select{border-radius:12px}
 .landing .flow li:nth-child(5) .no{color:#C2410C!important}
 .landing .flow b{font-size:18px;line-height:1.35}
 .landing .flow span:not(.no){font-size:14.5px;line-height:1.5}
-.landing .card-login{width:100%;max-width:520px;text-align:left}
+.landing .card-login{width:100%;max-width:520px;text-align:left;margin-top:40px}
 @media (max-width:960px){ .landing .flow{grid-template-columns:repeat(2,minmax(0,1fr))} .landing .flow li:nth-child(5){grid-column:1 / -1} }
-@media (max-width:480px){ .landing{padding:28px 14px 44px;gap:26px} .landing .flow{gap:10px} .landing .flow li{padding:12px;border-radius:14px;box-shadow:4px 4px 0 var(--c)} .landing .flow .no{font-size:26px} .landing .flow b{font-size:15.5px} .landing .flow span:not(.no){font-size:13px} }
+@media (max-width:480px){ .landing{padding:28px 14px 44px;gap:26px} .landing .card-login{margin-top:24px} .landing .flow{gap:10px} .landing .flow li{padding:12px;border-radius:14px;box-shadow:4px 4px 0 var(--c)} .landing .flow .no{font-size:26px} .landing .flow b{font-size:15.5px} .landing .flow span:not(.no){font-size:13px} }
 .landing .flow li:nth-child(5) .no{font-family:"Noto Sans KR",sans-serif;font-weight:700}
 
 /* 왼쪽 자료와 오른쪽 활동의 색 톤 맞추기 — 둘 다 같은 차시 색을 옅게 */
@@ -618,6 +618,12 @@ body[data-l]{ --acc-t:color-mix(in srgb, var(--acc) 12%, #FFFDF8); --acc-d:color
 .top button{background:var(--paper);color:var(--ink);border-color:var(--ink)}
 .top .focusflag{background:var(--acc);color:#fff}
 .shell{position:relative}
+.duebar{margin-top:14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:12px 16px;border:2.5px solid var(--acc);border-radius:var(--r,14px);background:var(--paper);font-size:15px}
+.duebar .dl{background:var(--acc);color:#fff;border-radius:999px;padding:2px 11px;font-size:13px;font-weight:700}
+.duebar b{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:20px}
+.duebar small{flex-basis:100%;color:var(--muted)}
+.duebar small b{font-family:inherit;font-size:inherit;font-weight:700;color:var(--ink)}
+.duebar.late{border-color:var(--warn);background:color-mix(in srgb, var(--warn) 8%, var(--paper))} .duebar.late .dl{background:var(--warn)}
 </style>
 </head>
 <body>
@@ -2201,14 +2207,20 @@ function zoneBody(z, D){
   if(z === 7) return [1,2,3,4].map(i => `<div class="sched"><input type="text" id="pf-s5d${i}" data-k="pf-s5d${i}" data-pf="s5d${i}" maxlength="20" value="${esc(pv("s5d" + i))}" placeholder="날짜" ${D ? "disabled" : ""}><input type="text" id="pf-s5t${i}" data-k="pf-s5t${i}" data-pf="s5t${i}" maxlength="200" value="${esc(pv("s5t" + i))}" placeholder="할 일" ${D ? "disabled" : ""}></div>`).join("");
   return pf("s5ask", "선생님께 묻고 싶은 점", { dis:D });
 }
+/* 탐구 계획서 제출 기한: 11. 20.(금) 23:59, 피드백 반영 재제출 11. 27.(금) */
+const PLAN_DUE = new Date("2026-11-20T23:59:59+09:00").getTime(), PLAN_RE = "11. 27.(금)";
+const planDue = sub => { const now = typeof srvNow === "function" ? srvNow() : Date.now(), left = Math.ceil((PLAN_DUE - now) / 86400000);
+  return `<div class="duebar${!sub && now > PLAN_DUE ? " late" : ""}"><span class="dl">📅 제출 기한</span><b>11. 20.(금) 23:59</b>
+    <span>${sub ? "✓ 제출함" : now > PLAN_DUE ? "기한이 지났어요 — 지금이라도 꼭 제출하기" : left <= 1 ? "오늘이 마감이에요!" : `마감까지 ${left}일`}</span>
+    <small>선생님 피드백을 반영해 <b>${PLAN_RE}</b>까지 다시 제출</small></div>`; };
 VIEWS["5-3"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56(), sub = pv("s5sub");
-  return `${dlNote()}<div class="box"><span class="tag">탐구 계획서</span> 구역을 펼쳐 차례로 채우기. 구역을 펼치거나 칸을 누르면 <b>옆 자료 칸에 그 구역의 도움 자료</b>가 나와요. <small>휴대폰에서는 구역 제목 옆 [도움 자료]를 누르기</small></div>
+  return `${dlNote()}${planDue(sub)}<div class="box"><span class="tag">탐구 계획서</span> 구역을 펼쳐 차례로 채우기. 구역을 펼치거나 칸을 누르면 <b>옆 자료 칸에 그 구역의 도움 자료</b>가 나와요. <small>휴대폰에서는 구역 제목 옆 [도움 자료]를 누르기</small></div>
     ${ZONES.map(([z, t]) => `<details class="zone" data-zone="${z}" ${openZones.has(z) ? "open" : ""}><summary data-zone="${z}"><span class="zt">구역 ${z} · ${t}</span><button class="zhelp" data-act="zoneHelp" data-id="${z}">도움 자료</button></summary>
       <div class="zin">${inlineHelp.has(z) ? `<div class="zinline">${zoneHelp(z)}</div>` : ""}${zoneBody(z, D)}</div></details>`).join("")}
-    ${sub ? `<div class="done"><b>탐구 계획서를 제출함</b> <small>${esc(sub)}</small><br>고친 뒤 다시 제출하면 선생님께 최신 내용이 전달돼요.${D ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s5sub" data-id="1">고친 내용으로 다시 제출하기</button></div>`}</div>`
-      : D ? "" : `<button class="primary" data-act="psub" data-g="s5sub" data-id="1">탐구 계획서 제출하기</button><p class="hint">제출한 뒤에도 마감 전까지 고칠 수 있어요.</p>`}`;
+    ${sub ? `<div class="done"><b>탐구 계획서를 제출함</b> <small>${esc(sub)}</small><br>고친 뒤 다시 제출하면 선생님께 최신 내용이 전달돼요. 피드백 반영 재제출은 <b>${PLAN_RE}</b>까지.${D ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s5sub" data-id="1">고친 내용으로 다시 제출하기</button></div>`}</div>`
+      : D ? "" : `<p class="hint" style="margin-top:18px"><b>📅 제출 기한 11. 20.(금) 23:59</b></p><button class="primary" data-act="psub" data-g="s5sub" data-id="1" style="margin-top:6px">탐구 계획서 제출하기 (11. 20. 금까지)</button><p class="hint">제출한 뒤에도 고칠 수 있어요 — 선생님 피드백을 반영해 ${PLAN_RE}까지 다시 제출하기</p>`}`;
 };
 function drawHelp(){
   if(step !== "5-3" || !$("helpBody")) return;
