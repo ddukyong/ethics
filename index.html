@@ -1095,7 +1095,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611111425";
+const APP_VER = "202611111710";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -1312,7 +1312,7 @@ function drawTeacher(){
   $("tLive").checked = !!c.live; $("tLock").checked = !!c.lock; $("tOpen").checked = !!c.open56;
   const at = c.step && STEPS[c.step] ? `‘${lessonOf(c.step)}차시 ${STEPS[c.step].label}’` : "정해지지 않음";
   $("tStatus").textContent = "학생 화면은 선생님을 따라가지 않아요 — 학생은 처음(연습)에서 시작해 안내에 맞춰 스스로 차시·활동을 눌러 넘겨요." +
-    (c.lock ? " · 집중 모드 켜짐 — 학생 화면은 전체 화면으로만 쓰여요. 전체 화면을 나가거나 다른 화면으로 가면 앱이 가려지고, 벗어난 시간이 기록돼요." : "") +
+    (c.lock ? " · 집중 모드 켜짐 — 학생 화면은 전체 화면으로 쓰여요(아이폰·아이패드·맥 사파리는 글자 입력 때문에 전체 화면 대신 화면 분할을 감지). 다른 화면으로 가면 앱이 가려지고, 벗어난 시간이 기록돼요." : "") +
     (c.open56 ? " · 5·6차시 자기주도 탐구가 학생에게 열려 있어요." : " · 5·6차시는 학생에게 잠겨 있어요.");
   $("focusFlag").hidden = !c.lock;
   drawNav(); if(slideOn) drawSlides();
@@ -1434,7 +1434,7 @@ $("teacherToggle").onclick = () => {
 function saveMe(){ try{ localStorage.setItem(LS, JSON.stringify(me)); }catch(e){} }
 const whoText = () => me.teacher ? (tmode === "moum" ? `선생님 · ${me.moum}모둠 보는 중` : "선생님") : `${me.moum}모둠 ${me.sid} ${me.name}`;
 $("joinBtn").onclick = async () => {
-  if(!asTeacher && typeof fsOk !== "undefined" && fsOk && !fsEl()){ fsAuto = true; fsEnter(); }
+  if(!asTeacher && typeof fsOk !== "undefined" && fsOk && !appleWebKit && !fsEl()){ fsAuto = true; fsEnter(); }
   me = asTeacher ? { code:$("jcode").value.trim(), moum:"1", sid:"", name:"선생님", teacher:true, key:$("jkey").value.trim() }
                  : { code:$("jcode").value.trim(), moum:$("jmoum").value, sid:$("jsid").value.trim(), name:$("jname").value.trim() };
   $("joinBtn").disabled = true; $("joinMsg").textContent = "들어가는 중…";
@@ -2860,14 +2860,34 @@ const fmt = d => d.toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit
 const mmss = sec => `${Math.floor(sec / 60)}분 ${sec % 60}초`;
 function focusCheck(){
   $("focusFlag").hidden = !lockOn();
-  if(!lockOn()){ away = null; $("lockOv").hidden = true; }
-  fsGate();
+  if(!lockOn()){ away = null; $("lockOv").hidden = true; splitAway = false; }
+  fsGate(); setTimeout(splitCheck, 0);
 }
 /* 집중 모드의 학생 화면은 전체 화면으로만 — 전체 화면을 나가면 가리고, 나가 있던 시간을 기록 */
-let fsWas = false, fsAuto = false;
-const fsNeed = () => lockOn() && typeof fsOk !== "undefined" && fsOk;
+let fsWas = false, fsAuto = false, splitAway = false;
+/* 사파리(아이폰·아이패드의 모든 브라우저, 맥 사파리)는 전체 화면에서 키보드 입력을 막아요 → 전체 화면을 강제하지 않음 */
+const UA = navigator.userAgent;
+const appleWebKit = /iPad|iPhone|iPod/.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  || (/Safari/.test(UA) && /AppleWebKit/.test(UA) && !/Chrome|Chromium|CriOS|FxiOS|EdgiOS|Edg\/|OPR|Android|SamsungBrowser/.test(UA));
+const fsNeed = () => lockOn() && typeof fsOk !== "undefined" && fsOk && !appleWebKit;
+/* 태블릿 화면 분할 알아채기: 앱 창이 화면 폭보다 많이 좁아지면 분할로 봄 (전체 화면을 강제하지 않는 기기용) */
+function splitNow(){
+  if(!matchMedia("(pointer:coarse)").matches || Math.min(screen.width, screen.height) < 600) return false;
+  const full = innerWidth > innerHeight ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+  return innerWidth < full * 0.85;
+}
+function splitCheck(){
+  if(!lockOn() || fsNeed()){ if(splitAway){ splitAway = false; fsGate(); } return; }
+  const sp = splitNow();
+  if(sp && !splitAway){ splitAway = true; startAway(true); fsGate(); }
+  else if(!sp && splitAway){ splitAway = false; endAway(); fsGate(); }
+}
+addEventListener("resize", () => setTimeout(splitCheck, 300));
 function fsGate(){
   const g = $("fsGate"); if(!g) return;
+  if(splitAway && lockOn()){ g.hidden = false; $("fsGo").hidden = true;
+    $("fsMsg").textContent = "화면 분할을 쓰고 있어요. 화면 분할을 끄고 이 앱을 크게 쓰면 다시 보여요. 그동안의 시간은 선생님께 기록돼요."; return; }
+  $("fsGo").hidden = false;
   if(!fsNeed()){ g.hidden = true;
     if(fsAuto && me && !me.teacher && fsEl()){ fsAuto = false; try{ (document.exitFullscreen || document.webkitExitFullscreen).call(document); }catch(e){} }
     return; }
@@ -2904,10 +2924,10 @@ const leaveRetry = [];
 setInterval(() => { if(!leaveRetry.length || !me) return; const r = leaveRetry.shift(); api(r).catch(() => leaveRetry.push(r)); }, 15000);
 document.addEventListener("visibilitychange", () => {
   if(document.hidden) startAway();
-  else { poll(); if(document.hasFocus() && !(fsNeed() && fsWas && !fsEl())) endAway(); }
+  else { poll(); if(document.hasFocus() && !splitAway && !(fsNeed() && fsWas && !fsEl())) endAway(); }
 });
 window.addEventListener("blur", () => { if($("modal").hidden) startAway(); });
-window.addEventListener("focus", () => { if(!document.hidden && !(fsNeed() && fsWas && !fsEl())) endAway(); });
+window.addEventListener("focus", () => { if(!document.hidden && !splitAway && !(fsNeed() && fsWas && !fsEl())) endAway(); });
 window.addEventListener("pagehide", () => {
   if(!away || !me) return;
   const end = new Date(), sec = Math.round((end - away.start) / 1000);
