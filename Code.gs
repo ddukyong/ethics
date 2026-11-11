@@ -13,9 +13,9 @@ const MOUMS = 8;                              // 모둠 수 (index.html의 MOUMS
 const SHEET_ID = "";                          // 스프레드시트에 붙은 스크립트면 비워 둠
 /* ============================ */
 
-const STEP_IDS = ["1-1", "1-2", "1-3", "2-1", "2-2", "2-3", "3-1", "3-2", "3-3", "4-1", "4-2", "4-3", "5-1", "5-2", "5-3", "6-1", "6-2"];
+const STEP_IDS = ["0-1", "1-1", "1-2", "1-3", "2-1", "2-2", "2-3", "3-1", "3-2", "3-3", "4-1", "4-2", "4-3", "5-1", "5-2", "5-3", "6-1", "6-2"];
 const DEADLINE = new Date("2026-12-20T23:59:59+09:00"); // 자기주도 탐구(5·6차시) 마감
-const STEP_NAME = { "1-1":"질문 쏟아내기", "1-2":"비슷한 것끼리 묶기", "1-3":"후보 탐구 질문 추리기", "2-1":"후보 질문 정교화하기", "2-2":"최종 탐구 질문 정하기",
+const STEP_NAME = { "0-1":"질문 쏟아내기 연습", "1-1":"질문 쏟아내기", "1-2":"비슷한 것끼리 묶기", "1-3":"후보 탐구 질문 추리기", "2-1":"후보 질문 정교화하기", "2-2":"최종 탐구 질문 정하기",
   "2-3":"하위 질문·조사 계획", "3-1":"하위 질문 자료 조사", "3-2":"조사 내용 공유·보완", "3-3":"답변 작성", "4-1":"발표 준비", "4-2":"발표와 댓글",
   "4-3":"배움 정리", "5-1":"새 사례 찾고 질문 쏟아내기", "5-2":"나의 탐구 질문 정하기", "5-3":"하위 질문·탐구 계획", "6-1":"자료 조사 기록", "6-2":"정책 제안서" };
 const CACHE_SEC = 21600; // 6시간
@@ -57,7 +57,7 @@ function handle_(p){
     }
     if(!moumOk(moum)) throw new Error(teacher ? "볼 모둠을 골라 주세요." : "처음 들어올 때는 모둠을 골라 주세요.");
     if(!teacher) joinMoum_(code, moum, oldMoum, uid);
-    return { ok:true, uid, moum, state:load_(code, moum), p:pp, cls:getCls_(code) };
+    return { ok:true, uid, moum, state:load_(code, moum), p:pp, cls:getCls_(code), now:Date.now() };
   }
 
   const moum = String(p.moum || "");
@@ -67,7 +67,7 @@ function handle_(p){
     case "state": {
       const st = load_(code, moum);
       const pp = teacher ? null : loadP_(code, uid);
-      return { ok:true, state:(p.v === st.v ? null : st), p:(!pp || p.pv === pp.v ? null : pp), cls:getCls_(code) };
+      return { ok:true, state:(p.v === st.v ? null : st), p:(!pp || p.pv === pp.v ? null : pp), cls:getCls_(code), now:Date.now() };
     }
     case "op": {
       const op = p.op || {};
@@ -172,9 +172,50 @@ function handle_(p){
       }
       return { ok:true, cmts:st.cmts };
     }
+    /* ===== 질문 쏟아내기 연습: 1분 타이머와 순위 ===== */
+    case "warmStart": {
+      checkTeacher_(p.key);
+      const lock = LockService.getScriptLock();
+      lock.waitLock(20000);
+      try{
+        const c = getCls_(code), w = c.warm || { game:0 };
+        const r = Math.min(3, Math.max(1, +p.round || 1));
+        const game = p.newGame || !w.game ? (w.game || 0) + 1 : w.game;
+        c.warm = { game, round:r, start:p.reset ? 0 : Date.now() + 3000, sec:60 };
+        putCls_(code, c);
+        return { ok:true, cls:c, now:Date.now() };
+      } finally { lock.releaseLock(); }
+    }
+    case "warm": {
+      if(teacher) throw new Error("선생님 화면에서는 질문을 올릴 수 없어요.");
+      const w = getCls_(code).warm, now = Date.now();
+      if(!w || now < w.start - 1000 || now > w.start + w.sec * 1000 + 2500) throw new Error("지금은 질문을 올리는 시간이 아니에요.");
+      const text = String(p.text || "").trim().slice(0, 200);
+      if(text.length < 2) throw new Error("질문을 써 주세요.");
+      const lock = LockService.getScriptLock();
+      lock.waitLock(20000);
+      let counts;
+      try{
+        counts = warmCounts_(code, w.game, w.round);
+        const me_ = counts[uid] = counts[uid] || { name, moum, n:0, last:[] };
+        if(me_.last.indexOf(text) >= 0) return { ok:true, n:me_.n, dup:true };
+        me_.n++; me_.last = me_.last.concat(text).slice(-50); me_.moum = moum;
+        CacheService.getScriptCache().put("warmc:" + code + ":" + w.game + ":" + w.round, JSON.stringify(counts), CACHE_SEC);
+      } finally { lock.releaseLock(); }
+      try{ sheet_("질문연습", ["시각", "반", "게임", "라운드", "모둠", "학번", "이름", "질문"]).appendRow([new Date(), cls.name, w.game, w.round, moum, sid, name, text]); }catch(err){ console.error(err); }
+      return { ok:true, n:counts[uid].n };
+    }
+    case "warmRank": {
+      const w = getCls_(code).warm;
+      if(!w) return { ok:true, game:0, round:0, rank:[], total:[] };
+      const list = cs => Object.keys(cs).map(u => ({ uid:u, name:cs[u].name, moum:cs[u].moum, n:cs[u].n })).sort((a, b) => b.n - a.n);
+      const per = [1, 2, 3].map(r => warmCounts_(code, w.game, r)), sum = {};
+      per.forEach(cs => Object.keys(cs).forEach(u => { const x = sum[u] = sum[u] || { name:cs[u].name, moum:cs[u].moum, n:0 }; x.n += cs[u].n; }));
+      return { ok:true, game:w.game, round:w.round, rank:list(per[w.round - 1]), total:list(sum) };
+    }
     case "teacher": {
       checkTeacher_(p.key);
-      return { ok:true, cls:getCls_(code) };
+      return { ok:true, cls:getCls_(code), now:Date.now() };
     }
     case "cls": {
       checkTeacher_(p.key);
@@ -190,7 +231,7 @@ function handle_(p){
         c.seq = (c.seq || 0) + 1;
         c.at = Date.now();
         putCls_(code, c);
-        return { ok:true, cls:c };
+        return { ok:true, cls:c, now:Date.now() };
       } finally { lock.releaseLock(); }
     }
   }
@@ -213,6 +254,22 @@ function joinMoum_(code, moum, oldMoum, uid){
   } finally { lock.releaseLock(); }
 }
 function moumOk_(m){ return /^\d+$/.test(String(m)) && +m >= 1 && +m <= MOUMS; }
+
+/* 연습 회차별 질문 수 — 캐시에 없으면 ‘질문연습’ 시트에서 다시 셈 */
+function warmCounts_(code, game, round){
+  const hit = CacheService.getScriptCache().get("warmc:" + code + ":" + game + ":" + round);
+  if(hit){ try{ return JSON.parse(hit); }catch(e){} }
+  const counts = {}, cls = findClass_(code), sh = book_().getSheetByName("질문연습");
+  if(sh && sh.getLastRow() >= 2){
+    sh.getRange(2, 1, sh.getLastRow() - 1, 8).getValues().forEach(r => {
+      if(String(r[1]) !== cls.name || String(r[2]) !== String(game) || String(r[3]) !== String(round)) return;
+      const u = String(r[5]) + " " + String(r[6]);
+      const c = counts[u] = counts[u] || { name:String(r[6]), moum:String(r[4]), n:0, last:[] };
+      c.n++; c.last.push(String(r[7]));
+    });
+  }
+  return counts;
+}
 
 function checkTeacher_(key){
   const real = PropertiesService.getScriptProperties().getProperty("TEACHER_KEY") || TEACHER_KEY;

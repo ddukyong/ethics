@@ -154,7 +154,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .follow{margin-top:12px;padding:8px 14px;border-radius:10px;background:var(--soft);font-size:14px}
 
 /* 차시·활동 탭 */
-.lessons{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:16px}
+.lessons{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
 .lessons button{border:1.5px solid var(--hair);background:var(--paper);padding:8px 6px;line-height:1.25;font-size:15px;text-align:center}
 .lessons button small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
 .slots{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap}
@@ -162,6 +162,23 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .slot{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);font-size:16px;padding:0;line-height:1}
 .slot.on{background:var(--ink);color:var(--paper)}
 .slot:disabled{opacity:.3;border-style:dashed}
+.warm{margin-top:16px;padding:18px;border:2px solid var(--ink);border-radius:16px;text-align:center;background:var(--paper)}
+.wtimer{font-family:"Black Han Sans",sans-serif;font-size:72px;line-height:1.1;letter-spacing:.02em}
+.wtimer.big{font-size:min(28vw,180px)}
+.wstate{font-family:"Black Han Sans",sans-serif;font-size:34px;line-height:1.2}
+.wstate.run{color:var(--q)} .wstate.end{color:var(--ok)}
+.wtimer.run{color:var(--ink)} .wtimer.hurry{color:var(--q)} .wtimer.end{color:var(--ok)}
+.wcount{font-size:18px;margin:10px 0 0}
+.wround{display:inline-block;padding:2px 12px;border-radius:20px;background:var(--ink);color:var(--paper);font-weight:700;font-size:14px;margin-bottom:6px}
+.wranks{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:600px){ .wranks{grid-template-columns:1fr} }
+.wcount b{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:30px}
+.wrank{list-style:none;margin:6px 0 0;padding:0}
+.wrank li{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--hair);font-size:16px}
+.wrank li:nth-child(1) .rk{background:#FFD02B}.wrank li:nth-child(2) .rk{background:#D9D9D9}.wrank li:nth-child(3) .rk{background:#E8B98A}
+.wrank .rk{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:2px solid var(--ink);color:#16150F;background:var(--paper)}
+.wrank .nm{flex:1} .wrank .nm small{color:var(--muted)}
+.wrank li.me{background:var(--soft);border-radius:8px}
 .credit{text-align:center;font-size:13px;color:var(--muted);padding:18px 16px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--hair);margin-top:24px}
 .credit a{color:inherit;text-underline-offset:3px}
 .kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
@@ -360,7 +377,7 @@ details.box summary{cursor:pointer;font-weight:700}
 #toast.info{background:#16150F;color:var(--yellow)}
 
 @media (max-width:860px){ .landing{grid-template-columns:1fr;gap:32px;padding:32px 18px} .landing h1{font-size:34px} #join{align-items:flex-start} }
-@media (max-width:600px){ .lessons{grid-template-columns:repeat(3,1fr)} .row2,.steps2{grid-template-columns:1fr} .ex-pair{grid-template-columns:1fr} .ex-pair i{display:none} .shell{padding:0 12px 120px} #work > section{padding:0 14px 20px} .acthead{margin:0 -14px 14px;padding:12px 14px} }
+@media (max-width:600px){ .lessons{grid-template-columns:repeat(4,1fr)} .row2,.steps2{grid-template-columns:1fr} .ex-pair{grid-template-columns:1fr} .ex-pair i{display:none} .shell{padding:0 12px 120px} #work > section{padding:0 14px 20px} .acthead{margin:0 -14px 14px;padding:12px 14px} }
 </style>
 </head>
 <body>
@@ -456,6 +473,14 @@ details.box summary{cursor:pointer;font-weight:700}
               <p style="margin-top:0">· AI를 썼다면 조사 칸 아래 'AI 활용 표시'에 어디에 썼는지 한 줄 남기기</p></section>
             <section class="src"><h4><span class="lbl">⑤</span>다 쓰기 전 스스로 점검</h4>
               <p>· 질문과 답의 연결: 내가 맡은 하위 질문에 정확히 답했는가?<br>· 자료의 적절성: 출처가 믿을 만하고, 비교 기준이 같은가?<br>· 설명의 충분성: 개인 사정이 아니라 지역의 구조적 조건을 드러냈는가?</p></section>
+          </div>
+
+          <div class="doc" data-doc="w0">
+            <p class="doc-title">사진을 보고 질문 쏟아내기</p>
+            <p class="doctip">사진을 누르면 크게 볼 수 있어요. 어떤 사진이든, 무엇이든 궁금한 것을 물어보기</p>
+            <section class="src"><h4><span class="lbl">1</span>벽난로 앞의 강아지</h4><img class="map" src="warm1.jpg" alt="벽난로 앞에서 강아지를 찍는 사람"></section>
+            <section class="src"><h4><span class="lbl">2</span>도심을 달리는 사람들</h4><img class="map" src="warm2.jpg" alt="도심 도로를 가득 메운 달리기 참가자들"></section>
+            <section class="src"><h4><span class="lbl">3</span>영화관의 캐릭터 인형들</h4><img class="map" src="warm3.jpg" alt="영화관 무대 위 캐릭터 인형 탈"></section>
           </div>
 
           <div class="doc" data-doc="d1">
@@ -790,6 +815,7 @@ function applyOp(st, op){
 
 /* ===== 차시와 활동 ===== */
 const LESSON = {
+  0:{ stage:"워밍업", title:"질문 쏟아내기 연습", docs:["w0"] },
   1:{ stage:"질문 생성하기", title:"응급의료 취약지 사례에서 탐구 질문 찾기", docs:["d1"] },
   2:{ stage:"질문으로 학습 설계하기", title:"공간 불평등 개념으로 질문 다듬고 탐구 설계하기", docs:["d2","d1"] },
   3:{ stage:"질문에 답 찾기", title:"자료 조사로 탐구 질문에 답하기", docs:["d8","d3","d2","d1"] },
@@ -797,9 +823,10 @@ const LESSON = {
   5:{ stage:"자기주도 탐구 · 질문 생성하기 · 학습 설계하기", title:"내 진로 분야에서 탐구 계획 세우기", docs:["d6","d9"] },
   6:{ stage:"자기주도 탐구 · 질문에 답 찾기 · 내 말로 종합하기", title:"조사하고 공간 불평등 완화 정책 제안서 쓰기", docs:["d7","d9","d5","d6"] },
 };
-const DOCNAME = { d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드", t51:"탐구 꿀팁", t52:"탐구 꿀팁", t53:"탐구 꿀팁", t62:"탐구 꿀팁", help:"도움 자료", d10:"우리 모둠 질문" };
+const DOCNAME = { w0:"연습 사진", d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드", t51:"탐구 꿀팁", t52:"탐구 꿀팁", t53:"탐구 꿀팁", t62:"탐구 꿀팁", help:"도움 자료", d10:"우리 모둠 질문" };
 const STEP_DOCS = { "5-1":["t51","d6"], "5-2":["t52","d9"], "5-3":["help"], "2-3":["d10","d2","d1"], "6-1":["d8","d7"], "6-2":["t62","d7","d5"] };
 const STEPS = {
+  "0-1":{ label:"1분 질문 쏟아내기", who:"개인", q:"사진을 보고 1분 동안 쉴 새 없이 질문을 쏟아내 보자." },
   "1-1":{ label:"질문 쏟아내기", who:"개인", q:"자료 (1)을 읽으며 떠오른 질문을 자유롭게 적어 보자." },
   "1-2":{ label:"비슷한 것끼리 묶기", who:"모둠", q:"모둠원의 질문을 모두 펼쳐 놓고, 비슷한 질문끼리 묶어 보자." },
   "1-3":{ label:"후보 탐구 질문 추리기", who:"모둠", q:"우리 모둠이 가장 답을 찾아보고 싶은 후보 탐구 질문을 2~3개로 추려 보자." },
@@ -835,16 +862,19 @@ const hasQ = t => /[?？]\s*$/.test(t);
 const OPENW = /(왜|어떻게|어떤|무엇|무슨|누가|누구|어디|얼마나|까닭|이유|영향|관계|관련)/;
 const dn = n => { const m = String(n || "").match(/^\d+\s+(.+)$/); return m ? m[1] : String(n || ""); };
 
-let me = null, S = null, P = null, CLS = null, step = "1-1", lastStep = {}, docSel = {};
+let me = null, S = null, P = null, CLS = null, step = "0-1", lastStep = {}, docSel = {};
 let selected = new Set(), queue = [], busy = false, hintShown = false, clsSeen = null;
 let pendSrc = [], pendQuote = "", docOpen = matchMedia("(min-width:960px)").matches;
 try{ me = JSON.parse(localStorage.getItem(LS)); }catch(e){}
 
+let skew = 0;
+const srvNow = () => Date.now() + skew;
 async function api(payload){
   const res = await fetch(API_URL, { method:"POST", body: JSON.stringify({ classCode:me.code, moum:me.moum, sid:me.sid, name:me.name, key:me.key || "", ...payload }) });
   if(!res.ok) throw new Error("서버 응답 오류 (" + res.status + ")");
   const d = await res.json();
   if(!d.ok) throw new Error(d.error || "알 수 없는 오류");
+  if(d.now) skew = d.now - Date.now();
   return d;
 }
 function toast(msg, info){ const t = $("toast"); t.textContent = msg; t.className = info ? "info" : ""; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3800); }
@@ -1061,7 +1091,7 @@ function setStep(s, byUser){
 }
 function drawNav(){
   const l = lessonOf(step);
-  $("lessonNav").innerHTML = [1,2,3,4,5,6].map(n => `<button role="tab" data-l="${n}" aria-selected="${n === l}">${closed56(n + "-1") ? "🔒 " : ""}${n}차시${CLS && CLS.step && lessonOf(CLS.step) === n ? '<span class="badge">선생님</span>' : ""}<small>${LESSON[n].stage.split(" · ")[0]}</small></button>`).join("");
+  $("lessonNav").innerHTML = [0,1,2,3,4,5,6].map(n => `<button role="tab" data-l="${n}" aria-selected="${n === l}">${closed56(n + "-1") ? "🔒 " : ""}${n ? n + "차시" : "연습"}${CLS && CLS.step && lessonOf(CLS.step) === n ? '<span class="badge">선생님</span>' : ""}<small>${LESSON[n].stage.split(" · ")[0]}</small></button>`).join("");
   $("stepNav").innerHTML = Object.entries(STEPS).filter(([k]) => lessonOf(k) === l).map(([k, v]) =>
     `<button role="tab" data-go="${k}" aria-selected="${k === step}">활동 ${k.split("-")[1]}${CLS && CLS.step === k ? '<span class="badge">선생님</span>' : ""}<small>${v.label}</small></button>`).join("");
 }
@@ -1073,7 +1103,7 @@ function drawDocTabs(){
 $("docTabs").addEventListener("click", e => { const b = e.target.closest("[data-doc]"); if(!b) return; docSel[STEP_DOCS[step] ? step : lessonOf(step)] = b.dataset.doc; drawDocTabs(); });
 /* 좁은 화면에서는 자료를 활동 안내 바로 아래(SLOT)에 넣어 ‘안내 → 자료 → 쓰기’ 순서로 보이게 함 */
 const narrow = () => matchMedia("(max-width:959px)").matches;
-const READ = new Set(["1-1", "2-1", "3-1", "4-1", "5-1"]);
+const READ = new Set(["0-1", "1-1", "2-1", "3-1", "4-1", "5-1"]);
 const docUser = {};
 const docIsOpen = () => step in docUser ? docUser[step] : (narrow() ? READ.has(step) : docOpen);
 function drawDoc(){ const o = docIsOpen(); $("split").classList.toggle("nodoc", !o); $("docToggle").textContent = o ? "접기" : "펼치기"; }
@@ -1161,6 +1191,84 @@ async function endPreview(){
 }
 
 const VIEWS = {};
+/* ----- 연습: 1분 질문 쏟아내기 (라운드 1~3, 총합 순위) ----- */
+let WM = { key:"", mine:[], n:0 }, WR = null, warmBusy = false;
+const warmState = () => { const w = CLS && CLS.warm; if(!w || !w.game) return { phase:"wait" }; const t = srvNow();
+  if(!w.start) return { phase:"wait", w };
+  if(t < w.start) return { phase:"ready", left:Math.ceil((w.start - t) / 1000), w };
+  if(t < w.start + w.sec * 1000) return { phase:"run", left:Math.ceil((w.start + w.sec * 1000 - t) / 1000), w };
+  return { phase:"end", w }; };
+const mmss2 = n => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
+const rankList = (list, max) => `<ol class="wrank">${list.slice(0, max).map((r, i) => `<li class="${r.uid === me.uid ? "me" : ""}"><span class="rk">${i + 1}</span><span class="nm">${esc(r.name)} <small>${esc(r.moum)}모둠</small></span><b>${r.n}개</b></li>`).join("") || '<p class="empty">아직 올라온 질문이 없어요</p>'}</ol>`;
+VIEWS["0-1"] = () => {
+  const ws = warmState(), w = ws.w, T = me.teacher || me.preview, key = w ? `${w.game}-${w.round}` : "";
+  if(key !== WM.key) WM = { key, mine:[], n:0 };
+  const timer = ws.phase === "wait" ? "1:00" : ws.phase === "ready" ? `${ws.left}…` : ws.phase === "run" ? mmss2(ws.left) : "끝!";
+  const R1 = w && w.round ? w.round : 0, rk = WR && w && WR.game === w.game ? WR : null, last = R1 === 3 && ws.phase === "end";
+  const myTotal = rk ? (rk.total.find(x => x.uid === me.uid) || { n:0 }).n : 0;
+  return `<div class="box"><span class="tag">이렇게 해요</span>
+      <ol><li>라운드마다 <b>사진 한 장</b>을 보고 떠오르는 것은 무엇이든 질문으로 쓰기 — 바보 같은 질문은 없어요</li><li>한 줄 쓰고 <b>Enter</b>, 바로 다음 질문! 맞춤법·좋은 질문인지는 신경 쓰지 않기</li><li>라운드 1·2·3 각 <b>1분</b> — 세 라운드 <b>총합</b>이 가장 많은 사람에게 상품! 🎁</li></ol></div>
+    ${SLOT}
+    <div class="warm"><div class="wround">${R1 ? `라운드 ${R1} / 3 · 사진 ${R1}` : "라운드 1 · 사진 1부터"}</div>
+      ${me.teacher ? `<div class="wtimer big ${ws.phase}" id="wTimer">${timer}</div>` : `<div class="wstate ${ws.phase}">${ws.phase === "wait" ? "준비" : ws.phase === "ready" ? "곧 시작!" : ws.phase === "run" ? "지금 쏟아내기!" : "끝!"}</div>`}
+      <p class="hint" id="wMsg">${ws.phase === "wait" ? (me.teacher ? "라운드를 시작하면 3초 뒤 1분 타이머가 돌아가요. 이 화면을 크게 띄워 주세요." : "선생님이 시작하면 질문을 쓸 수 있어요") : ws.phase === "ready" ? "사진을 보며 준비하기" : ws.phase === "run" ? (me.teacher ? "학생들이 질문을 쏟아내는 중" : "타이머는 앞 화면을 보세요") : last ? "세 라운드 끝! 총합 순위를 확인해요" : "이번 라운드 끝! 다음 라운드를 기다려요"}</p>
+      ${me.teacher ? `<div class="acts" style="justify-content:center">${[1,2,3].map(r => `<button class="${r === (ws.phase === "end" || ws.phase === "wait" ? Math.min(3, R1 + (ws.phase === "end" ? 1 : 0) || 1) : 0) ? "primary y" : "ghost"}" style="width:auto;margin:0;padding:8px 16px" data-act="warmStart" data-id="${r}" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>라운드 ${r} 시작</button>`).join("")}</div>
+          <div class="acts" style="justify-content:center"><button class="ghost" data-act="warmMusic">${musicOn ? "🔊 음악 켜짐" : "🔇 음악 꺼짐"}</button><button class="ghost" data-act="warmRank">순위 새로 고침</button><button class="ghost" data-act="warmNew" ${ws.phase === "run" || ws.phase === "ready" ? "disabled" : ""}>새 게임 (점수 0부터)</button></div>`
+        : T ? "" : `<div class="fbin" style="margin-top:12px"><input type="text" id="wIn" data-k="wIn" maxlength="200" placeholder="${ws.phase === "run" ? "질문 쓰고 Enter" : "시작하면 여기에 써요"}" ${ws.phase === "run" ? "" : "disabled"}><button class="primary" style="width:auto;margin:0;padding:8px 18px" data-act="warmAdd" ${ws.phase === "run" ? "" : "disabled"}>올리기</button></div>
+          <p class="wcount">이번 라운드 <b>${WM.n}</b>개${rk ? ` · 총합 <b>${Math.max(myTotal, 0)}</b>개` : ""}</p>`}
+    </div>
+    ${rk && ws.phase !== "run" && ws.phase !== "ready" ? `<div class="wranks"><div><h2>${last ? "🏆 총합 순위" : "총합 순위"}</h2>${rankList(rk.total, me.teacher ? 50 : 10)}</div><div><h2>라운드 ${rk.round} 순위</h2>${rankList(rk.rank, me.teacher ? 50 : 5)}</div></div>` : ws.phase === "end" ? '<p class="hint">순위를 불러오는 중…</p>' : ""}
+    ${WM.mine.length ? `<h2>이번 라운드에 쏟아낸 질문</h2><ul class="mine">${WM.mine.slice().reverse().map(t => `<li><span>${esc(t)}</span></li>`).join("")}</ul>` : ""}`;
+};
+async function warmAdd(){
+  const el = $("wIn"); if(!el) return; const text = el.value.trim(); if(text.length < 2) return;
+  if(warmState().phase !== "run") return toast("지금은 질문을 올리는 시간이 아니에요");
+  el.value = ""; el.focus(); WM.mine.push(text);
+  try{ const d = await api({ action:"warm", text }); WM.n = d.n; if(d.dup){ WM.mine.pop(); toast("같은 질문은 한 번만 세요"); } }
+  catch(err){ WM.mine.pop(); toast(err.message); }
+  later();
+}
+async function warmRank(){
+  if(warmBusy) return; warmBusy = true;
+  try{ WR = await api({ action:"warmRank" }); const mine = WR.rank.find(r => r.uid === me.uid); if(mine) WM.n = mine.n; }catch(err){ toast(err.message); }
+  warmBusy = false; later();
+}
+/* 긴박감 음악 — 음원 파일 없이 브라우저에서 직접 만든 소리 (선생님 화면만) */
+let AC = null, musicOn = true, musicTimer = null;
+function acx(){ try{ AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if(AC.state === "suspended") AC.resume(); }catch(e){ AC = null; } return AC; }
+function tone(freq, dur, type, vol, when){ const a = acx(); if(!a) return; const t = when || a.currentTime, o = a.createOscillator(), g = a.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(freq, t); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02); }
+function kick(t){ const a = acx(); if(!a) return; const o = a.createOscillator(), g = a.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.15);
+  g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22); o.connect(g).connect(a.destination); o.start(t); o.stop(t + 0.25); }
+function startMusic(w){
+  stopMusic(); if(!musicOn || !acx()) return;
+  const end = w.start + w.sec * 1000; let beat = 0, next = AC.currentTime + 0.05;
+  musicTimer = setInterval(() => {
+    const left = (end - srvNow()) / 1000; if(left <= 0){ stopMusic(); tone(220, 0.9, "sawtooth", 0.18); tone(330, 0.9, "square", 0.08); return; }
+    const spb = left <= 10 ? 0.25 : left <= 30 ? 0.36 : 0.45;
+    while(next < AC.currentTime + 0.2){
+      if(beat % 2 === 0) kick(next);
+      tone(beat % 2 ? 2400 : 1800, 0.03, "square", 0.04, next);
+      if(beat % 4 === 2) tone(left <= 10 ? 880 : 440, 0.12, "triangle", 0.07, next);
+      next += spb / 2; beat++;
+    }
+  }, 50);
+}
+function stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer = null; } }
+/* 타이머 화면을 0.25초마다 갱신, 시작 전·끝난 뒤에는 1초마다 서버 확인 */
+let wLastPhase = "", wTick = 0;
+setInterval(() => {
+  if(!me || !S || step !== "0-1"){ stopMusic(); return; }
+  const ws = warmState(), tm = $("wTimer"), ph = ws.phase + (ws.w ? ws.w.game + "-" + ws.w.round : "");
+  if(ph !== wLastPhase){ const prev = wLastPhase; wLastPhase = ph; render();
+    if(ws.phase === "run"){ if($("wIn")) $("wIn").focus(); if(me.teacher) startMusic(ws.w); }
+    if(ws.phase === "end"){ stopMusic(); if(prev) setTimeout(warmRank, 1500); }
+    return; }
+  if(tm){ tm.textContent = ws.phase === "ready" ? `${ws.left}…` : ws.phase === "run" ? mmss2(ws.left) : tm.textContent; tm.classList.toggle("hurry", ws.phase === "run" && ws.left <= 10); }
+  if(me.teacher && ws.phase === "ready" && musicOn){ const k = "c" + ws.left; if(warmState.beep !== k){ warmState.beep = k; tone(660, 0.15, "square", 0.1); } }
+  if(++wTick % 4 === 0 && ws.phase !== "run" && !busy && !queue.length && !document.hidden) poll();
+}, 250);
 /* ----- 1-1 질문 쏟아내기 ----- */
 VIEWS["1-1"] = () => {
   const mine = S.cards.filter(c => c.name === me.uid);
@@ -1652,6 +1760,8 @@ function renderDocs(){
     ["c","삶에 미치는 영향","사례·인터뷰·설문","지역 언론 보도, 설문 조사 결과 (개인 사례는 통계와 짝지어 쓰기)"]];
   $("tipWhere").innerHTML = '<p class="hint" style="margin:0">내 하위 질문이 무엇을 묻는지에 따라 골라 보기</p>' + WHERE.map(([k, n, kind, where]) => `<div class="where"><b>· ${n}</b> → ${kind}<br>→ ${where}</div>`).join("");
   drawHelp();
+  { const w = CLS && CLS.warm, r = w && w.game && w.round ? w.round : 0;
+    document.querySelectorAll('[data-doc="w0"] .src').forEach((x, i) => { x.hidden = !!r && i !== r - 1; }); }
   if(step === "2-3" && $("ourQs")){
     const D = S.done2, keys = KS();
     const row = t => !t || !t.trim() ? "" : `<div class="pickq" style="margin:4px 0"><span>${esc(t)}</span>${D || me.teacher || me.preview ? "" : `<span class="slots">${keys.map(([k, n]) => `<button class="slot" data-act="toSub" data-g="${k}" data-w="${esc(t)}" title="하위 질문 ${n} 칸에 넣기">${n}</button>`).join("")}</span>`}</div>`;
@@ -1688,8 +1798,14 @@ document.addEventListener("click", async e => {
     drawPend(); return; }
   const b = e.target.closest("[data-act]"); if(!b || !S) return;
   const { act, id, g } = b.dataset;
-  if(me.preview && !["showSrcQ","boardSel","boardRefresh","copy","copyText","pvAs","pvBack","tGo","tRep","cmtKind","zoneHelp"].includes(act)){ toast(PVMSG); return; }
+  if(me.preview && !["showSrcQ","boardSel","boardRefresh","copy","copyText","pvAs","pvBack","tGo","tRep","cmtKind","zoneHelp","warmRank"].includes(act)){ toast(PVMSG); return; }
   if(act === "pvAs"){ startPreview(id); return; }
+  if(act === "warmAdd"){ warmAdd(); return; }
+  if(act === "warmRank"){ warmRank(); return; }
+  if(act === "warmStart"){ acx(); try{ const d = await api({ action:"warmStart", round:+id }); CLS = d.cls; render(); }catch(err){ toast(err.message); } return; }
+  if(act === "warmNew"){ if(!(await ask("새 게임을 시작할까요? 라운드 1부터 다시 세고, 총합도 0부터 시작해요."))) return;
+    try{ const d = await api({ action:"warmStart", round:1, newGame:true, reset:true }); CLS = d.cls; WR = null; render(); }catch(err){ toast(err.message); } return; }
+  if(act === "warmMusic"){ musicOn = !musicOn; if(!musicOn) stopMusic(); else { acx(); const ws = warmState(); if(ws.phase === "run") startMusic(ws.w); } render(); return; }
   if(act === "zoneHelp"){ e.preventDefault(); const z = +id; inlineHelp.has(z) ? inlineHelp.delete(z) : inlineHelp.add(z); openZones.add(z); planZone = z; render(); return; }
   if(act === "pvBack"){ endPreview(); return; }
   if(act === "tGo"){ openMoum(id); return; }
@@ -1854,6 +1970,7 @@ document.addEventListener("input", e => {
   if(d.memo){ NOTES.memos[d.memo] = el.value; saveNotes(); }
 });
 document.addEventListener("keydown", e => { if(e.target.id === "qin" && e.key === "Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); addQuestion(); }
+  if(e.target.id === "wIn" && e.key === "Enter" && !e.isComposing){ e.preventDefault(); warmAdd(); }
   if(e.target.id === "qin2" && e.key === "Enter" && !e.isComposing){ e.preventDefault(); document.querySelector('[data-act="addQ2"]').click(); } });
 
 function summary(){
