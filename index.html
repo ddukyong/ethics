@@ -712,6 +712,9 @@ details.src.tipsec .tipsec-in{padding:10px 16px 14px}
 .top #qrDock .qt small{font-size:12px}
 body.has-dock{padding-bottom:0}
 @media (max-width:600px){ .top #qrDock .qt small{display:none} }
+#verBar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;padding:8px 10px 8px 18px;border-radius:999px;background:#16150F;color:#fff;font-weight:700;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#verBar[hidden]{display:none}
+#verBar button{border:0;border-radius:999px;background:#FFD02B;color:#16150F;padding:6px 16px;font-size:15px}
 </style>
 </head>
 <body>
@@ -1080,9 +1083,16 @@ body.has-dock{padding-bottom:0}
   <div class="zwrap" id="zoomWrap"><img id="zoomImg" alt=""></div>
 </div>
 <div id="toast" hidden></div>
+<div id="verBar" hidden><span>✨ 새 버전이 나왔어요</span><button id="verGo">새로 고침</button></div>
 
 <script src="qrcode.js"></script>
 <script>
+/* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
+const APP_VER = "202611111423";
+async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
+  if(v && v !== APP_VER) document.getElementById("verBar").hidden = false; }catch(e){} }
+setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
+document.getElementById("verGo").onclick = () => { const u = new URL(location.href); u.searchParams.set("v", Date.now()); location.replace(u.toString()); };
 const API_URL = "https://script.google.com/macros/s/AKfycbzfHP_EYODLuj0xLqBrmL_kVV-Y16oSoOtVF0DpyMKRLJoc4vdjRqpWnx5KLnPnJ1s/exec";
 const MOUMS = 8;
 const LS = "qmakers-me2";
