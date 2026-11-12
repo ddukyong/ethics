@@ -1108,7 +1108,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611130159";
+const APP_VER = "202611130201";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER && typeof me !== "undefined" && me && (me.teacher || (me.back && me.back.teacher))) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -2498,7 +2498,10 @@ VIEWS["6-1"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56();
   return `${road56("6-1")}${dlNote()}${myCase()}
-    ${todo(H3.map(([i, t]) => [`하위 질문 ${t} · 조사 내용, 출처, 해석`, filled("s6r" + i + "d", "s6r" + i + "s", "s6r" + i + "i")]))}
+    ${todo([["먼저 · 공간 불평등을 내 말로 한 문장 정의", filled("s6def")]].concat(H3.map(([i, t]) => [`하위 질문 ${t} · 조사 내용, 출처, 해석`, filled("s6r" + i + "d", "s6r" + i + "s", "s6r" + i + "i")])))}
+    <div class="panel"><span class="num">조사 시작 전 — 공간 불평등, 내 말로 정의하기</span>
+      <p class="hint">교과서 문장을 옮기지 말고, 지금까지 탐구한 내 사례를 떠올리며 <b>한 문장</b>으로 · AI 없이</p>
+      ${pf("s6def", "공간 불평등이란 …", { dis:D, rows:2, max:300, hint:"이런 말이 들어가면 좋아요: 생활에 꼭 필요한 것 · 사는 곳에 따른 기회·부담의 차이 · 지역의 구조적 원인" })}</div>
     <div class="box"><span class="tag">AI 활용 약속</span>
       <ul><li><b>자료 조사</b>는 AI를 써도 돼요 (검색어·기관·용어)</li>
       <li>수치는 <b>원래 출처</b>에서 확인 · <b>AI 활용 표시</b> 쓰기</li>
@@ -2522,7 +2525,7 @@ VIEWS["6-2"] = () => {
     ${todo([["제목", filled("s6title")], ["1~4 네 칸", filled("s6a1", "s6a2", "s6a3", "s6a4")], ["채점 기준표로 스스로 점검", RUBRIC.every(r => pv(r[0]))]])}
     <p class="hint">칸마다 <b>‘앞에서 쓴 내 기록’</b>을 펼쳐 보며 문장으로 이어 쓰면 돼요 — 처음부터 새로 쓰지 않아도 돼요</p>
     <div class="panel">${pf("s6title", "제안서 제목", { line:true, max:100, dis:D })}</div>
-    <div class="panel"><span class="num">1 현상 및 문제 진단</span>${myRec([["사례", "s5title"], ["눈에 띈 사실", "s5facts"], ["출처", "s5source"], ["생활의 필요", "s5n1"], ["기회·부담의 차이", "s5n2"], ["구조적 원인", "s5n3"], ["조사 해석 ①", "s6r1i"], ["조사 해석 ②", "s6r2i"], ["조사 해석 ③", "s6r3i"]])}${pf("s6a1", "내가 조사한 공간 불평등 사례와 공간 불평등에 해당하는 이유", { dis:D, rows:8, cnt:true, max:3000, hint:"구체적인 수치·출처와 구조적 원인을 포함할 것" })}</div>
+    <div class="panel"><span class="num">1 현상 및 문제 진단</span>${myRec([["공간 불평등 — 내 정의", "s6def"], ["사례", "s5title"], ["눈에 띈 사실", "s5facts"], ["출처", "s5source"], ["생활의 필요", "s5n1"], ["기회·부담의 차이", "s5n2"], ["구조적 원인", "s5n3"], ["조사 해석 ①", "s6r1i"], ["조사 해석 ②", "s6r2i"], ["조사 해석 ③", "s6r3i"]])}${pf("s6a1", "내가 조사한 공간 불평등 사례와 공간 불평등에 해당하는 이유", { dis:D, rows:8, cnt:true, max:3000, hint:"구체적인 수치·출처와 구조적 원인을 포함할 것" })}</div>
     <div class="panel"><span class="num">2 해결 방안 제안 ①</span>${myRec([["구조적 원인", "s5n3"], ["떠올린 제도", "s5inst"], ["원인 조사 해석", "s6r2i"]])}${pf("s6a2", "제도적(국가·지방 자치 단체) 방안과 필요한 이유", { dis:D, rows:7, cnt:true, max:3000 })}</div>
     <div class="panel"><span class="num">3 해결 방안 제안 ②</span>${myRec([["떠올린 시민 실천", "s5civic"], ["영향 조사 해석", "s6r3i"]])}${pf("s6a3", "시민으로서의 실천 방안과 필요한 이유", { dis:D, rows:7, cnt:true, max:3000 })}</div>
     <div class="panel"><span class="num">4 진로와의 연결</span>${myRec([["내 진로(관심) 분야", "s5career"], ["나의 탐구 질문", "s5myq"]])}${pf("s6a4", "이 탐구와 제안이 내 진로(관심) 분야와 어떻게 이어지는가?", { dis:D, rows:5, cnt:true, max:2000 })}</div>
@@ -2582,6 +2585,7 @@ function renderDocs(){
   $("conclDoc").innerHTML = [["Q","탐구 질문",S.fin.text],["답","탐구 질문에 대한 답변",c.answer],["근거","답변을 뒷받침하는 핵심 근거",c.evidence],["+","더 확인하고 싶은 점 / 새로 생긴 질문",c.more]]
     .map(([l, t, v]) => `<section class="src"><h4><span class="lbl">${l}</span>${t}</h4><p style="margin:0">${esc(v) || "-"}</p></section>`).join("");
   const PLAN = [["사례","내 사례",[["s5career","진로(관심) 분야"],["s5title","사례"],["s5facts","눈에 띈 사실"],["s5source","출처"]]],["확인","공간 불평등인지 확인",[["s5n1","생활의 필요"],["s5n2","기회·부담의 차이"],["s5n3","구조적 원인"]]],
+    ["정의","공간 불평등 — 내 말로 정의",[["s6def",""]]],
     ["Q","나의 탐구 질문",[["s5myq",""]]],["하위","하위 질문과 찾을 자료",H3.flatMap(([i, t]) => [["s5h" + i, t], ["s5h" + i + "s", "찾을 자료"]])],
     ["방향","해결 방향",[["s5inst","제도"],["s5civic","시민 실천"]]]];
   $("prepDoc").innerHTML = PLAN.map(([l, g, fs]) => `<section class="src"><h4><span class="lbl">${l}</span>${g}</h4>${fs.map(([f, lab]) => {
