@@ -1106,7 +1106,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611130215";
+const APP_VER = "202611130218";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER && typeof me !== "undefined" && me && (me.teacher || (me.back && me.back.teacher))) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -1221,7 +1221,7 @@ const LESSON = {
   6:{ stage:"정책 제안서 작성하기 · 자기주도 탐구", title:"정책 제안서 작성하기 — 조사하고 제안하기", docs:["d7","d9","d5","d6"] },
 };
 const DOCNAME = { w0:"연습 사진", d1:"자료 (1)", d2:"자료 (2)", d3:"보조 자료", d4:"모둠 결론", d5:"자료 (3)", d6:"진로 가이드", d7:"내 탐구 계획서", d8:"조사 꿀팁", d9:"개념 가이드", t51:"탐구 꿀팁", t52:"탐구 꿀팁", t53:"탐구 꿀팁", t62:"탐구 꿀팁", help:"도움 자료", d10:"우리 모둠 질문" };
-const STEP_DOCS = { "4-1":["d4"], "5-1":["t51","d6"], "5-2":["t52","d9"], "5-3":["help","t53","d9"], "2-3":["d10","d2","d1"], "6-1":["d8","d9","d7"], "6-2":["t62","d7","d5"] };
+const STEP_DOCS = { "4-1":["d4"], "5-1":["t51","t52","d6","d9"], "5-2":["t53","d9"], "5-3":["help","t53","d9"], "2-3":["d10","d2","d1"], "6-1":["d8","d9","d7"], "6-2":["t62","d7","d5"] };
 const STEPS = {
   "0-1":{ label:"질문 쏟아내기 연습", who:"개인", q:"사진을 보고 질문을 쏟아내 보자." },
   "1-1":{ label:"질문 쏟아내기", who:"개인", q:"자료 (1)을 읽고 떠오른 질문을 적어 보자." },
@@ -1236,8 +1236,8 @@ const STEPS = {
   "4-1":{ label:"발표 준비", who:"모둠", q:"발표 역할과 순서를 정해 보자." },
   "4-2":{ label:"발표와 댓글", who:"전체", q:"발표를 듣고 댓글을 남겨 보자." },
   "4-3":{ label:"배움 정리", who:"개인", q:"질문하고 답을 찾은 과정을 돌아보자." },
-  "5-1":{ label:"새 사례 찾고 질문 쏟아내기", who:"개인", q:"내 진로 분야의 새 사례로 질문을 쏟아내 보자." },
-  "5-2":{ label:"나의 탐구 질문 정하기", who:"개인", q:"질문 하나를 골라 나의 탐구 질문으로 다듬자." },
+  "5-1":{ label:"새 사례 찾고 탐구 질문 정하기", who:"개인", q:"내 진로 분야의 새 사례로 질문을 쏟아내고, 탐구 질문을 정하자." },
+  "5-2":{ label:"계획서 고쳐 보며 배우기", who:"개인", q:"잘못 쓴 계획서를 고쳐 보며 좋은 계획서를 배워 보자." },
   "5-3":{ label:"탐구 계획서", who:"개인", q:"주제부터 정하고, 네 구역을 채워 탐구 계획서를 제출하자." },
   "6-1":{ label:"자료 조사·심화 탐구", who:"개인", q:"하위 질문마다 자료·출처·해석을 기록하자." },
   "6-2":{ label:"정책 제안서", who:"개인", q:"조사를 바탕으로 정책 제안서를 써 보자." },
@@ -1605,7 +1605,7 @@ const pchk = (f, text, dis) => `<label class="chk"><input type="checkbox" data-p
 const todo = items => { const n = items.filter(([, ok]) => ok).length;
   return `<div class="box todo"><span class="tag">이렇게 해요</span> <b>이 화면에서 쓸 것 ${n}/${items.length}</b><ul style="list-style:none;padding-left:0;margin:6px 0 0">${items.map(([t, ok]) => `<li>${ok ? "✅" : "⬜"} ${t}</li>`).join("")}</ul></div>`; };
 const filled = (...ks) => ks.every(k => String(pv(k)).trim());
-const STEPS56 = [["5-1","5차시 새 사례 탐구 ① 사례 찾고 질문 쏟아내기"],["5-2","5차시 새 사례 탐구 ② 탐구 질문 정하기"],["5-3","5차시 새 사례 탐구 ③ 계획서 제출 (11. 20.)"],["6-1","6차시 정책 제안서 ① 자료 조사·심화 탐구"],["6-2","6차시 정책 제안서 ② 제안서 제출 (12. 20.)"]];
+const STEPS56 = [["5-1","5차시 새 사례 탐구 ① 사례 찾고 탐구 질문 정하기"],["5-2","5차시 새 사례 탐구 ② 잘못 쓴 계획서 고쳐 보기"],["5-3","5차시 새 사례 탐구 ③ 계획서 제출 (11. 20.)"],["6-1","6차시 정책 제안서 ① 자료 조사·심화 탐구"],["6-2","6차시 정책 제안서 ② 제안서 제출 (12. 20.)"]];
 const road56 = cur => `<div class="box"><span class="tag">자기주도 탐구 5단계</span><ol style="margin:6px 0 0;padding-left:22px">${STEPS56.map(([k, t]) => `<li${k === cur ? ' style="font-weight:700"' : ""}>${t}${k === cur ? " ← 지금" : ""}</li>`).join("")}</ol><small>앞에서 쓴 내용은 다음 단계에 자동으로 따라와요 — 다시 쓸 필요 없어요</small></div>`;
 const myMore = () => { const m = [S && S.concl && S.concl.more, S && S.pres && S.pres.p3, pv("s4learn")].map(x => String(x || "").trim()).filter(Boolean);
   return m.length ? `<div class="where" style="margin:4px 0"><b>우리 모둠·내가 남긴 ‘더 궁금한 점’</b>${m.map(x => `<br>· ${esc(x.length > 140 ? x.slice(0, 140) + "…" : x)}`).join("")}</div>` : ""; };
@@ -1630,7 +1630,7 @@ const PLAN_EX = () => `<details class="box" style="margin:8px 0"><summary><b>�
   <p class="ro" style="margin:8px 0 2px"><b>구역 4 · 해결 방향</b><br>제도: 우체국 공공 배송망과 이어진 마을 공동 수령함 설치비를 지원한다<br>시민 실천: 이웃끼리 공동 주문·공동 수령을 제안해 배송 부담을 줄인다</p>
   <small class="hint">수치는 반드시 기관 자료에서 찾아 출처와 함께 쓰기</small></details>`;
 const myCase = () => `<div class="qbox"><small class="hint">내 사례</small><br><b>${esc(pv("s5title")) || '<span class="empty">활동 1에서 먼저 쓰기</span>'}</b>${pv("s5career") ? ` <small class="hint">· ${esc(pv("s5career"))}</small>` : ""}
-  <br><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">활동 2에서 먼저 정하기</span>'}</b></div>`;
+  <br><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">활동 1에서 먼저 정하기</span>'}</b></div>`;
 const teacherNote = '<p class="locked">학생 개인 활동이에요. 선생님 화면에서는 쓸 수 없고, 학생이 제출한 내용은 스프레드시트에서 볼 수 있어요.</p>';
 
 /* ===== 화면 그리기 — 입력 중인 칸은 지키면서 다시 그림 ===== */
@@ -2216,7 +2216,7 @@ VIEWS["2-3"] = () => {
   return `<div class="box"><span class="tag">이렇게 해요</span>
       <ol><li><b>하위 질문</b>과 확인할 것·자료 쓰기</li><li><b>체크리스트</b>에 맞추기<ul style="margin:4px 0 0"><li><b>기여</b>: 최종 질문 해결에 도움이 되나?</li><li><b>단계</b>: 차례대로 이어지나? (현황 → 원인 → 영향)</li><li><b>조사 가능성</b>: 찾을 수 있는 자료가 있나?</li></ul></li><li><b>담당자</b> 정하기 — 모두 하나씩</li></ol></div>
     ${SLOT}
-    <div class="qbox"><small class="hint">우리 모둠 최종 탐구 질문</small><br><b>${esc(F.text) || '<span class="empty">활동 2에서 먼저 정하기</span>'}</b></div>
+    <div class="qbox"><small class="hint">우리 모둠 최종 탐구 질문</small><br><b>${esc(F.text) || '<span class="empty">활동 1에서 먼저 정하기</span>'}</b></div>
     <h2>① 하위 질문과 조사할 것</h2>
     ${KS().map(([k, t]) => { const v = S.subs[k];
       return `<div class="sub"><span class="num">하위 질문 ${t}</span>
@@ -2373,8 +2373,9 @@ const dlNote = () => pastDL() ? '<p class="locked">마감(12. 20.)이 지나 더
 VIEWS["5-1"] = () => {
   if(me.teacher) return teacherNote;
   const D = locked56();
+  const qok = !!pv("s5qsub");
   return `${road56("5-1")}${SLOT}${dlNote()}
-    ${todo([["진로(관심) 분야와 탐구할 사례", filled("s5career", "s5title")], ["눈에 띈 사실과 출처", filled("s5facts", "s5source")], ["질문 5개 이상 쏟아내기", myQs().length >= 5]])}
+    ${todo([["① 진로(관심) 분야와 탐구 주제(새 사례)", filled("s5career", "s5title")], ["① 눈에 띈 사실과 출처", filled("s5facts", "s5source")], ["② 질문 5개 이상 쏟아내기", myQs().length >= 5], ["③ 질문사다리로 다듬어 [나의 탐구 질문 확정하기]", qok]])}
     <div class="panel"><span class="num">① 탐구 주제(새 사례) 정하기</span>${topicHow()}
       ${pf("s5career", "내 진로(관심) 분야", { line:true, dis:D, hint:"예) 간호, 도시공학, 미디어, 교육" })}
       ${pf("s5title", "내 탐구 주제 — 새 사례 (한 줄)", { line:true, dis:D, hint:"예) 산간 마을 주민의 택배 이용 기회" })}
@@ -2382,24 +2383,23 @@ VIEWS["5-1"] = () => {
       ${pf("s5source", "어디서 봤나요? (기관·기사 이름, 연도)", { line:true, dis:D })}
       ${pf("s5deep", "더 깊이 알고 싶은 것 — 과학적 원리·전문 지식 (선택)", { dis:D, rows:2, hint:"예) 열섬 현상의 원리 · 미세먼지가 몸에 들어오는 과정 · 통신 전파가 산간 지역에 닿기 어려운 이유 — 하위 질문으로 이어 갈 수 있어요" })}</div>
     <div class="panel"><span class="num">② 질문 쏟아내기</span>
-      <p class="hint">3분 동안 멈추지 말고 <b>한 줄에 질문 하나씩</b> — 좋은 질문인지는 활동 2에서 따져요. 시작말을 누르면 새 줄에 들어가요.</p>
+      <p class="hint">3분 동안 멈추지 말고 <b>한 줄에 질문 하나씩</b> — 좋은 질문인지는 아래 ③에서 따져요. 시작말을 누르면 새 줄에 들어가요.</p>
       <div class="kinds">${["왜 ", "어떻게 ", "사는 곳에 따라 ", "누구에게 어떤 영향을 "].map(w => `<button class="chip" data-act="qstart" data-w="${w}" ${D ? "disabled" : ""}>${w.trim()}…?</button>`).join("")}</div>
-      ${pf("s5qs", "", { dis:D, rows:8, max:2000 })}<p class="hint">쓴 질문 ${myQs().length}개${myQs().length < 5 ? " · 5개 이상 써 보기" : " 👍"}</p></div>`;
+      ${pf("s5qs", "", { dis:D, rows:8, max:2000 })}<p class="hint">쓴 질문 ${myQs().length}개${myQs().length < 5 ? " · 5개 이상 써 보기" : " 👍"}</p></div>
+    ${ladderPart()}`;
 };
 const myQs = () => pv("s5qs").split(/\n+/).map(x => x.trim()).filter(Boolean);
 const PLEX = { s5start:"시골은 왜 택배가 늦을까?", s5c1:"시골 주민이 택배 서비스를 이용할 기회는 왜 도시보다 적을까?", s5c2:"산간 마을 주민이 생필품을 택배로 받을 기회는 왜 대도시보다 적을까?",
   s5c3:"산간 마을의 택배 배송에는 어떤 지역의 구조적 조건이 영향을 미칠까?", s5myq:"산간 마을 주민이 택배를 늦게, 더 비싸게 받는 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?" };
 const PL = [["s5start","출발 · 고른 질문",""],["s5c1","① 개념 연결하기","일상 표현을 공간 불평등 개념과 잇기 (진로 교과 개념도 좋아요)"],
   ["s5c2","② 범위와 대상 구체화하기","막연한 말을 조사할 수 있는 대상으로 좁히기"],["s5c3","③ 탐구형으로 넓히기","사실 확인을 원인·영향·관계를 묻는 질문(왜? 어떻게?)으로"],["s5myq","도착 · 나의 탐구 질문","고친 요소를 모두 모아 하나의 질문으로"]];
-VIEWS["5-2"] = () => {
-  if(me.teacher) return teacherNote;
+const ladderPart = () => {
   const ok = !!pv("s5qsub"), D = locked56() || ok, qs = myQs();
   const ready = pv("s5myq").trim().length >= 8 && [1,2,3,4].every(i => pv("s5k" + i));
-  return `${road56("5-2")}${dlNote()}${SLOT}
-    ${todo([["쏟아낸 질문 중 하나 고르기 (출발 칸)", filled("s5start")], ["질문사다리 세 칸 내려가기", filled("s5c1", "s5c2", "s5c3")], ["도착 칸에 나의 탐구 질문 쓰고 체크리스트 확인", ready], ["[나의 탐구 질문 확정하기]", ok]])}
+  return `<h2 style="margin-top:22px">③ 나의 탐구 질문 정하기 — 질문사다리</h2>
     <div class="panel"><span class="num">쏟아낸 질문 점검하고 고르기</span>
       <ul style="margin:6px 0;padding-left:20px;font-size:14px"><li>비슷한 질문은 <b>합쳐서</b> 한 문장으로</li><li>닫힌 질문은 <b>‘왜·어떻게·어떤 영향’</b>을 넣어 열린 질문으로</li><li>단순한 수치 확인보다 <b>가장 알아보고 싶은</b> 질문 하나 고르기</li></ul>
-      ${qs.length ? `<div class="kinds">${qs.map((q, i) => `<button class="chip" data-act="pickQ" data-id="${i}" ${D ? "disabled" : ""}>${esc(q)}</button>`).join("")}</div><p class="hint">누르면 출발 칸에 들어가요. 두 질문을 합치려면 하나를 고른 뒤 출발 칸에서 이어 쓰기</p>` : '<p class="empty">활동 1에서 질문을 먼저 쏟아내 보기</p>'}</div>
+      ${qs.length ? `<div class="kinds">${qs.map((q, i) => `<button class="chip" data-act="pickQ" data-id="${i}" ${D ? "disabled" : ""}>${esc(q)}</button>`).join("")}</div><p class="hint">누르면 출발 칸에 들어가요. 두 질문을 합치려면 하나를 고른 뒤 출발 칸에서 이어 쓰기</p>` : '<p class="empty">위 ②에서 질문을 먼저 쏟아내 보기</p>'}</div>
     <div class="ladder"><div class="lhead"><b>나의 질문사다리</b></div>
       ${PL.map(([f, t, h], i) => `<div class="rung${i === 0 || i === 4 ? " ends" : ""}"><label for="pf-${f}">${t}</label>${h ? `<p class="hint">${h}</p>` : ""}<p class="hint" style="margin:0 0 6px">예) ${PLEX[f]}</p>
         <textarea id="pf-${f}" data-k="pf-${f}" data-pf="${f}" data-qc="${f === "s5myq" ? "open" : ""}" maxlength="300" ${D ? "disabled" : ""}>${esc(pv(f))}</textarea>${qc("pf-" + f, pv(f), f === "s5myq" ? "open" : "")}
@@ -2409,6 +2409,34 @@ VIEWS["5-2"] = () => {
     <div class="box"><span class="tag">탐구 질문 체크리스트</span>${CHK2.map((c, i) => pchk(`s5k${i+1}`, c, D)).join("")}</div>
     ${ok ? `<div class="done"><b>나의 탐구 질문을 확정함</b> <small>${esc(pv("s5qsub"))}</small><p style="margin:6px 0 0;font-weight:700">${esc(pv("s5myq"))}</p>${locked56() ? "" : `<div class="acts"><button class="ghost" data-act="psub" data-g="s5qsub" data-id="">다시 고치기</button></div>`}</div>`
       : locked56() ? "" : `<button class="primary" data-act="psub" data-g="s5qsub" data-id="1" ${ready ? "" : "disabled"}>나의 탐구 질문 확정하기</button>${ready ? "" : '<p class="hint">도착 칸에 나의 탐구 질문을 쓰고, 체크리스트 4가지를 모두 확인하면 확정할 수 있어요.</p>'}`}`;
+};
+/* 5-2 잘못 쓴 계획서 고쳐 보기: [구역, 잘못 쓴 내용, 보기(첫째가 정답), 왜 문제인지] */
+const BADPLAN = [
+  ["탐구 주제", "택배", ["지역·대상이 없어 너무 넓다", "공간 불평등과 관계없는 주제다", "문제없다"], "주제에는 (어느 지역) (누구)의 (어떤 시설·서비스)가 들어가야 조사할 수 있어요"],
+  ["나의 탐구 질문", "시골 택배는 느린가?", ["‘예·아니요’로 끝나는 닫힌 질문이다", "질문이 너무 길다", "문제없다"], "‘왜·어떻게·어떤 영향’으로 열어야 원인과 영향을 탐구할 수 있어요"],
+  ["공간 불평등 확인 ③ 왜 그런가?", "시골 사람들이 택배 주문을 잘 안 해서", ["지역의 구조가 아니라 개인 탓으로 돌렸다", "너무 구체적이다", "문제없다"], "공간 불평등은 개인의 선택이 아니라 인구·비용·시설 같은 지역의 구조적 조건에서 원인을 찾아요"],
+  ["하위 질문", "택배는 언제 처음 생겼을까?", ["탐구 질문에 답하는 데 도움이 되지 않는다", "‘언제’로 시작해서 틀렸다", "문제없다"], "하위 질문은 탐구 질문에 답하기 위한 조각이어야 해요 — 실태·원인·영향·과학 원리처럼"],
+  ["찾을 자료", "AI에게 물어보기", ["원래 출처(기관·통계·보고서)가 아니다", "AI는 절대 쓰면 안 된다", "문제없다"], "AI는 어디서 찾을지 묻는 길잡이 — 수치는 기관·통계·보고서 같은 원래 출처에서 확인해요"],
+  ["해결 방향 (제도)", "정부가 잘 해야 한다", ["누가 무엇을 어떻게 할지 없는 막연한 구호다", "시민 실천이 아니라서 틀렸다", "문제없다"], "제도는 누가(주체) 무엇을(대상) 어떻게(방법) 할지 구체적으로, 원인과 짝지어 써요"]];
+const BAD_ORDER = [[1,0,2],[0,2,1],[2,1,0],[1,0,2],[0,1,2],[2,0,1]];
+VIEWS["5-2"] = () => {
+  if(me.teacher) return teacherNote;
+  const D = locked56(), ans = BADPLAN.map((_, i) => pv("s5z" + (i + 1))), nOk = ans.filter(a => a === "0").length, done = ans.every(Boolean);
+  return `${road56("5-2")}${dlNote()}${SLOT}
+    ${todo([["잘못 쓴 계획서에서 문제 찾기 (6곳)", done], ["두 곳 골라 고쳐 쓰기", filled("s5fix")], ["잘 쓴 계획서와 비교하고, 내 계획서에 가져갈 점 쓰기", filled("s5take")]])}
+    <div class="panel"><span class="num">① 무엇이 문제일까? — 잘못 쓴 계획서</span>
+      <p class="hint">물류·유통 분야 학생이 처음 쓴 계획서예요. 칸마다 <b>무엇이 문제인지</b> 골라 보기 — 고르면 바로 알려 줘요</p>
+      ${BADPLAN.map(([zone, bad, opts, why], i) => { const a = ans[i];
+        return `<div class="sub"><span class="num">${i + 1}. ${zone}</span><p class="ro" style="margin:4px 0 8px;font-size:16px">“${bad}”</p>
+          <div class="kinds">${BAD_ORDER[i].map(k => `<button class="chip" data-act="badPick" data-g="s5z${i + 1}" data-id="${k}" ${D ? "disabled" : ""} style="${a === String(k) ? (k === 0 ? "background:#d3f9d8;border-color:#2b8a3e" : "background:#ffe3e3;border-color:#e03131") : ""}">${opts[k]}</button>`).join("")}</div>
+          ${a === "0" ? `<p class="hint" style="margin:6px 0 0">✅ 맞아요. ${why}</p>` : a ? `<p class="hint" style="margin:6px 0 0">🤔 다시 생각해 보기 — 다른 보기를 눌러 봐요</p>` : ""}</div>`; }).join("")}
+      <p class="hint">찾은 문제 ${nOk} / ${BADPLAN.length}</p></div>
+    <div class="panel"><span class="num">② 두 곳 골라 고쳐 쓰기</span>
+      <p class="hint">①에서 찾은 문제를 바탕으로, 두 곳을 골라 내 말로 고쳐 쓰기 — 어느 칸인지 먼저 쓰기</p>
+      ${pf("s5fix", "", { dis:D, rows:4, hint:"예) 2. 나의 탐구 질문 → ……" })}</div>
+    <div class="panel"><span class="num">③ 잘 쓴 계획서와 비교하기</span>
+      ${done && filled("s5fix") ? PLAN_EX() : '<p class="empty">①의 여섯 곳을 고르고 ②를 쓰면 잘 쓴 계획서가 열려요 — 내가 고친 것과 비교해 보기</p>'}
+      ${pf("s5take", "내 계획서에 가져갈 점 한 줄", { dis:D, line:true, hint:"예) 하위 질문이 탐구 질문에 답하는 데 쓰이는지 확인하기" })}</div>`;
 };
 const H3 = [["1","①"],["2","②"],["3","③"]];
 const ZONES = [[1,"탐구 주제 정하기 — 내 진로와 이어진 새 사례"],[2,"내 사례가 공간 불평등인지 확인하기"],[5,"하위 질문 3개와 찾을 자료"],[6,"해결 방향 미리 생각하기"]];
@@ -2459,8 +2487,8 @@ function zoneHelp(z){
 function zoneBody(z, D){
   if(z === 1) return topicHow() + `<p class="hint">활동 1에서 썼다면 그대로 들어와 있어요 — 여기서 고쳐도 같이 바뀌어요</p>` + pf("s5career", "내 진로(관심) 분야", { line:true, dis:D }) + pf("s5title", "내 탐구 주제 — 새 사례 (한 줄)", { line:true, dis:D, hint:"(어느 지역) (누구)의 (어떤 시설·서비스) 이용 기회" });
   if(z === 2) return `<p class="hint">세 물음에 한두 문장씩 — 모두 ‘그렇다’면 공간 불평등이에요</p>` + pf("s5n1", "① 생활에 꼭 필요한 것인가요?", { dis:D, rows:2, hint:"예) 약·생필품을 온라인으로 사려면 택배가 꼭 필요하다" }) + pf("s5n2", "② 사는 곳에 따라 이용 기회·부담이 어떻게 다른가요?", { dis:D, rows:2, hint:"예) 도시는 다음 날 받지만 산간 마을은 며칠 더 걸린다" }) + pf("s5n3", "③ 왜 그런가요? (개인 탓이 아닌 지역의 구조적 원인)", { dis:D, rows:2, hint:"예) 집이 흩어져 배송 비용이 커서 택배 회사가 배송을 줄인다" });
-  if(z === 3) return `<p class="ro"><b>출발 질문</b> ${esc(pv("s5start")) || "-"}</p>` + (pv("s5qsub") ? `<p class="ro"><b>나의 탐구 질문</b> ${esc(pv("s5myq"))}</p><p class="hint">활동 2에서 확정했어요. 고치려면 활동 2에서 [다시 고치기]</p>`
-      : pf("s5myq", "나의 탐구 질문", { dis:D, hint:"활동 2의 질문사다리에서 다듬어 확정하면 여기에 그대로 들어가요." }));
+  if(z === 3) return `<p class="ro"><b>출발 질문</b> ${esc(pv("s5start")) || "-"}</p>` + (pv("s5qsub") ? `<p class="ro"><b>나의 탐구 질문</b> ${esc(pv("s5myq"))}</p><p class="hint">활동 1에서 확정했어요. 고치려면 활동 1에서 [다시 고치기]</p>`
+      : pf("s5myq", "나의 탐구 질문", { dis:D, hint:"활동 1의 질문사다리에서 다듬어 확정하면 여기에 그대로 들어가요." }));
   if(z === 4) return pf("s5who", "누구를 (대상)", { line:true, dis:D }) + pf("s5where", "어디를 (지역)", { line:true, dis:D }) + pf("s5year", "언제를 (기준 연도)", { line:true, dis:D });
   if(z === 5) return `<div class="box" style="margin:4px 0 10px"><b>하위 질문은 내가 정해요</b> — 탐구 질문에 답하려면 무엇을 알아야 할지 3가지
       <ul style="margin:6px 0 0;padding-left:20px;font-size:14px"><li><b>실태</b> 얼마나 다를까? 예) 도시와 산간 마을의 택배 도착 기간은 얼마나 다를까?</li>
@@ -2501,7 +2529,7 @@ VIEWS["5-3"] = () => {
       <ul style="margin:6px 0 0;padding-left:20px"><li><b>도움 자료</b> — 지금 펼친 구역의 예시와 요령 (구역을 펼치면 바뀌어요)</li>
       <li><b>탐구 꿀팁</b> — 하위 질문 짜는 법, 찾을 자료 정하기, 해결 방향을 원인과 짝짓기</li>
       <li><b>개념 가이드</b> — 진로 계열별 개념과 <b>과학 원리·심화 하위 질문</b> 예시</li></ul>
-      <small>휴대폰은 화면 위 [자료] 단추로 열어요 · 사례와 탐구 질문은 활동 1·2에서 쓴 것이 자동으로 들어가요</small></div>
+      <small>휴대폰은 화면 위 [자료] 단추로 열어요 · 사례와 탐구 질문은 활동 1에서 쓴 것이 자동으로 들어가요</small></div>
     ${PLAN_EX()}
     <p class="hint">구역 제목을 눌러 하나씩 펼쳐 쓰기</p>
     ${ZONES.map(([z, t], n) => `<details class="zone" data-zone="${z}" ${openZones.has(z) ? "open" : ""}><summary data-zone="${z}"><span class="zt">구역 ${n + 1} · ${t}</span><button class="zhelp" data-act="zoneHelp" data-id="${z}">도움 자료</button></summary>
@@ -2790,6 +2818,7 @@ document.addEventListener("click", async e => {
     try{ const d = await api({ action:"uncmt", to:boardSel, id }); const t = BOARD.find(x => String(x.moum) === boardSel); if(t) t.cmts = d.cmts; }catch(err){ toast(err.message); }
     render();
   }
+  if(act === "badPick"){ if(locked56()) return; psend(g, id); return; }
   if(act === "qstart"){
     const el = $("pf-s5qs"); if(!el || el.disabled) return;
     const pre = el.value && !/\n$/.test(el.value) ? "\n" : ""; el.value += pre + b.dataset.w; el.focus(); el.setSelectionRange(el.value.length, el.value.length);
