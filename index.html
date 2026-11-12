@@ -112,6 +112,17 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .dpill small{font-weight:400;color:var(--muted)}
 .dpill.ok{background:var(--soft);border-color:var(--ink)}
 .repbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.rfl-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.rfl-chips button{border:1.5px solid var(--hair);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:14px;cursor:pointer}
+.rfl-chips button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rfl-chips button small{margin-left:4px;opacity:.75}
+.rfl-theme{margin-top:18px}
+.rfl-theme h3{margin:0 0 8px;font-size:17px}
+.rfl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.rfl-card{background:var(--paper);border:1px solid var(--hair);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.65}
+.rfl-card .who{font-size:12.5px;color:var(--muted);margin-bottom:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.rfl-card .tag{font-size:11.5px;border:1px solid var(--hair);border-radius:6px;padding:0 6px}
+.rfl-card mark{background:#FFE58A;color:#16150F;border-radius:3px;padding:0 1px}
 .rep{margin-top:14px;background:#fff;color:#16150F;border:1px solid var(--hair);border-radius:14px;padding:20px 24px;max-width:960px}
 .rephead{display:flex;gap:12px;align-items:center;padding-bottom:12px;border-bottom:2px solid #16150F}
 .rephead b{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:20px}
@@ -125,7 +136,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .rep .ro b{color:#5F5C54}
 .rq{font-weight:700;font-size:16px;margin:0 0 4px}
 .rfb{margin:4px 0;padding:6px 10px;border-left:3px solid #FFD02B;background:#FAF9F5;font-size:14px}
-@media print{ .top,.tbar,.leaves,.follow,#lessonArea,#dash,.repbar,#toast,.bar{display:none!important} body{background:#fff} .shell{padding:0} .rep{border:0;max-width:none} }
+@media print{ .top,.tbar,.leaves,.follow,#lessonArea,#dash,.repbar,.rfl-bar,#toast,.bar{display:none!important} body{background:#fff} .shell{padding:0} .rep{border:0;max-width:none} }
 .pvbar{margin-top:14px;padding:10px 14px;border-radius:12px;border:2px dashed var(--ink);background:var(--paper);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
 .pvbar b{margin-right:4px}
 .pvbar.on{border-style:solid;background:var(--soft)}
@@ -783,6 +794,7 @@ input,textarea,select{max-width:100%}
       <button id="tWarm">🖥 도입 활동 전체 화면</button>
       <button id="tDash">현황판</button>
       <button id="tReport">연수용 결과물</button>
+      <button id="tRefl">📝 배움 정리 모아 보기</button>
       <button id="tLeaves">화면 이탈 기록</button>
       <select id="tMoum" aria-label="모둠 활동 보기"></select>
       <span id="tStatus"></span>
@@ -792,6 +804,7 @@ input,textarea,select{max-width:100%}
 
     <section id="dash" hidden></section>
     <section id="report" hidden></section>
+    <section id="refl" hidden></section>
     <div id="lessonArea">
     <div class="pvbar" id="pvBar" hidden></div>
     <nav class="lessons" role="tablist" aria-label="차시" id="lessonNav"></nav>
@@ -1095,7 +1108,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611120818";
+const APP_VER = "202611121037";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER && typeof me !== "undefined" && me && (me.teacher || (me.back && me.back.teacher))) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -1344,9 +1357,11 @@ function setTMode(m){
   if(me.preview){ me = me.back; P = { v:0, f:{}, notes:{ marks:[], memos:{} } }; loadNotes(); }
   tmode = m;
   $("dash").hidden = m !== "dash"; $("report").hidden = m !== "report"; $("lessonArea").hidden = m !== "moum";
+  $("refl").hidden = m !== "refl"; $("tRefl").style.outline = m === "refl" ? "3px solid #fff" : "";
   $("tDash").style.outline = m === "dash" ? "3px solid #fff" : ""; $("tReport").style.outline = m === "report" ? "3px solid #fff" : "";
   if(m !== "moum") $("tMoum").value = "";
   $("whoText").textContent = whoText(); hideMarkBar();
+  if(m === "refl") return loadRefl();
   if(m !== "moum") loadAll();
 }
 async function loadAll(){
@@ -1363,6 +1378,53 @@ $("tWarm").onclick = async () => {
 };
 $("tDash").onclick = () => setTMode("dash");
 $("tReport").onclick = () => setTMode("report");
+$("tRefl").onclick = () => setTMode("refl");
+/* ===== 교사: 배움 정리 모아 보기 (키워드별) ===== */
+const RTHEMES = [
+  ["질문 만들기", "질문을? ?만들|질문을? ?만드|질문이 생기|질문을 생각|질문 거리"],
+  ["질문 다듬기·질문사다리", "사다리|다듬|구체화|정교|차근차근|질 높은"],
+  ["하위 질문", "하위 ?질문"],
+  ["새로 떠오른 질문", "새롭게 떠오른|새로 떠오른|새로운 질문|떠오른 질문"],
+  ["스스로 생각하기", "스스로|내 생각|나의 생각|머리"],
+  ["AI 활용", "AI|인공지능"],
+  ["자료 조사", "자료 ?조사|조사|통계"],
+  ["발표·댓글", "발표|댓글"],
+  ["뿌듯함·만족", "뿌듯|만족|유익|재미|좋았다|좋았고|즐거|흥미"],
+  ["어려움", "어려|어렵|힘들|버거|막막|감이 (?:안|오지)"],
+  ["시간 부족", "시간이 ?부족|시간도 부족|시간이 모자"]
+];
+let RFL = null, rflTab = "all", rflKey = "", rflHide = false;
+async function loadRefl(){
+  $("refl").innerHTML = '<p class="hint" style="margin-top:18px">불러오는 중…</p>';
+  try{ const d = await api({ action:"reflect" }); RFL = d.rows || []; }
+  catch(err){ $("refl").innerHTML = `<p class="locked" style="margin-top:18px">배움 정리를 불러오지 못했어요. (${esc(err.message)})<br>서버를 새 버전으로 올린 뒤에 볼 수 있어요.</p>`; return; }
+  drawRefl();
+}
+function drawRefl(){
+  if(!RFL) return;
+  const fields = rflTab === "learn" ? [["learn", "배운 점·새 질문"]] : rflTab === "hard" ? [["hard", "어려웠던 점"]] : [["learn", "배운 점·새 질문"], ["hard", "어려웠던 점"]];
+  const items = [];
+  RFL.forEach((r, i) => fields.forEach(([f, n]) => { const t = String(r[f] || "").trim(); if(t) items.push({ r, i, f, n, t }); }));
+  const re = src => new RegExp(src, "i"), reg = src => new RegExp(src, "gi");
+  const hit = RTHEMES.map(([name, src]) => ({ name, src, list: items.filter(x => re(src).test(x.t)) }));
+  const other = items.filter(x => !RTHEMES.some(([, src]) => re(src).test(x.t)));
+  const order = [...new Set(RFL.map(r => r.moum + "|" + r.uid))];
+  const who = x => rflHide ? `${x.r.moum}모둠 학생 ${"ABCDEFGHIJKLMNOPQRSTUVWXYZ"[order.indexOf(x.r.moum + "|" + x.r.uid)] || ""}` : `${x.r.moum}모둠 ${esc(dn(x.r.uid))}`;
+  const card = (x, src) => { let h = esc(x.t).replace(/\n/g, "<br>"); if(src) h = h.replace(reg(src), m => `<mark>${m}</mark>`);
+    return `<div class="rfl-card"><div class="who"><b>${who(x)}</b><span class="tag">${x.n}</span>${x.r.sub ? "" : '<span class="tag">작성 중</span>'}</div>${h}</div>`; };
+  const nSub = RFL.filter(r => r.sub).length;
+  const shown = rflKey === "__other" ? [] : hit.filter(h => h.list.length && (!rflKey || h.name === rflKey));
+  $("refl").innerHTML = `<div class="repbar rfl-bar"><b class="bh" style="font-size:18px">배움 정리 모아 보기</b>
+      <span class="hint">제출 ${nSub}명 · 작성 중 ${RFL.length - nSub}명</span>
+      <div class="srcpick" style="margin:0">${[["all", "전체"], ["learn", "① 배운 점·새 질문"], ["hard", "② 어려웠던 점"]].map(([k, n]) => `<button data-act="rflTab" data-id="${k}" aria-pressed="${k === rflTab}">${n}</button>`).join("")}</div>
+      <label class="chk" style="margin:0"><input type="checkbox" id="rflHide" ${rflHide ? "checked" : ""}> 이름 가리기</label>
+      <button class="ghost" data-act="rflReload">새로 고침</button><button class="ghost" onclick="window.print()">인쇄·PDF</button></div>
+    <div class="rfl-chips"><button data-act="rflKey" data-id="" aria-pressed="${!rflKey}">모든 키워드</button>${hit.filter(h => h.list.length).map(h => `<button data-act="rflKey" data-id="${esc(h.name)}" aria-pressed="${rflKey === h.name}">${esc(h.name)}<small>${h.list.length}</small></button>`).join("")}${other.length ? `<button data-act="rflKey" data-id="__other" aria-pressed="${rflKey === "__other"}">기타<small>${other.length}</small></button>` : ""}</div>
+    ${items.length ? "" : '<p class="empty" style="margin-top:18px">아직 들어온 배움 정리가 없어요.</p>'}
+    ${shown.map(h => `<section class="rfl-theme"><h3>🔑 ${esc(h.name)} <small class="hint">${h.list.length}개</small></h3><div class="rfl-grid">${h.list.map(x => card(x, h.src)).join("")}</div></section>`).join("")}
+    ${other.length && (!rflKey || rflKey === "__other") ? `<section class="rfl-theme"><h3>기타 <small class="hint">${other.length}개</small></h3><div class="rfl-grid">${other.map(x => card(x, "")).join("")}</div></section>` : ""}`;
+}
+document.addEventListener("change", e => { if(e.target.id === "rflHide"){ rflHide = e.target.checked; drawRefl(); } });
 const pill = (label, val, ok) => `<span class="dpill${ok ? " ok" : ""}"><small>${label}</small>${val}</span>`;
 function drawDash(){
   if(!ALL) return;
@@ -2520,7 +2582,7 @@ document.addEventListener("click", async e => {
     drawPend(); return; }
   const b = e.target.closest("[data-act]"); if(!b || !S) return;
   const { act, id, g } = b.dataset;
-  if(me.preview && !["showSrcQ","boardSel","boardRefresh","copy","copyText","pvAs","pvBack","tGo","tRep","cmtKind","zoneHelp","warmRank"].includes(act)){ toast(PVMSG); return; }
+  if(me.preview && !["showSrcQ","boardSel","boardRefresh","copy","copyText","pvAs","pvBack","tGo","tRep","rflTab","rflKey","rflReload","cmtKind","zoneHelp","warmRank"].includes(act)){ toast(PVMSG); return; }
   if(act === "pvAs"){ startPreview(id); return; }
   if(act === "warmAdd"){ warmAdd(); return; }
   if(act === "warmRank"){ warmRank(); return; }
@@ -2551,6 +2613,9 @@ document.addEventListener("click", async e => {
   if(act === "zoneHelp"){ e.preventDefault(); const z = +id; inlineHelp.has(z) ? inlineHelp.delete(z) : inlineHelp.add(z); openZones.add(z); planZone = z; render(); return; }
   if(act === "pvBack"){ endPreview(); return; }
   if(act === "tGo"){ openMoum(id); return; }
+  if(act === "rflTab"){ rflTab = id; drawRefl(); return; }
+  if(act === "rflKey"){ rflKey = id; drawRefl(); return; }
+  if(act === "rflReload"){ loadRefl(); return; }
   if(act === "tRep"){ repMoum = String(id); if(tmode !== "report") setTMode("report"); else drawReport(); return; }
   if(act === "showSrcQ"){ const el = $("srcq-" + id); if(el) el.hidden = !el.hidden; return; }
   if(act === "quoteX"){ pendQuote = ""; drawPend(); }
