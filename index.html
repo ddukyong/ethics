@@ -112,6 +112,20 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .dpill small{font-weight:400;color:var(--muted)}
 .dpill.ok{background:var(--soft);border-color:var(--ink)}
 .repbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.tp-roads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media (max-width:560px){ .tp-roads{grid-template-columns:1fr} }
+.tp-road{border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px}
+.tp-road.r1{background:#E7F5FF;border:1.5px solid #74C0FC}.tp-road.r2{background:#FFF4E6;border:1.5px solid #FFA94D}
+.tp-h{font-weight:700;font-size:14.5px;margin-bottom:4px}
+.tp-step{display:flex;gap:8px;align-items:flex-start;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:7px 10px;color:#16150F}
+.tp-step b{font-size:14px;display:block}.tp-step small{font-size:12.5px;color:#5F5C54;display:block}
+.tp-n{flex:none;width:22px;height:22px;border-radius:50%;background:#16150F;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.tp-ar{text-align:center;font-size:12px;color:#868E96;line-height:1}
+.tp-join{display:grid;grid-template-columns:1fr 1fr;text-align:center;font-size:12px;color:#868E96;margin:4px 0}
+.tp-q{background:#FFF9DB;border-color:#FAB005}
+.tp-frame{margin-top:4px;text-align:center;font-weight:700;font-size:15px;background:#16150F;color:#fff;border-radius:10px;padding:9px}
+.tp-frame span{background:#FFD43B;color:#16150F;border-radius:6px;padding:1px 8px;margin:0 2px}
+
 .rfl-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .rfl-chips button{border:1.5px solid var(--hair);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:14px;cursor:pointer}
 .rfl-chips button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -1106,7 +1120,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611130218";
+const APP_VER = "202611130226";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER && typeof me !== "undefined" && me && (me.teacher || (me.back && me.back.teacher))) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -1609,19 +1623,24 @@ const STEPS56 = [["5-1","5차시 새 사례 탐구 ① 사례 찾고 탐구 질�
 const road56 = cur => `<div class="box"><span class="tag">자기주도 탐구 5단계</span><ol style="margin:6px 0 0;padding-left:22px">${STEPS56.map(([k, t]) => `<li${k === cur ? ' style="font-weight:700"' : ""}>${t}${k === cur ? " ← 지금" : ""}</li>`).join("")}</ol><small>앞에서 쓴 내용은 다음 단계에 자동으로 따라와요 — 다시 쓸 필요 없어요</small></div>`;
 const myMore = () => { const m = [S && S.concl && S.concl.more, S && S.pres && S.pres.p3, pv("s4learn")].map(x => String(x || "").trim()).filter(Boolean);
   return m.length ? `<div class="where" style="margin:4px 0"><b>우리 모둠·내가 남긴 ‘더 궁금한 점’</b>${m.map(x => `<br>· ${esc(x.length > 140 ? x.slice(0, 140) + "…" : x)}`).join("")}</div>` : ""; };
-const topicHow = () => `<div class="box topic"><b>🧭 탐구 주제 정하는 법 — 공간 불평등 × 내 진로 = 새 사례</b>
-  <p style="margin:6px 0 2px"><b>출발점은 둘 중 편한 쪽으로</b></p>
-  <p style="margin:2px 0"><b>길 ① 내 진로에서 출발</b></p>
-  <ol style="margin:2px 0 4px;padding-left:22px"><li>내 <b>진로(관심) 분야</b>를 정해요</li>
-  <li>그 분야에서 <b>생활에 꼭 필요한 시설·서비스</b>를 하나 떠올려요</li>
-  <li>“<b>사는 곳에 따라</b> 이용할 기회가 다를까?” — ‘그렇다’면 그게 내 주제예요</li></ol>
-  <p style="margin:6px 0 2px"><b>길 ② 모둠 탐구에서 더 궁금했던 점에서 출발</b></p>
-  <ol style="margin:2px 0 4px;padding-left:22px"><li>응급의료 탐구를 하며 <b>더 알고 싶었던 점</b>을 떠올려요</li>
-  <li>그 궁금증을 <b>내 진로 분야의 다른 시설·서비스</b>로 한 걸음 넓혀요<br><small class="hint">예) 응급실 의사가 부족했다 → 우리 지역 소아과·정신건강 진료도 그럴까? · 병원까지 60분 → 군 지역 노인은 버스로 어디까지 갈 수 있을까?</small></li></ol>
+const topicHow = () => {
+  const step = (n, t, sm) => `<div class="tp-step"><span class="tp-n">${n}</span><div><b>${t}</b>${sm ? `<small>${sm}</small>` : ""}</div></div>`;
+  const arrow = '<div class="tp-ar">▼</div>';
+  return `<div class="box topic"><b>🧭 탐구 주제 정하기 — 출발점은 둘 중 편한 쪽으로</b>
+  <div class="tp-roads">
+    <div class="tp-road r1"><div class="tp-h">길 ① 내 진로에서 출발</div>
+      ${step(1, "내 진로(관심) 분야 정하기", "예) 물류·유통")}${arrow}${step(2, "그 분야의 꼭 필요한 시설·서비스", "예) 택배 배송")}</div>
+    <div class="tp-road r2"><div class="tp-h">길 ② 모둠 탐구에서 출발</div>
+      ${step(1, "응급의료 탐구에서 더 궁금했던 점", "예) 응급실 의사가 부족했다")}${arrow}${step(2, "내 진로 분야의 다른 시설·서비스로 넓히기", "예) 소아과·정신건강 진료는?")}</div>
+  </div>
+  <div class="tp-join"><span>▼</span><span>▼</span></div>
+  <div class="tp-step tp-q"><span class="tp-n">3</span><div><b>“사는 곳에 따라 이용할 기회가 다를까?”</b><small>‘그렇다’면 그게 내 주제! · 분만·응급의료는 빼고 새 사례로</small></div></div>
+  <div class="tp-ar">▼</div>
+  <div class="tp-frame">내 주제 = <span>어느 지역</span> <span>누구</span>의 <span>어떤 시설·서비스</span> 이용 기회</div>
   ${myMore()}
-  <p style="margin:4px 0">주제 틀: <b>(어느 지역) (누구)의 (어떤 시설·서비스) 이용 기회</b> <small class="hint">· 분만·응급의료는 수업에서 다뤘으니 빼고 새 사례로</small></p>
-  <table class="wtable" style="font-size:13px"><tr><th>진로(관심)</th><th>주제 예시</th></tr>${[["의약·보건","군 지역 어린이의 야간 소아과 진료 기회"],["공학·도시·교통","농촌 노인의 버스 이용 기회"],["교육","섬 지역 학생의 공공 도서관 이용 기회"],["환경·과학","동네별 폭염 쉼터 이용 기회"],["미디어·문화·예술","지역별 영화관·공연장 관람 기회"],["경영·경제","농촌 주민의 은행 점포 이용 기회"]].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</table>
-  <small class="hint">진로가 아직 없으면 관심 있는 분야로 · 더 많은 키워드는 자료 칸 ‘진로 가이드’</small></div>`;
+  <details style="margin-top:8px"><summary><b>진로별 주제 예시 보기</b></summary>
+  <table class="wtable" style="font-size:13px;margin-top:6px"><tr><th>진로(관심)</th><th>주제 예시</th></tr>${[["의약·보건","군 지역 어린이의 야간 소아과 진료 기회"],["공학·도시·교통","농촌 노인의 버스 이용 기회"],["교육","섬 지역 학생의 공공 도서관 이용 기회"],["환경·과학","동네별 폭염 쉼터 이용 기회"],["미디어·문화·예술","지역별 영화관·공연장 관람 기회"],["경영·경제","농촌 주민의 은행 점포 이용 기회"]].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</table></details>
+  <small class="hint">진로가 아직 없으면 관심 있는 분야로 · 더 많은 키워드는 자료 칸 ‘진로 가이드’</small></div>`; };
 const PLAN_EX = () => `<details class="box" style="margin:8px 0"><summary><b>📝 완성된 계획서 예시 보기</b> <small class="hint">물류·유통 분야 예시 — 그대로 따라 쓰지 말고 짜임만 참고</small></summary>
   <p class="ro" style="margin:8px 0 2px"><b>구역 1 · 탐구 주제</b><br>진로(관심): 물류·유통<br>주제: 산간 마을 주민의 택배 이용 기회</p>
   <p class="ro" style="margin:8px 0 2px"><b>나의 탐구 질문</b><br>산간 마을 주민이 택배를 늦게, 더 비싸게 받는 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?</p>
