@@ -990,11 +990,11 @@ input,textarea,select{max-width:100%}
             <section class="src"><h4><span class="lbl">②</span>질문의 크기 맞추기</h4>
               <p>· 너무 넓으면 → 대상·지역을 좁히기<br>&nbsp;&nbsp;예) 우리나라 불평등은 왜 생길까? → 군 지역 노인의 대중교통 이용 기회는 왜 적을까?<br>· 너무 좁으면 → 원인·영향을 묻기<br>&nbsp;&nbsp;예) ○○군 버스는 하루 몇 번 다닐까? → ○○군의 적은 버스 배차는 주민 생활에 어떤 영향을 미칠까?</p></section>
             <section class="src"><h4><span class="lbl">③</span>질문사다리 예시 한눈에</h4>
-              <p class="ro"><b>출발</b> 시골은 왜 버스가 적을까?</p>
-              <p class="ro"><b>① 개념</b> 시골 주민이 대중교통을 <u>이용할 기회</u>는 왜 도시보다 적을까?</p>
-              <p class="ro"><b>② 범위·대상</b> <u>군 지역 노인</u>이 병원에 갈 때 버스를 이용할 기회는 왜 대도시보다 적을까?</p>
-              <p class="ro"><b>③ 탐구형</b> 군 지역의 버스 배차에는 <u>어떤 지역의 구조적 조건</u>이 영향을 미칠까?</p>
-              <p class="ro"><b>도착</b> 군 지역 노인의 대중교통 이용 기회가 적은 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?</p></section>
+              <p class="ro"><b>출발</b> 시골은 왜 택배가 늦을까?</p>
+              <p class="ro"><b>① 개념</b> 시골 주민이 택배 서비스를 <u>이용할 기회</u>는 왜 도시보다 적을까?</p>
+              <p class="ro"><b>② 범위·대상</b> <u>산간 마을 주민</u>이 생필품을 택배로 받을 기회는 왜 대도시보다 적을까?</p>
+              <p class="ro"><b>③ 탐구형</b> 산간 마을의 택배 배송에는 <u>어떤 지역의 구조적 조건</u>이 영향을 미칠까?</p>
+              <p class="ro"><b>도착</b> 산간 마을 주민이 택배를 늦게, 더 비싸게 받는 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?</p></section>
             <section class="src"><h4><span class="lbl">④</span>확정하기 전에</h4>
               <p>· 탐구 질문 체크리스트 4가지를 모두 확인하기<br>· 소리 내어 읽어 보기 — 한 번에 이해되는 문장인가?<br>· 이 질문에 답하려면 무엇을 조사해야 할지 떠오르는가? 떠오르지 않으면 범위를 다시 좁히기</p></section>
           </div>
@@ -1622,6 +1622,13 @@ const topicHow = () => `<div class="box topic"><b>🧭 탐구 주제 정하는 �
   <p style="margin:4px 0">주제 틀: <b>(어느 지역) (누구)의 (어떤 시설·서비스) 이용 기회</b> <small class="hint">· 분만·응급의료는 수업에서 다뤘으니 빼고 새 사례로</small></p>
   <table class="wtable" style="font-size:13px"><tr><th>진로(관심)</th><th>주제 예시</th></tr>${[["의약·보건","군 지역 어린이의 야간 소아과 진료 기회"],["공학·도시·교통","농촌 노인의 버스 이용 기회"],["교육","섬 지역 학생의 공공 도서관 이용 기회"],["환경·과학","동네별 폭염 쉼터 이용 기회"],["미디어·문화·예술","지역별 영화관·공연장 관람 기회"],["경영·경제","농촌 주민의 은행 점포 이용 기회"]].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</table>
   <small class="hint">진로가 아직 없으면 관심 있는 분야로 · 더 많은 키워드는 자료 칸 ‘진로 가이드’</small></div>`;
+const PLAN_EX = () => `<details class="box" style="margin:8px 0"><summary><b>📝 완성된 계획서 예시 보기</b> <small class="hint">물류·유통 분야 예시 — 그대로 따라 쓰지 말고 짜임만 참고</small></summary>
+  <p class="ro" style="margin:8px 0 2px"><b>구역 1 · 탐구 주제</b><br>진로(관심): 물류·유통<br>주제: 산간 마을 주민의 택배 이용 기회</p>
+  <p class="ro" style="margin:8px 0 2px"><b>나의 탐구 질문</b><br>산간 마을 주민이 택배를 늦게, 더 비싸게 받는 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?</p>
+  <p class="ro" style="margin:8px 0 2px"><b>구역 2 · 공간 불평등인지 확인</b><br>① 약·생필품을 온라인으로 사려면 택배가 꼭 필요하다<br>② 도시는 다음 날 받지만, 산간 마을은 며칠 더 걸리고 추가 배송비가 붙기도 한다<br>③ 집이 멀리 흩어져 있어 한 번 배송하는 비용이 커서, 택배 회사가 배송을 줄이고 비용을 주민에게 넘긴다</p>
+  <p class="ro" style="margin:8px 0 2px"><b>구역 3 · 하위 질문과 찾을 자료</b><br>① 도시와 산간 마을의 택배 도착 기간과 추가 배송비는 얼마나 다를까? → 한국소비자원 조사, 지역 신문<br>② 배송 거리와 집이 흩어진 정도에 따라 배송 비용은 어떻게 늘어날까? (원리) → 물류 연구 보고서, 국토교통부 물류 통계<br>③ 택배가 늦으면 거동이 불편한 노인의 생필품 구입은 어떻게 달라질까? → 지역 기사, 인터뷰</p>
+  <p class="ro" style="margin:8px 0 2px"><b>구역 4 · 해결 방향</b><br>제도: 우체국 공공 배송망과 이어진 마을 공동 수령함 설치비를 지원한다<br>시민 실천: 이웃끼리 공동 주문·공동 수령을 제안해 배송 부담을 줄인다</p>
+  <small class="hint">수치는 반드시 기관 자료에서 찾아 출처와 함께 쓰기</small></details>`;
 const myCase = () => `<div class="qbox"><small class="hint">내 사례</small><br><b>${esc(pv("s5title")) || '<span class="empty">활동 1에서 먼저 쓰기</span>'}</b>${pv("s5career") ? ` <small class="hint">· ${esc(pv("s5career"))}</small>` : ""}
   <br><small class="hint">나의 탐구 질문</small><br><b>${esc(pv("s5myq")) || '<span class="empty">활동 2에서 먼저 정하기</span>'}</b></div>`;
 const teacherNote = '<p class="locked">학생 개인 활동이에요. 선생님 화면에서는 쓸 수 없고, 학생이 제출한 내용은 스프레드시트에서 볼 수 있어요.</p>';
@@ -2370,8 +2377,8 @@ VIEWS["5-1"] = () => {
     ${todo([["진로(관심) 분야와 탐구할 사례", filled("s5career", "s5title")], ["눈에 띈 사실과 출처", filled("s5facts", "s5source")], ["질문 5개 이상 쏟아내기", myQs().length >= 5]])}
     <div class="panel"><span class="num">① 탐구 주제(새 사례) 정하기</span>${topicHow()}
       ${pf("s5career", "내 진로(관심) 분야", { line:true, dis:D, hint:"예) 간호, 도시공학, 미디어, 교육" })}
-      ${pf("s5title", "내 탐구 주제 — 새 사례 (한 줄)", { line:true, dis:D, hint:"예) 군 지역 노인의 버스 이용 기회" })}
-      ${pf("s5facts", "눈에 띈 사실 (수치 한두 개)", { dis:D, rows:3, hint:"예) ○○군 버스 배차 간격 평균 90분, 서울은 10분" })}
+      ${pf("s5title", "내 탐구 주제 — 새 사례 (한 줄)", { line:true, dis:D, hint:"예) 산간 마을 주민의 택배 이용 기회" })}
+      ${pf("s5facts", "눈에 띈 사실 (수치 한두 개)", { dis:D, rows:3, hint:"예) 산간 마을은 택배가 며칠 더 걸리고 추가 배송비가 붙기도 함 — 기관 자료의 수치로 쓰기" })}
       ${pf("s5source", "어디서 봤나요? (기관·기사 이름, 연도)", { line:true, dis:D })}
       ${pf("s5deep", "더 깊이 알고 싶은 것 — 과학적 원리·전문 지식 (선택)", { dis:D, rows:2, hint:"예) 열섬 현상의 원리 · 미세먼지가 몸에 들어오는 과정 · 통신 전파가 산간 지역에 닿기 어려운 이유 — 하위 질문으로 이어 갈 수 있어요" })}</div>
     <div class="panel"><span class="num">② 질문 쏟아내기</span>
@@ -2380,8 +2387,8 @@ VIEWS["5-1"] = () => {
       ${pf("s5qs", "", { dis:D, rows:8, max:2000 })}<p class="hint">쓴 질문 ${myQs().length}개${myQs().length < 5 ? " · 5개 이상 써 보기" : " 👍"}</p></div>`;
 };
 const myQs = () => pv("s5qs").split(/\n+/).map(x => x.trim()).filter(Boolean);
-const PLEX = { s5start:"시골은 왜 버스가 적을까?", s5c1:"시골 주민이 대중교통을 이용할 기회는 왜 도시보다 적을까?", s5c2:"군 지역 노인이 병원에 갈 때 버스를 이용할 기회는 왜 대도시보다 적을까?",
-  s5c3:"군 지역의 버스 배차에는 어떤 지역의 구조적 조건이 영향을 미칠까?", s5myq:"군 지역 노인의 대중교통 이용 기회가 적은 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?" };
+const PLEX = { s5start:"시골은 왜 택배가 늦을까?", s5c1:"시골 주민이 택배 서비스를 이용할 기회는 왜 도시보다 적을까?", s5c2:"산간 마을 주민이 생필품을 택배로 받을 기회는 왜 대도시보다 적을까?",
+  s5c3:"산간 마을의 택배 배송에는 어떤 지역의 구조적 조건이 영향을 미칠까?", s5myq:"산간 마을 주민이 택배를 늦게, 더 비싸게 받는 데에는 어떤 지역의 구조적 조건이 영향을 미칠까?" };
 const PL = [["s5start","출발 · 고른 질문",""],["s5c1","① 개념 연결하기","일상 표현을 공간 불평등 개념과 잇기 (진로 교과 개념도 좋아요)"],
   ["s5c2","② 범위와 대상 구체화하기","막연한 말을 조사할 수 있는 대상으로 좁히기"],["s5c3","③ 탐구형으로 넓히기","사실 확인을 원인·영향·관계를 묻는 질문(왜? 어떻게?)으로"],["s5myq","도착 · 나의 탐구 질문","고친 요소를 모두 모아 하나의 질문으로"]];
 VIEWS["5-2"] = () => {
@@ -2451,18 +2458,18 @@ function zoneHelp(z){
 }
 function zoneBody(z, D){
   if(z === 1) return topicHow() + `<p class="hint">활동 1에서 썼다면 그대로 들어와 있어요 — 여기서 고쳐도 같이 바뀌어요</p>` + pf("s5career", "내 진로(관심) 분야", { line:true, dis:D }) + pf("s5title", "내 탐구 주제 — 새 사례 (한 줄)", { line:true, dis:D, hint:"(어느 지역) (누구)의 (어떤 시설·서비스) 이용 기회" });
-  if(z === 2) return `<p class="hint">세 물음에 한두 문장씩 — 모두 ‘그렇다’면 공간 불평등이에요</p>` + pf("s5n1", "① 생활에 꼭 필요한 것인가요?", { dis:D, rows:2, hint:"예) 병원에 가려면 꼭 버스가 필요하다" }) + pf("s5n2", "② 사는 곳에 따라 이용 기회·부담이 어떻게 다른가요?", { dis:D, rows:2, hint:"예) 군 지역은 배차가 90분이라 병원 한 번에 반나절이 걸린다" }) + pf("s5n3", "③ 왜 그런가요? (개인 탓이 아닌 지역의 구조적 원인)", { dis:D, rows:2, hint:"예) 인구가 줄어 노선이 적자라 버스 회사가 운행을 줄인다" });
+  if(z === 2) return `<p class="hint">세 물음에 한두 문장씩 — 모두 ‘그렇다’면 공간 불평등이에요</p>` + pf("s5n1", "① 생활에 꼭 필요한 것인가요?", { dis:D, rows:2, hint:"예) 약·생필품을 온라인으로 사려면 택배가 꼭 필요하다" }) + pf("s5n2", "② 사는 곳에 따라 이용 기회·부담이 어떻게 다른가요?", { dis:D, rows:2, hint:"예) 도시는 다음 날 받지만 산간 마을은 며칠 더 걸린다" }) + pf("s5n3", "③ 왜 그런가요? (개인 탓이 아닌 지역의 구조적 원인)", { dis:D, rows:2, hint:"예) 집이 흩어져 배송 비용이 커서 택배 회사가 배송을 줄인다" });
   if(z === 3) return `<p class="ro"><b>출발 질문</b> ${esc(pv("s5start")) || "-"}</p>` + (pv("s5qsub") ? `<p class="ro"><b>나의 탐구 질문</b> ${esc(pv("s5myq"))}</p><p class="hint">활동 2에서 확정했어요. 고치려면 활동 2에서 [다시 고치기]</p>`
       : pf("s5myq", "나의 탐구 질문", { dis:D, hint:"활동 2의 질문사다리에서 다듬어 확정하면 여기에 그대로 들어가요." }));
   if(z === 4) return pf("s5who", "누구를 (대상)", { line:true, dis:D }) + pf("s5where", "어디를 (지역)", { line:true, dis:D }) + pf("s5year", "언제를 (기준 연도)", { line:true, dis:D });
   if(z === 5) return `<div class="box" style="margin:4px 0 10px"><b>하위 질문은 내가 정해요</b> — 탐구 질문에 답하려면 무엇을 알아야 할지 3가지
-      <ul style="margin:6px 0 0;padding-left:20px;font-size:14px"><li><b>실태</b> 얼마나 다를까? 예) ○○군과 서울의 버스 배차 간격은 얼마나 다를까?</li>
-      <li><b>원인</b> 왜 생길까? 예) 군 지역 버스 노선은 왜 줄어들까?</li>
-      <li><b>영향</b> 누구에게 어떤 어려움이? 예) 배차가 적으면 노인의 병원 이용에 어떤 어려움이 생길까?</li>
+      <ul style="margin:6px 0 0;padding-left:20px;font-size:14px"><li><b>실태</b> 얼마나 다를까? 예) 도시와 산간 마을의 택배 도착 기간은 얼마나 다를까?</li>
+      <li><b>원인</b> 왜 생길까? 예) 택배 회사는 왜 산간 마을 배송을 줄일까?</li>
+      <li><b>영향</b> 누구에게 어떤 어려움이? 예) 택배가 늦으면 거동이 불편한 노인의 생필품 구입은 어떻게 달라질까?</li>
       <li><b>과학 원리·심화</b> 내 진로 분야의 원리로 깊이 파기 예) 열섬 현상은 어떤 원리로 특정 동네를 더 덥게 만들까? · 골든타임은 왜 생리학적으로 중요할까?</li></ul>
       <small>이 범주는 예시예요 — 섞어도, 내 방식대로 정해도 돼요. 과학적 사실을 밝히는 하위 질문 하나가 들어가면 탐구가 깊어져요.</small></div>`
     + H3.map(([i, t]) => `<div class="sub"><span class="num">하위 질문 ${t}</span>${pf("s5h" + i, "하위 질문", { dis:D, rows:2 })}${pf("s5h" + i + "s", "어디서 찾을까? (기관·통계·기사·논문·전문 자료)", { line:true, dis:D })}</div>`).join("");
-  if(z === 6) return `<p class="hint">지금 떠오르는 대로 한 줄씩 — 조사하면서 바뀌어도 괜찮아요</p>` + pf("s5inst", "국가·지방 자치 단체가 할 수 있는 일 (제도)", { line:true, dis:D, hint:"예) 수요응답형 버스 운영비를 지원한다" }) + pf("s5civic", "내가(우리가) 할 수 있는 일 (시민 실천)", { line:true, dis:D, hint:"예) 군청 누리집에 노선 확대 의견을 낸다" });
+  if(z === 6) return `<p class="hint">지금 떠오르는 대로 한 줄씩 — 조사하면서 바뀌어도 괜찮아요</p>` + pf("s5inst", "국가·지방 자치 단체가 할 수 있는 일 (제도)", { line:true, dis:D, hint:"예) 마을 공동 수령함 설치비를 지원한다" }) + pf("s5civic", "내가(우리가) 할 수 있는 일 (시민 실천)", { line:true, dis:D, hint:"예) 이웃끼리 공동 주문·공동 수령을 제안한다" });
   if(z === 7) return [1,2,3,4].map(i => `<div class="sched"><input type="text" id="pf-s5d${i}" data-k="pf-s5d${i}" data-pf="s5d${i}" maxlength="20" value="${esc(pv("s5d" + i))}" placeholder="날짜" ${D ? "disabled" : ""}><input type="text" id="pf-s5t${i}" data-k="pf-s5t${i}" data-pf="s5t${i}" maxlength="200" value="${esc(pv("s5t" + i))}" placeholder="할 일" ${D ? "disabled" : ""}></div>`).join("");
   return pf("s5ask", "선생님께 묻고 싶은 점", { dis:D });
 }
@@ -2495,6 +2502,7 @@ VIEWS["5-3"] = () => {
       <li><b>탐구 꿀팁</b> — 하위 질문 짜는 법, 찾을 자료 정하기, 해결 방향을 원인과 짝짓기</li>
       <li><b>개념 가이드</b> — 진로 계열별 개념과 <b>과학 원리·심화 하위 질문</b> 예시</li></ul>
       <small>휴대폰은 화면 위 [자료] 단추로 열어요 · 사례와 탐구 질문은 활동 1·2에서 쓴 것이 자동으로 들어가요</small></div>
+    ${PLAN_EX()}
     <p class="hint">구역 제목을 눌러 하나씩 펼쳐 쓰기</p>
     ${ZONES.map(([z, t], n) => `<details class="zone" data-zone="${z}" ${openZones.has(z) ? "open" : ""}><summary data-zone="${z}"><span class="zt">구역 ${n + 1} · ${t}</span><button class="zhelp" data-act="zoneHelp" data-id="${z}">도움 자료</button></summary>
       <div class="zin">${inlineHelp.has(z) ? `<div class="zinline">${zoneHelp(z)}</div>` : ""}${zoneBody(z, D)}</div></details>`).join("")}
