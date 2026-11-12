@@ -1108,7 +1108,7 @@ input,textarea,select{max-width:100%}
 <script src="qrcode.js"></script>
 <script>
 /* 새 버전 알림: version.json이 바뀌면 화면 아래에 [새로 고침] 안내 */
-const APP_VER = "202611130139";
+const APP_VER = "202611130141";
 async function checkVer(){ try{ const r = await fetch("version.json?t=" + Date.now(), { cache:"no-store" }); if(!r.ok) return; const v = (await r.json()).v;
   if(v && v !== APP_VER && typeof me !== "undefined" && me && (me.teacher || (me.back && me.back.teacher))) document.getElementById("verBar").hidden = false; }catch(e){} }
 setTimeout(checkVer, 5000); setInterval(checkVer, 60000);
@@ -1418,7 +1418,7 @@ function drawRefl(){
   const byTime = RFL.map((r, i) => ({ r, i })).sort((a, b) => subKey(a.r) - subKey(b.r) || a.i - b.i);
   const stuCard = ({ r, i }, n) => { const x = { r, i };
     const parts = fields.map(([f, nm]) => { const t = String(r[f] || "").trim(); return `<div style="margin-top:6px"><span class="tag">${nm}</span><div style="margin-top:2px">${t ? esc(t).replace(/\n/g, "<br>") : '<span class="hint">-</span>'}</div></div>`; }).join("");
-    return `<div class="rfl-card"><div class="who"><b>${n}. ${who(x)}</b>${r.sub ? `<span class="tag">제출 ${esc(r.sub)}</span>` : '<span class="tag">작성 중</span>'}</div>${parts}</div>`; };
+    return `<div class="rfl-card"><div class="who"><b>${n}. ${who(x)}</b>${r.sub ? "" : '<span class="tag">작성 중</span>'}</div>${parts}</div>`; };
   const viewBtns = `<div class="srcpick" style="margin:0">${[["student", "학생별 (제출 순)"], ["key", "키워드별"]].map(([k, n]) => `<button data-act="rflView" data-id="${k}" aria-pressed="${k === rflView}">${n}</button>`).join("")}</div>`;
   $("refl").innerHTML = `<div class="repbar rfl-bar"><b class="bh" style="font-size:18px">배움 정리 모아 보기</b>
       <span class="hint">제출 ${nSub}명 · 작성 중 ${RFL.length - nSub}명</span>${viewBtns}
